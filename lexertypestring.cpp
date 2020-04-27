@@ -44,7 +44,6 @@ string Lexer::tokenTypeString(TokenType token)
         ENUM_ELEMENT(T_ENUM),
         ENUM_ELEMENT(T_BREAK),
         ENUM_ELEMENT(T_WHILE),
-        ENUM_ELEMENT(T_IMPORT),
         ENUM_ELEMENT(T_RETURN),
         ENUM_ELEMENT(T_CONTINUE),
         ENUM_ELEMENT(T_COMMENT),
@@ -58,8 +57,6 @@ string Lexer::tokenTypeString(TokenType token)
         ENUM_ELEMENT(T_COLON),
         ENUM_ELEMENT(T_QUOTE),
         ENUM_ELEMENT(T_SINGLE_QUOTE),
-        ENUM_ELEMENT(T_PLUS_PLUS),
-        ENUM_ELEMENT(T_MINUS_MINUS),
         ENUM_ELEMENT(T_AND_AND),
         ENUM_ELEMENT(T_OR_OR),
         ENUM_ELEMENT(T_NOT),
@@ -82,7 +79,6 @@ string Lexer::tokenTypeString(TokenType token)
         ENUM_ELEMENT(T_IDENTIFIER),
         ENUM_ELEMENT(T_EOF),
         ENUM_ELEMENT(T_ERROR),
-        ENUM_ELEMENT(T_CHAR),
     };
 
     assert(STRING_MAP.size() == TokenCount);

@@ -130,26 +130,8 @@ Lexer::TokenType Lexer::scanToken()
         return T_SLASH;
     }
     case '.': return T_DOT;
-    case '-':
-    {
-        if (m_char == '-')
-        {
-            nextChar();
-            m_lastToken = "--";
-            return T_MINUS_MINUS;
-        }
-        return T_MINUS;
-    }
-    case '+':
-    {
-        if (m_char == '+')
-        {
-            nextChar();
-            m_lastToken = "++";
-            return T_PLUS_PLUS;
-        }
-        return T_PLUS;
-    }
+    case '-': return T_MINUS;
+    case '+': return T_PLUS;
     case ',': return T_COMMA;
     case '*': return T_STAR;
     case '&':

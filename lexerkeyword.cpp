@@ -56,19 +56,6 @@ static inline Lexer::TokenType classify3(const char *s)
 
 static inline Lexer::TokenType classify4(const char *s)
 {
-    if (s[0] == 'c')
-    {
-        if (s[1] == 'h')
-        {
-            if (s[2] == 'a')
-            {
-                if (s[3] == 'r')
-                {
-                    return Lexer::T_CHAR;
-                }
-            }
-        }
-    }
     if (s[0] == 'e')
     {
         if (s[1] == 'l')
@@ -192,25 +179,6 @@ static inline Lexer::TokenType classify5(const char *s)
 
 static inline Lexer::TokenType classify6(const char *s)
 {
-    if (s[0] == 'i')
-    {
-        if (s[1] == 'm')
-        {
-            if (s[2] == 'p')
-            {
-                if (s[3] == 'o')
-                {
-                    if (s[4] == 'r')
-                    {
-                        if (s[5] == 't')
-                        {
-                            return Lexer::T_IMPORT;
-                        }
-                    }
-                }
-            }
-        }
-    }
     if (s[0] == 'r')
     {
         if (s[1] == 'e')
