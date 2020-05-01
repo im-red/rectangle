@@ -33,7 +33,7 @@ void Lexer::setCode(const string &code, int line, int column)
     m_column = column;
     m_pos = 0;
     m_char = '\n';
-    m_lastToken = "";
+    m_tokenString = "";
     m_tokenLine = 0;
     m_tokenColumn = 0;
     m_tokenPos = 0;
@@ -43,7 +43,7 @@ void Lexer::setCode(const string &code, int line, int column)
 
 Lexer::TokenType Lexer::scanToken()
 {
-    m_lastToken = "";
+    m_tokenString = "";
 
     while (isSpace(m_char))
     {
@@ -62,7 +62,7 @@ Lexer::TokenType Lexer::scanToken()
     const char c = m_char;
     nextChar();
 
-    m_lastToken = c;
+    m_tokenString = c;
 
     switch (c)
     {
@@ -77,7 +77,7 @@ Lexer::TokenType Lexer::scanToken()
         if (m_char == '|')
         {
             nextChar();
-            m_lastToken = "||";
+            m_tokenString = "||";
             return T_OR_OR;
         }
         m_error = IllegalSymbol;
@@ -88,7 +88,7 @@ Lexer::TokenType Lexer::scanToken()
         if (m_char == '=')
         {
             nextChar();
-            m_lastToken = ">=";
+            m_tokenString = ">=";
             return T_GE;
         }
         return T_GT;
@@ -98,7 +98,7 @@ Lexer::TokenType Lexer::scanToken()
         if (m_char == '=')
         {
             nextChar();
-            m_lastToken = "==";
+            m_tokenString = "==";
             return T_EQUAL;
         }
         return T_ASSIGN;
@@ -108,7 +108,7 @@ Lexer::TokenType Lexer::scanToken()
         if (m_char == '=')
         {
             nextChar();
-            m_lastToken = "<=";
+            m_tokenString = "<=";
             return T_LE;
         }
         return T_LT;
@@ -119,10 +119,10 @@ Lexer::TokenType Lexer::scanToken()
     {
         if (m_char == '/')
         {
-            m_lastToken = "/";
+            m_tokenString = "/";
             while (static_cast<size_t>(m_pos) <= m_code.size() && !isLineTerminator(m_char))
             {
-                m_lastToken += m_char;
+                m_tokenString += m_char;
                 nextChar();
             }
             return T_COMMENT;
@@ -139,7 +139,7 @@ Lexer::TokenType Lexer::scanToken()
         if (m_char == '&')
         {
             nextChar();
-            m_lastToken = "&&";
+            m_tokenString = "&&";
             return T_AND_AND;
         }
         m_error = IllegalSymbol;
@@ -151,7 +151,7 @@ Lexer::TokenType Lexer::scanToken()
         if (m_char == '=')
         {
             nextChar();
-            m_lastToken = "!=";
+            m_tokenString = "!=";
             return T_NOT_EQUAL;
         }
         return T_NOT;
@@ -159,7 +159,7 @@ Lexer::TokenType Lexer::scanToken()
     case '\'':
     case '"':
     {
-        m_lastToken = "";
+        m_tokenString = "";
         return scanString(c);
     }
     case '0':
@@ -173,21 +173,21 @@ Lexer::TokenType Lexer::scanToken()
     case '8':
     case '9':
     {
-        m_lastToken = "";
+        m_tokenString = "";
         return scanNumber(c);
     }
     default:
     {
-        m_lastToken = "";
+        m_tokenString = "";
         if (isIdentifierStart(c))
         {
-            m_lastToken = c;
+            m_tokenString = c;
             while (isIdentifierPart(m_char))
             {
-                m_lastToken += m_char;
+                m_tokenString += m_char;
                 nextChar();
             }
-            return classify(m_lastToken.c_str(), static_cast<int>(m_lastToken.size()));
+            return classify(m_tokenString.c_str(), static_cast<int>(m_tokenString.size()));
         }
         break;
     }
@@ -212,7 +212,7 @@ Lexer::TokenType Lexer::scanString(char c)
         }
         else
         {
-            m_lastToken += m_char;
+            m_tokenString += m_char;
         }
         nextChar();
     }
@@ -222,16 +222,16 @@ Lexer::TokenType Lexer::scanString(char c)
 
 Lexer::TokenType Lexer::scanNumber(char c)
 {
-    m_lastToken += c;
+    m_tokenString += c;
     while (isDigit(m_char))
     {
-        m_lastToken += m_char;
+        m_tokenString += m_char;
         nextChar();
     }
 
     if (m_char == '.')
     {
-        m_lastToken += m_char;
+        m_tokenString += m_char;
         nextChar();
     }
     else
@@ -241,7 +241,7 @@ Lexer::TokenType Lexer::scanNumber(char c)
 
     while (isDigit(m_char))
     {
-        m_lastToken += m_char;
+        m_tokenString += m_char;
         nextChar();
     }
 
@@ -314,9 +314,9 @@ int Lexer::column() const
     return m_column;
 }
 
-std::string Lexer::lastToken() const
+std::string Lexer::tokenString() const
 {
-    return m_lastToken;
+    return m_tokenString;
 }
 
 Lexer::ErrorType Lexer::error() const

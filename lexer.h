@@ -94,6 +94,20 @@ public:
     void setCode(const std::string &code, int line, int column);
 
     TokenType scanToken();
+
+    static std::string tokenTypeString(TokenType token);
+    static std::string errorTypeString(ErrorType error);
+
+    int line() const;
+    int column() const;
+    ErrorType error() const;
+
+    std::string tokenString() const;
+    int tokenLine() const;
+    int tokenColumn() const;
+    int tokenPos() const;
+
+private:
     TokenType scanString(char c);
     TokenType scanNumber(char c);
     void nextChar();
@@ -105,16 +119,6 @@ public:
     static bool isIdentifierPart(char c);
 
     static TokenType classify(const char *s, int n);
-    static std::string tokenTypeString(TokenType token);
-    static std::string errorTypeString(ErrorType error);
-
-    int line() const;
-    int column() const;
-    std::string lastToken() const;
-    ErrorType error() const;
-    int tokenLine() const;
-    int tokenColumn() const;
-    int tokenPos() const;
 
 private:
     std::string m_code;
@@ -122,7 +126,7 @@ private:
     int m_column = 0;
     int m_pos = 0;
     char m_char = 0;
-    std::string m_lastToken;
+    std::string m_tokenString;
     int m_tokenLine = 0;
     int m_tokenColumn = 0;
     int m_tokenPos = 0;
