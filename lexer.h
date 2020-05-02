@@ -94,11 +94,8 @@ public:
         NoError,
         IllegalSymbol,
         IllegalCharacter,
-        IllegalInt,
-        IllegalFloat,
         UnclosedStringLiteral,
         StrayNewlineInStringLiteral,
-        IllegalIdentifier,
         ErrorCount
     };
 

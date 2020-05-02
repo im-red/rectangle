@@ -94,11 +94,8 @@ string Lexer::errorTypeString(Lexer::ErrorType error)
         ENUM_ELEMENT(NoError),
         ENUM_ELEMENT(IllegalSymbol),
         ENUM_ELEMENT(IllegalCharacter),
-        ENUM_ELEMENT(IllegalInt),
-        ENUM_ELEMENT(IllegalFloat),
         ENUM_ELEMENT(UnclosedStringLiteral),
-        ENUM_ELEMENT(StrayNewlineInStringLiteral),
-        ENUM_ELEMENT(IllegalIdentifier)
+        ENUM_ELEMENT(StrayNewlineInStringLiteral)
     };
 
     assert(STRING_MAP.size() == ErrorCount);
