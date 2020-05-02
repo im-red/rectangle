@@ -92,8 +92,14 @@ TEST(lexer, SYMBOL)
 
 TEST(lexer, SYMBOL_ERROR)
 {
-    string code = "|";
-    singleTokenErrorHelper(code, Lexer::IllegalSymbol);
+    {
+        string code = "|";
+        singleTokenErrorHelper(code, Lexer::IllegalSymbol);
+    }
+    {
+        string code = "&";
+        singleTokenErrorHelper(code, Lexer::IllegalSymbol);
+    }
 }
 
 TEST(lexer, STRING_LITERAL)
