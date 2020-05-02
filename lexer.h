@@ -111,6 +111,7 @@ public:
     int line() const;
     int column() const;
     ErrorType error() const;
+    std::string errorString() const { return errorTypeString(error()); }
 
     std::string tokenString() const;
     int tokenLine() const;

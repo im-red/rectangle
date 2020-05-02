@@ -13,6 +13,13 @@ pkg_check_modules(GTEST REQUIRED gtest_main)
 include_directories(.)
 include_directories(..)
 
-add_executable(test_lexer test_lexer.cpp ../lexer.cpp ../lexerkeyword.cpp ../lexertypestring.cpp)
-target_link_libraries(test_lexer ${GTEST_LIBRARIES} pthread)
+add_executable(test_all
+    test_lexer.cpp 
+    ../lexer.cpp 
+    ../lexerkeyword.cpp 
+    ../lexertypestring.cpp
+    test_driver.cpp
+    ../driver.cpp
+)
+target_link_libraries(test_all ${GTEST_LIBRARIES} pthread)
 

@@ -112,13 +112,13 @@ static inline Lexer::TokenType classify5(const char *s)
 {
     if (s[0] == 'b')
     {
-        if (s[0] == 'r')
+        if (s[1] == 'r')
         {
-            if (s[1] == 'e')
+            if (s[2] == 'e')
             {
-                if (s[2] == 'a')
+                if (s[3] == 'a')
                 {
-                    if (s[3] == 'k')
+                    if (s[4] == 'k')
                     {
                         return Lexer::T_BREAK;
                     }
@@ -128,13 +128,13 @@ static inline Lexer::TokenType classify5(const char *s)
     }
     if (s[0] == 'f')
     {
-        if (s[0] == 'l')
+        if (s[1] == 'l')
         {
-            if (s[1] == 'o')
+            if (s[2] == 'o')
             {
-                if (s[2] == 'a')
+                if (s[3] == 'a')
                 {
-                    if (s[3] == 't')
+                    if (s[4] == 't')
                     {
                         return Lexer::T_FLOAT;
                     }
@@ -144,13 +144,13 @@ static inline Lexer::TokenType classify5(const char *s)
     }
     if (s[0] == 'p')
     {
-        if (s[0] == 'o')
+        if (s[1] == 'o')
         {
-            if (s[1] == 'i')
+            if (s[2] == 'i')
             {
-                if (s[2] == 'n')
+                if (s[3] == 'n')
                 {
-                    if (s[3] == 't')
+                    if (s[4] == 't')
                     {
                         return Lexer::T_POINT;
                     }
@@ -160,13 +160,13 @@ static inline Lexer::TokenType classify5(const char *s)
     }
     if (s[0] == 'w')
     {
-        if (s[0] == 'h')
+        if (s[1] == 'h')
         {
-            if (s[1] == 'i')
+            if (s[2] == 'i')
             {
-                if (s[2] == 'l')
+                if (s[3] == 'l')
                 {
-                    if (s[3] == 'e')
+                    if (s[4] == 'e')
                     {
                         return Lexer::T_WHILE;
                     }

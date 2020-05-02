@@ -7,4 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(.)
 
-add_executable(rectangle main.cpp lexer.cpp lexerkeyword.cpp lexertypestring.cpp)
+add_executable(rectangle
+    main.cpp
+    lexer.cpp
+    lexerkeyword.cpp
+    lexertypestring.cpp
+    driver.cpp
+)

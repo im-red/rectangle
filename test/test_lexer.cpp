@@ -3,114 +3,140 @@
 #include <gtest/gtest.h>
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 
 using namespace testing;
+using namespace std;
+
+TEST(lexer, KEYWORD)
+{
+    string code = "if\ndef\nint\nelse\nenum\nlist\nvoid\nbreak\nfloat\npoint\n" \
+        "while\nreturn\nstring\ncontinue";
+    vector<int> expect = { Lexer::T_IF, Lexer::T_DEF, Lexer::T_INT, Lexer::T_ELSE, 
+        Lexer::T_ENUM, Lexer::T_LIST, Lexer::T_VOID, Lexer::T_BREAK, 
+        Lexer::T_FLOAT, Lexer::T_POINT, Lexer::T_WHILE, Lexer::T_RETURN, 
+        Lexer::T_STRING, Lexer::T_CONTINUE, Lexer::T_EOF };
+    vector<int> actual;
+
+    Lexer l;
+    l.setCode(code, 1, 1);
+    while (true)
+    {
+        Token tok = l.nextToken();
+        actual.push_back(tok.type);
+        if (tok.type == Lexer::T_EOF)
+        {
+            break;
+        }
+    }
+    EXPECT_EQ(expect, actual);
+}
 
 TEST(lexer, STRING_LITERAL)
 {
-    std::string code = "     abcde     ";
+    string code = "     abcde     ";
 
     Lexer l;
     l.setCode("\"" + code + "\"", 0, 0);
-    Lexer::TokenType type = l.scanToken();
-    std::string s = l.tokenString();
 
-    EXPECT_EQ(type, Lexer::T_STRING_LITERAL);
-    EXPECT_EQ(s, code);
+    Token tok = l.nextToken();
+
+    EXPECT_EQ(tok.type, Lexer::T_STRING_LITERAL);
+    EXPECT_EQ(tok.str, code);
 }
 
 TEST(lexer, STRING_LITERAL_BAD)
 {
     {
-        std::string code = "     abcde  \n   ";
+        string code = "     abcde  \n   ";
 
         Lexer l;
         l.setCode("\"" + code + "\"", 0, 0);
-        Lexer::TokenType type = l.scanToken();
-        Lexer::ErrorType err = l.error();
+        
+        Token tok = l.nextToken();
 
-        EXPECT_EQ(type, Lexer::T_ERROR);
-        EXPECT_EQ(err, Lexer::StrayNewlineInStringLiteral);
+        EXPECT_EQ(tok.type, Lexer::T_ERROR);
+        EXPECT_EQ(l.error(), Lexer::StrayNewlineInStringLiteral);
     }
     {
-        std::string code = "     abcde     ";
+        string code = "     abcde     ";
 
         Lexer l;
         l.setCode("\"" + code, 0, 0);
-        Lexer::TokenType type = l.scanToken();
-        Lexer::ErrorType err = l.error();
+        
+        Token tok = l.nextToken();
 
-        EXPECT_EQ(type, Lexer::T_ERROR);
-        EXPECT_EQ(err, Lexer::UnclosedStringLiteral);
+        EXPECT_EQ(tok.type, Lexer::T_ERROR);
+        EXPECT_EQ(l.error(), Lexer::UnclosedStringLiteral);
     }
 }
 
 TEST(lexer, NUMBER_LITERAL)
 {
     {
-        std::string code = "12345";
+        string code = "12345";
 
         Lexer l;
         l.setCode(code, 0, 0);
-        Lexer::TokenType type = l.scanToken();
-        std::string s = l.tokenString();
+        
+        Token tok = l.nextToken();
 
-        EXPECT_EQ(type, Lexer::T_NUMBER_LITERAL);
-        EXPECT_EQ(s, code);
+        EXPECT_EQ(tok.type, Lexer::T_NUMBER_LITERAL);
+        EXPECT_EQ(tok.str, code);
     }
     {
-        std::string code = "12345";
+        string code = "12345";
 
         Lexer l;
         l.setCode("   " + code + "   ", 0, 0);
-        Lexer::TokenType type = l.scanToken();
-        std::string s = l.tokenString();
+        
+        Token tok = l.nextToken();
 
-        EXPECT_EQ(type, Lexer::T_NUMBER_LITERAL);
-        EXPECT_EQ(s, code);
+        EXPECT_EQ(tok.type, Lexer::T_NUMBER_LITERAL);
+        EXPECT_EQ(tok.str, code);
     }
     {
-        std::string code = "123.45";
+        string code = "123.45";
 
         Lexer l;
         l.setCode(code, 0, 0);
-        Lexer::TokenType type = l.scanToken();
-        std::string s = l.tokenString();
+        
+        Token tok = l.nextToken();
 
-        EXPECT_EQ(type, Lexer::T_NUMBER_LITERAL);
-        EXPECT_EQ(s, code);
+        EXPECT_EQ(tok.type, Lexer::T_NUMBER_LITERAL);
+        EXPECT_EQ(tok.str, code);
     }
     {
-        std::string code = "123.45";
+        string code = "123.45";
 
         Lexer l;
         l.setCode("   " + code + "   ", 0, 0);
-        Lexer::TokenType type = l.scanToken();
-        std::string s = l.tokenString();
+        
+        Token tok = l.nextToken();
 
-        EXPECT_EQ(type, Lexer::T_NUMBER_LITERAL);
-        EXPECT_EQ(s, code);
+        EXPECT_EQ(tok.type, Lexer::T_NUMBER_LITERAL);
+        EXPECT_EQ(tok.str, code);
     }
 }
 
-TEST(lexer, parse_file)
-{
-    std::ifstream t("../example.rect");
-    std::stringstream buffer;
-    buffer << t.rdbuf();
-    std::string code = buffer.str();
+// TEST(lexer, parse_file)
+// {
+//     ifstream t("../example.rect");
+//     stringstream buffer;
+//     buffer << t.rdbuf();
+//     string code = buffer.str();
 
-    Lexer l;
-    l.setCode(code, 0, 0);
+//     Lexer l;
+//     l.setCode(code, 0, 0);
 
-    Lexer::TokenType token;
-    while ((token = l.scanToken()) != Lexer::T_EOF)
-    {
-        std::string s = l.tokenString();
-        std::cout << l.tokenLine() << " " << l.tokenColumn() << " " << Lexer::tokenTypeString(token) << " " << s << std::endl;
-    }
-    std::cout << l.tokenLine() << " " << l.tokenColumn() << " " << Lexer::tokenTypeString(Lexer::T_EOF) << std::endl;
-}
+//     Lexer::TokenType token;
+//     while ((token = l.scanToken()) != Lexer::T_EOF)
+//     {
+//         string s = l.tokenString();
+//         cout << l.tokenLine() << " " << l.tokenColumn() << " " << Lexer::tokenTypeString(token) << " " << s << endl;
+//     }
+//     cout << l.tokenLine() << " " << l.tokenColumn() << " " << Lexer::tokenTypeString(Lexer::T_EOF) << endl;
+// }
