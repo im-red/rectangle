@@ -43,7 +43,20 @@ void Lexer::setCode(const string &code, int line, int column)
 
 Token Lexer::nextToken()
 {
-    assert(m_tokenType != T_EOF && m_tokenType != T_ERROR);
+    if (m_tokenType == T_EOF)
+    {
+        fprintf(stderr, "lexer reached EOF\n");
+        assert(m_tokenType != T_EOF);
+    }
+    if (m_tokenType == T_ERROR)
+    {
+        fprintf(stderr, "lexer error(token: %s, line: %d, column: %d, type: %s\n",
+                m_tokenString.c_str(),
+                m_tokenLine,
+                m_tokenColumn,
+                errorString().c_str());
+        assert(m_tokenType != T_ERROR);
+    }
 
     m_tokenType = scanToken();
     Token token(m_tokenType, m_tokenString, m_tokenLine, m_tokenColumn);

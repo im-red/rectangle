@@ -11,6 +11,29 @@
 using namespace testing;
 using namespace std;
 
+static void singleTokenHelper(const std::string &code, int type, const std::string &str)
+{
+    Lexer l;
+    l.setCode(code, 1, 1);
+
+    Token tok = l.nextToken();
+
+    EXPECT_EQ(tok.type, type);
+    EXPECT_EQ(tok.str, str);
+}
+
+static void singleTokenErrorHelper(const std::string &code, int error)
+{
+    Lexer l;
+    l.setCode(code, 1, 1);
+
+    Token tok = l.nextToken();
+
+    EXPECT_EQ(tok.type, Lexer::T_ERROR);
+    EXPECT_EQ(l.error(), error);
+}
+
+
 TEST(lexer, KEYWORD)
 {
     string code = "if\ndef\nint\nelse\nenum\nlist\nvoid\nbreak\nfloat\npoint\n" \
@@ -35,42 +58,59 @@ TEST(lexer, KEYWORD)
     EXPECT_EQ(expect, actual);
 }
 
-TEST(lexer, STRING_LITERAL)
+TEST(lexer, COMMENT)
 {
-    string code = "     abcde     ";
-
-    Lexer l;
-    l.setCode("\"" + code + "\"", 0, 0);
-
-    Token tok = l.nextToken();
-
-    EXPECT_EQ(tok.type, Lexer::T_STRING_LITERAL);
-    EXPECT_EQ(tok.str, code);
+    string code = "//abcde";
+    singleTokenHelper(code, Lexer::T_COMMENT, code);
 }
 
-TEST(lexer, STRING_LITERAL_BAD)
+TEST(lexer, SYMBOL)
+{
+    string code = "{}[](),:&&||!+-*/%. >= <= > < == != =;";
+    vector<int> expect = { Lexer::T_L_BRACE, Lexer::T_R_BRACE, Lexer::T_L_BRACKET, Lexer::T_R_BRACKET, 
+        Lexer::T_L_PAREN, Lexer::T_R_PAREN, Lexer::T_COMMA, Lexer::T_COLON, 
+        Lexer::T_AND_AND, Lexer::T_OR_OR, 
+        Lexer::T_NOT, Lexer::T_PLUS, Lexer::T_MINUS,  Lexer::T_STAR,
+        Lexer::T_SLASH, Lexer::T_REMAINDER, Lexer::T_DOT, Lexer::T_GE,
+        Lexer::T_LE, Lexer::T_GT, Lexer::T_LT, Lexer::T_EQUAL,
+        Lexer::T_NOT_EQUAL, Lexer::T_ASSIGN, Lexer::T_SEMICOLON, Lexer::T_EOF };
+    vector<int> actual;
+
+    Lexer l;
+    l.setCode(code, 1, 1);
+    while (true)
+    {
+        Token tok = l.nextToken();
+        actual.push_back(tok.type);
+        if (tok.type == Lexer::T_EOF)
+        {
+            break;
+        }
+    }
+    EXPECT_EQ(expect, actual);
+}
+
+TEST(lexer, SYMBOL_ERROR)
+{
+    string code = "|";
+    singleTokenErrorHelper(code, Lexer::IllegalSymbol);
+}
+
+TEST(lexer, STRING_LITERAL)
+{
+    string code = "   abcde   ";
+    singleTokenHelper('"' + code + '"', Lexer::T_STRING_LITERAL, code);
+}
+
+TEST(lexer, STRING_LITERAL_ERROR)
 {
     {
         string code = "     abcde  \n   ";
-
-        Lexer l;
-        l.setCode("\"" + code + "\"", 0, 0);
-        
-        Token tok = l.nextToken();
-
-        EXPECT_EQ(tok.type, Lexer::T_ERROR);
-        EXPECT_EQ(l.error(), Lexer::StrayNewlineInStringLiteral);
+        singleTokenErrorHelper("\"" + code + "\"", Lexer::StrayNewlineInStringLiteral);
     }
     {
         string code = "     abcde     ";
-
-        Lexer l;
-        l.setCode("\"" + code, 0, 0);
-        
-        Token tok = l.nextToken();
-
-        EXPECT_EQ(tok.type, Lexer::T_ERROR);
-        EXPECT_EQ(l.error(), Lexer::UnclosedStringLiteral);
+        singleTokenErrorHelper("\"" + code, Lexer::UnclosedStringLiteral);
     }
 }
 
@@ -78,65 +118,16 @@ TEST(lexer, NUMBER_LITERAL)
 {
     {
         string code = "12345";
-
-        Lexer l;
-        l.setCode(code, 0, 0);
-        
-        Token tok = l.nextToken();
-
-        EXPECT_EQ(tok.type, Lexer::T_NUMBER_LITERAL);
-        EXPECT_EQ(tok.str, code);
-    }
-    {
-        string code = "12345";
-
-        Lexer l;
-        l.setCode("   " + code + "   ", 0, 0);
-        
-        Token tok = l.nextToken();
-
-        EXPECT_EQ(tok.type, Lexer::T_NUMBER_LITERAL);
-        EXPECT_EQ(tok.str, code);
+        singleTokenHelper(code, Lexer::T_NUMBER_LITERAL, code);
     }
     {
         string code = "123.45";
-
-        Lexer l;
-        l.setCode(code, 0, 0);
-        
-        Token tok = l.nextToken();
-
-        EXPECT_EQ(tok.type, Lexer::T_NUMBER_LITERAL);
-        EXPECT_EQ(tok.str, code);
-    }
-    {
-        string code = "123.45";
-
-        Lexer l;
-        l.setCode("   " + code + "   ", 0, 0);
-        
-        Token tok = l.nextToken();
-
-        EXPECT_EQ(tok.type, Lexer::T_NUMBER_LITERAL);
-        EXPECT_EQ(tok.str, code);
+        singleTokenHelper(code, Lexer::T_NUMBER_LITERAL, code);
     }
 }
 
-// TEST(lexer, parse_file)
-// {
-//     ifstream t("../example.rect");
-//     stringstream buffer;
-//     buffer << t.rdbuf();
-//     string code = buffer.str();
-
-//     Lexer l;
-//     l.setCode(code, 0, 0);
-
-//     Lexer::TokenType token;
-//     while ((token = l.scanToken()) != Lexer::T_EOF)
-//     {
-//         string s = l.tokenString();
-//         cout << l.tokenLine() << " " << l.tokenColumn() << " " << Lexer::tokenTypeString(token) << " " << s << endl;
-//     }
-//     cout << l.tokenLine() << " " << l.tokenColumn() << " " << Lexer::tokenTypeString(Lexer::T_EOF) << endl;
-// }
+TEST(lexer, CHARACTOR_ERROR)
+{
+    string code = "@";
+    singleTokenErrorHelper(code, Lexer::IllegalCharacter);
+}
