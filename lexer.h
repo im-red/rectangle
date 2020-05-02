@@ -19,6 +19,19 @@
 
 #include <string>
 
+struct Token
+{
+    Token(int t, const std::string &s, int l, int col)
+        : type(t), str(s), line(l), column(col)
+    {
+    }
+
+    int type;
+    std::string str;
+    int line;
+    int column;
+};
+
 class Lexer
 {
 public:
@@ -93,7 +106,7 @@ public:
     Lexer();
     void setCode(const std::string &code, int line, int column);
 
-    TokenType scanToken();
+    Token nextToken();
 
     static std::string tokenTypeString(TokenType token);
     static std::string errorTypeString(ErrorType error);
@@ -108,8 +121,10 @@ public:
     int tokenPos() const;
 
 private:
+    TokenType scanToken();
     TokenType scanString(char c);
     TokenType scanNumber(char c);
+
     void nextChar();
 
     static bool isLineTerminator(char c);
@@ -126,6 +141,7 @@ private:
     int m_column = 0;
     int m_pos = 0;
     char m_char = 0;
+    TokenType m_tokenType = TokenCount;
     std::string m_tokenString;
     int m_tokenLine = 0;
     int m_tokenColumn = 0;

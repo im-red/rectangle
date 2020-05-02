@@ -41,6 +41,15 @@ void Lexer::setCode(const string &code, int line, int column)
     m_skipLineFeed = false;
 }
 
+Token Lexer::nextToken()
+{
+    assert(m_tokenType != T_EOF && m_tokenType != T_ERROR);
+
+    m_tokenType = scanToken();
+    Token token(m_tokenType, m_tokenString, m_tokenLine, m_tokenColumn);
+    return token;
+}
+
 Lexer::TokenType Lexer::scanToken()
 {
     m_tokenString = "";
@@ -193,6 +202,7 @@ Lexer::TokenType Lexer::scanToken()
     }
     }
 
+    m_error = IllegalCharacter;
     return T_ERROR;
 }
 
