@@ -1,0 +1,8 @@
+// instance.rect
+Rectangle {
+    x: 0
+    y: 0
+    width: 10
+    height: 10 * width
+    border.type: Rectangle.Dot
+}

@@ -18,12 +18,21 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <set>
 
 struct Token
 {
     Token(int t, const std::string &s, int l, int col)
         : type(t), str(s), line(l), column(col)
     {
+    }
+
+    bool is(int t) const { return t == type; }
+    bool isNot(int t) const { return t != type; }
+    bool isIn(const std::set<int> &s) const
+    {
+        return s.find(type) != s.end();
     }
 
     int type;
@@ -101,11 +110,12 @@ public:
 
 public:
     Lexer();
-    void setCode(const std::string &code, int line, int column);
+    void setCode(const std::string &code, int line = 1, int column = 0);
 
+    std::vector<Token> tokens();
     Token nextToken();
 
-    static std::string tokenTypeString(TokenType token);
+    static std::string tokenTypeString(int token);
     static std::string errorTypeString(ErrorType error);
 
     int line() const;

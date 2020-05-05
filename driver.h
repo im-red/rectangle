@@ -26,6 +26,7 @@ class Driver
 public:
     enum class Stage
     {
+        Begin,
         Lex,
         Parse,
         End
@@ -36,10 +37,12 @@ public:
 
     Stage compile(const std::string &code);
 
+    Stage stage() const { return m_stage; }
     std::string svgResult() const { return m_svgResult; }
     std::string errorString() const { return m_errorString; }
 
 private:
+    Stage m_stage = Stage::Begin;
     std::string m_svgResult;
     std::string m_errorString;
 

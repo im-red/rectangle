@@ -24,6 +24,7 @@ Driver::Driver()
 
 Driver::Stage Driver::compile(const std::string &code)
 {
+    m_stage = Stage::Begin;
     m_svgResult.clear();
     m_errorString.clear();
     m_tokens.clear();
@@ -37,7 +38,8 @@ Driver::Stage Driver::compile(const std::string &code)
         if (tok.type == Lexer::T_ERROR)
         {
             m_errorString = m_lexer.errorString();
-            return Stage::Lex;
+            m_stage = Stage::Lex;
+            return m_stage;
         }
         else if (tok.type == Lexer::T_EOF)
         {
@@ -45,5 +47,6 @@ Driver::Stage Driver::compile(const std::string &code)
         }
     }
 
-    return Stage::Parse;
+    m_stage = Stage::End;
+    return m_stage;
 }

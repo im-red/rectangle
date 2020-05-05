@@ -41,6 +41,29 @@ void Lexer::setCode(const string &code, int line, int column)
     m_skipLineFeed = false;
 }
 
+std::vector<Token> Lexer::tokens()
+{
+    vector<Token> result;
+    while (true)
+    {
+        Token tok = nextToken();
+        if (tok.type != Lexer::T_COMMENT)
+        {
+            result.push_back(tok);
+        }
+
+        if (tok.type == Lexer::T_ERROR)
+        {
+            break;
+        }
+        else if (tok.type == Lexer::T_EOF)
+        {
+            break;
+        }
+    }
+    return result;
+}
+
 Token Lexer::nextToken()
 {
     if (m_tokenType == T_EOF)

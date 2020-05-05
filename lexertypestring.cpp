@@ -26,7 +26,7 @@ using namespace std;
 
 #define ENUM_ELEMENT(x) { x, #x }
 
-string Lexer::tokenTypeString(TokenType token)
+string Lexer::tokenTypeString(int token)
 {
     static const std::map<int, std::string> STRING_MAP =
     {

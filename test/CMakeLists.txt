@@ -20,6 +20,9 @@ add_executable(test_all
     ../lexertypestring.cpp
     test_driver.cpp
     ../driver.cpp
+    test_parser.cpp
+    ../parser.cpp
+    ../parsertypestring.cpp
 )
 target_link_libraries(test_all ${GTEST_LIBRARIES} pthread)
 

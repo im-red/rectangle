@@ -13,4 +13,6 @@ add_executable(rectangle
     lexerkeyword.cpp
     lexertypestring.cpp
     driver.cpp
+    parser.cpp
+    parsertypestring.cpp
 )
