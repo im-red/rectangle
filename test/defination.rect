@@ -12,6 +12,7 @@ def Rectangle {
     int border.width: 1
     string border.color: "#FFFFFF"
     int border.type: Solid
+    list<point> points: {}
     void draw() {
         rect r;
         r.x = x;

@@ -307,6 +307,12 @@ static const set<int> typeFirst =
 };
 static const set<int> &functionDefinationFirst = typeFirst;
 
+//memberItem  // Int | Void | Point | Float | String | List | Enum | Identifier
+//    : propertyDefination    // Int | Point | Float | String | List
+//    | functionDefination    // Int | Void | Point | Float | String | List | Identifier
+//    | enumDefination        // Enum
+//    ;
+
 void Parser::parseMemberItem()
 {
     int oldIndex = m_index;
@@ -319,15 +325,11 @@ void Parser::parseMemberItem()
     {
         parseEnumDefination();
     }
-    else if (curToken().isIn(propertyDefinationFirst)
-             && token(m_index + 1).is(Lexer::T_IDENTIFIER)
-             && token(m_index + 2).isIn({Lexer::T_COLON, Lexer::T_DOT}))
+    else if (tryMemberItemAlt1())
     {
         parsePropertyDefination();
     }
-    else if (curToken().isIn(functionDefinationFirst)
-             && token(m_index + 1).is(Lexer::T_IDENTIFIER)
-             && token(m_index + 2).is(Lexer::T_L_PAREN))
+    else if (tryMemberItemAlt2())
     {
         parseFunctionDefination();
     }
@@ -335,8 +337,8 @@ void Parser::parseMemberItem()
     {
         char buf[BUF_LEN];
         Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect enumDefination/propertyDefination/functionDefination at line %d column %d",
-                 tok.line, tok.column);
+        snprintf(buf, sizeof(buf), "(MemberItem)expect enumDefination/propertyDefination/functionDefination at line %d column %d(%s)",
+                 tok.line, tok.column, tok.str.c_str());
         throw ParseException(buf);
     }
 
@@ -345,6 +347,50 @@ void Parser::parseMemberItem()
         decIndent();
         pushParseResult(MemberItem, m_indent, oldIndex, m_index);
     }
+}
+
+bool Parser::tryMemberItemAlt1()
+{
+    int indexBackup = m_index;
+    incTrying();
+
+    bool result = true;
+    try
+    {
+        parsePropertyDefination();
+    }
+    catch (ParseException e)
+    {
+        fprintf(stderr, "tryMemberItemAlt1 fail: %s\n", e.what());
+        result = false;
+    }
+
+    decTrying();
+    m_index = indexBackup;
+
+    return result;
+}
+
+bool Parser::tryMemberItemAlt2()
+{
+    int indexBackup = m_index;
+    incTrying();
+
+    bool result = true;
+    try
+    {
+        parseFunctionDefination();
+    }
+    catch (ParseException e)
+    {
+        fprintf(stderr, "tryMemberItemAlt2 fail: %s\n", e.what());
+        result = false;
+    }
+
+    decTrying();
+    m_index = indexBackup;
+
+    return result;
 }
 
 void Parser::parsePropertyDefination()
@@ -360,28 +406,14 @@ void Parser::parsePropertyDefination()
     if (curToken().is(Lexer::T_COLON))
     {
         match(Lexer::T_COLON);
-        if (curToken().is(Lexer::T_IDENTIFIER))
-        {
-            match(Lexer::T_IDENTIFIER);
-        }
-        else
-        {
-            parseLiteral();
-        }
+        parseInitializer();
     }
     else if (curToken().is(Lexer::T_DOT))
     {
         match(Lexer::T_DOT);
         match(Lexer::T_IDENTIFIER);
         match(Lexer::T_COLON);
-        if (curToken().is(Lexer::T_IDENTIFIER))
-        {
-            match(Lexer::T_IDENTIFIER);
-        }
-        else
-        {
-            parseLiteral();
-        }
+        parseInitializer();
     }
     else
     {
@@ -769,6 +801,18 @@ static const set<int> expressionFirst =
     Lexer::T_NOT
 };
 
+static const set<int> initializerListFirst =
+{
+    Lexer::T_IDENTIFIER,
+    Lexer::T_STRING_LITERAL,
+    Lexer::T_NUMBER_LITERAL,
+    Lexer::T_L_PAREN,
+    Lexer::T_PLUS,
+    Lexer::T_MINUS,
+    Lexer::T_NOT,
+    Lexer::T_L_BRACE
+};
+
 void Parser::parseInitializer()
 {
     int oldIndex = m_index;
@@ -784,7 +828,10 @@ void Parser::parseInitializer()
     else if (curToken().is(Lexer::T_L_BRACE))
     {
         match(Lexer::T_L_BRACE);
-        parseInitializerList();
+        if (curToken().isIn(initializerListFirst))
+        {
+            parseInitializerList();
+        }
         match(Lexer::T_R_BRACE);
     }
     else

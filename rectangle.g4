@@ -14,17 +14,15 @@ memberItemList  // Int | Void | Point | Float | String | List | Enum | Identifie
     ;
 
 memberItem  // Int | Void | Point | Float | String | List | Enum | Identifier
-    : propertyDefination    // (Int | Point | Float | String | List) Identifier (Colon | Dot)
-    | functionDefination    // (Int | Void | Point | Float | String | List | Identifier) Identifier LParen
+    : propertyDefination    // Int | Point | Float | String | List
+    | functionDefination    // Int | Void | Point | Float | String | List | Identifier
     | enumDefination        // Enum
     ;
 
 propertyDefination  // Int | Point | Float | String | List
     : propertyType Identifier   // Int | Point | Float | String | List
-        ( Colon literal                     // Colon (StringLiteral | NumberLiteral)
-        | Colon Identifier                  // Colon Identifier
-        | Dot Identifier Colon literal      // Dot
-        | Dot Identifier Colon Identifier   // Dot
+        ( Colon initializer                 // Colon
+        | Dot Identifier Colon initializer  // Dot
         )
     ;
 
@@ -85,8 +83,8 @@ declaration // Int | Void | Point | Float | String | List | Identifier
     ;
 
 initializer // Identifier | StringLiteral | NumberLiteral | LParen | Plus | Minus | Not | LBrace
-    : expression                    // Identifier | StringLiteral | NumberLiteral | LParen | Plus | Minus | Not
-    | LBrace initializerList RBrace // LBrace
+    : expression                        // Identifier | StringLiteral | NumberLiteral | LParen | Plus | Minus | Not
+    | LBrace initializerList? RBrace    // LBrace
     ;
 
 initializerList // Identifier | StringLiteral | NumberLiteral | LParen | Plus | Minus | Not | LBrace

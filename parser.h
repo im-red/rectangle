@@ -129,6 +129,8 @@ private:
     void parseClassDefination();
     void parseMemberItemList();
     void parseMemberItem();
+    bool tryMemberItemAlt1();
+    bool tryMemberItemAlt2();
     void parsePropertyDefination();
     void parsePropertyType();
     void parseType();
