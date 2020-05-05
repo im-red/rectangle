@@ -85,6 +85,7 @@ bool Parser::parseRule(Parser::ParserRule rule, int index)
         case SelectionStatement:        parseSelectionStatement();          break;
         case IterationStatement:        parseIterationStatement();          break;
         case JumpStatement:             parseJumpStatement();               break;
+        case AssignmentStatement:       parseAssignmentStatement();         break;
         case EnumDefination:            parseEnumDefination();              break;
         case EnumConstantList:          parseEnumConstantList();            break;
         case EnumConstant:              parseEnumConstant();                break;
@@ -178,6 +179,14 @@ void Parser::pushParseResult(Parser::ParserRule rule, int indent, int begin, int
     {
         result += (token(i).str + " ");
     }
+    m_parseResult.push_back(result);
+}
+
+void Parser::pushParseResult(Parser::ParserRule rule, const string &info)
+{
+    string result(static_cast<size_t>(m_indent), ' ');
+    result += (parserRuleString(rule) + ": ");
+    result += info;
     m_parseResult.push_back(result);
 }
 
@@ -1185,13 +1194,7 @@ void Parser::parseStatement()
     {
         if (curToken().isIn(assignStatementFirst))
         {
-            parsePostfixExpression();
-            if (curToken().is(Lexer::T_ASSIGN))
-            {
-                match(Lexer::T_ASSIGN);
-                parseExpression();
-            }
-            match(Lexer::T_SEMICOLON);
+            parseAssignmentStatement();
         }
         else
         {
@@ -1319,6 +1322,29 @@ void Parser::parseJumpStatement()
     {
         decIndent();
         pushParseResult(JumpStatement, m_indent, oldIndex, m_index);
+    }
+}
+
+void Parser::parseAssignmentStatement()
+{
+    int oldIndex = m_index;
+    if (!trying())
+    {
+        incIndent();
+    }
+
+    parsePostfixExpression();
+    if (curToken().is(Lexer::T_ASSIGN))
+    {
+        match(Lexer::T_ASSIGN);
+        parseExpression();
+    }
+    match(Lexer::T_SEMICOLON);
+
+    if (!trying())
+    {
+        decIndent();
+        pushParseResult(AssignmentStatement, m_indent, oldIndex, m_index);
     }
 }
 

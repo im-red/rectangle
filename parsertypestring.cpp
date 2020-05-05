@@ -44,6 +44,7 @@ std::string Parser::parserRuleString(ParserRule rule)
         ENUM_ELEMENT(SelectionStatement),
         ENUM_ELEMENT(IterationStatement),
         ENUM_ELEMENT(JumpStatement),
+        ENUM_ELEMENT(AssignmentStatement),
         ENUM_ELEMENT(EnumDefination),
         ENUM_ELEMENT(EnumConstantList),
         ENUM_ELEMENT(EnumConstant),

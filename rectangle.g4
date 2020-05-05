@@ -178,7 +178,7 @@ statement   // LBrace | If | While | Continue | Break | Return | Identifier | St
     | selectionStatement                                // If
     | iterationStatement                                // While
     | jumpStatement                                     // Continue | Break | Return
-    | postfixExpression (Assign expression)? Semicolon  // Identifier | StringLiteral | NumberLiteral | LParen
+    | assignmentStatement                               // Identifier | StringLiteral | NumberLiteral | LParen
     ;
 
 selectionStatement  // If
@@ -198,6 +198,10 @@ jumpStatement   // Continue | Break | Return
     : Continue Semicolon
     | Break Semicolon
     | Return expression? Semicolon
+    ;
+
+assignmentStatement // Identifier | StringLiteral | NumberLiteral | LParen
+    : postfixExpression (Assign expression)? Semicolon  // Identifier | StringLiteral | NumberLiteral | LParen
     ;
 
 enumDefination  // Enum

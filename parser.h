@@ -76,6 +76,7 @@ public:
         SelectionStatement,
         IterationStatement,
         JumpStatement,
+        AssignmentStatement,
         EnumDefination,
         EnumConstantList,
         EnumConstant,
@@ -115,6 +116,7 @@ private:
     void updateMemory(int index, ParserRule rule, int result);
 
     void pushParseResult(ParserRule rule, int indent, int begin, int end);
+    void pushParseResult(ParserRule rule, const std::string &info);
 
     void incIndent();
     void decIndent();
@@ -159,6 +161,7 @@ private:
     void parseSelectionStatement();
     void parseIterationStatement();
     void parseJumpStatement();
+    void parseAssignmentStatement();
     void parseEnumDefination();
     void parseEnumConstantList();
     void parseEnumConstant();
