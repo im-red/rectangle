@@ -23,6 +23,7 @@ add_executable(test_all
     test_parser.cpp
     ../parser.cpp
     ../parsertypestring.cpp
+    ../ast.cpp
 )
 target_link_libraries(test_all ${GTEST_LIBRARIES} pthread)
 

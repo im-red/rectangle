@@ -32,15 +32,25 @@ void Parser::setTokens(const std::vector<Token> &tokens)
 {
     m_tokens = tokens;
     m_index = 0;
-    m_indent = 0;
     m_memory.clear();
-    m_parseResult.clear();
 }
 
 bool Parser::parse()
 {
-    parseRule(Document, 0);
-    return true;
+    m_document.reset();
+
+    bool result = true;
+    try
+    {
+        m_document = parseDocument();
+        m_document->print(0);
+    }
+    catch (ParseException &e)
+    {
+        result = false;
+        fprintf(stderr, "%s\n", e.what());
+    }
+    return result;
 }
 
 bool Parser::parseRule(Parser::ParserRule rule, int index)
@@ -53,19 +63,14 @@ bool Parser::parseRule(Parser::ParserRule rule, int index)
         {
         case Document:                  parseDocument();                    break;
         case ClassDefination:           parseClassDefination();             break;
-        case MemberItemList:            parseMemberItemList();              break;
-        case MemberItem:                parseMemberItem();                  break;
         case PropertyDefination:        parsePropertyDefination();          break;
         case Type:                      parseType();                        break;
         case PropertyType:              parsePropertyType();                break;
         case ListType:                  parseListType();                    break;
         case Literal:                   parseLiteral();                     break;
         case FunctionDefination:        parseFunctionDefination();          break;
-        case ParamList:                 parseParamList();                   break;
         case ParamItem:                 parseParamItem();                   break;
         case CompoundStatement:         parseCompoundStatement();           break;
-        case BlockItemList:             parseBlockItemList();               break;
-        case BlockItem:                 parseBlockItem();                   break;
         case Declaration:               parseDeclaration();                 break;
         case Initializer:               parseInitializer();                 break;
         case InitializerList:           parseInitializerList();             break;
@@ -80,18 +85,13 @@ bool Parser::parseRule(Parser::ParserRule rule, int index)
         case UnaryOperator:             parseUnaryOperator();               break;
         case PostfixExpression:         parsePostfixExpression();           break;
         case PrimaryExpression:         parsePrimaryExpression();           break;
-        case ArgumentExpressionList:    parseArgumentExpressionList();      break;
         case Statement:                 parseStatement();                   break;
         case SelectionStatement:        parseSelectionStatement();          break;
         case IterationStatement:        parseIterationStatement();          break;
         case JumpStatement:             parseJumpStatement();               break;
-        case AssignmentStatement:       parseAssignmentStatement();         break;
+        case ExprStatement:       parseExprStatement();         break;
         case EnumDefination:            parseEnumDefination();              break;
-        case EnumConstantList:          parseEnumConstantList();            break;
-        case EnumConstant:              parseEnumConstant();                break;
         case ClassInstance:             parseClassInstance();               break;
-        case BindingItemList:           parseBindingItemList();             break;
-        case BindingItem:               parseBindingItem();                 break;
         default :
         {
             fprintf(stderr, "Invalid ParserRule: %d\n", rule);
@@ -99,15 +99,12 @@ bool Parser::parseRule(Parser::ParserRule rule, int index)
         }
         }
     }
-    catch (ParseException e)
+    catch (ParseException &e)
     {
         result = false;
         fprintf(stderr, "%s\n", e.what());
     }
-    for (int i = static_cast<int>(m_parseResult.size() - 1); i >= 0; i--)
-    {
-        printf("%s\n", m_parseResult[static_cast<size_t>(i)].c_str());
-    }
+
     return result;
 }
 
@@ -171,35 +168,6 @@ void Parser::updateMemory(int index, Parser::ParserRule rule, int result)
     m_memory[index][rule] = result;
 }
 
-void Parser::pushParseResult(Parser::ParserRule rule, int indent, int begin, int end)
-{
-    string result(static_cast<size_t>(indent), ' ');
-    result += (parserRuleString(rule) + ": ");
-    for (int i = begin; i < end; i++)
-    {
-        result += (token(i).str + " ");
-    }
-    m_parseResult.push_back(result);
-}
-
-void Parser::pushParseResult(Parser::ParserRule rule, const string &info)
-{
-    string result(static_cast<size_t>(m_indent), ' ');
-    result += (parserRuleString(rule) + ": ");
-    result += info;
-    m_parseResult.push_back(result);
-}
-
-void Parser::incIndent()
-{
-    m_indent++;
-}
-
-void Parser::decIndent()
-{
-    m_indent--;
-}
-
 void Parser::incTrying()
 {
     m_trying++;
@@ -210,18 +178,30 @@ void Parser::decTrying()
     m_trying--;
 }
 
-void Parser::parseDocument()
+std::unique_ptr<DocumentDecl> Parser::parseDocument()
 {
-    int oldIndex = m_index;
+    unique_ptr<DocumentDecl> doc;
+
+    unique_ptr<ClassDefinationDecl> def;
+    unique_ptr<ClassInstanceDecl> instance;
+
     if (!trying())
     {
-        incIndent();
+        doc.reset(new DocumentDecl);
     }
 
     switch(curTokenType())
     {
-    case Lexer::T_DEF: parseClassDefination(); break;
-    case Lexer::T_IDENTIFIER: parseClassInstance(); break;
+    case Lexer::T_DEF:
+    {
+        def = parseClassDefination();
+        break;
+    }
+    case Lexer::T_IDENTIFIER:
+    {
+        instance = parseClassInstance();
+        break;
+    }
     default:
     {
         char buf[BUF_LEN];
@@ -235,53 +215,68 @@ void Parser::parseDocument()
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(Document, m_indent, oldIndex, m_index);
+        if (def)
+        {
+            doc->type = DocumentDecl::DocumentType::ClassDefination;
+            doc->defination = move(def);
+        }
+        else if (instance)
+        {
+            doc->type = DocumentDecl::DocumentType::ClassInstance;
+            doc->instance = move(instance);
+        }
+        else
+        {
+            assert(false);
+        }
     }
+
+    return doc;
 }
 
-void Parser::parseClassDefination()
+std::unique_ptr<ClassDefinationDecl> Parser::parseClassDefination()
 {
-    int oldIndex = m_index;
+    unique_ptr<ClassDefinationDecl> defination;
+    string className;
+
     if (!trying())
     {
-        incIndent();
+        defination.reset(new ClassDefinationDecl);
     }
 
     match(Lexer::T_DEF);
     match(Lexer::T_IDENTIFIER);
+    className = token(m_index - 1).str;
+
     match(Lexer::T_L_BRACE);
-    parseMemberItemList();
+    parseMemberItemList(defination);
     match(Lexer::T_R_BRACE);
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(ClassDefination, m_indent, oldIndex, m_index);
+        defination->name = className;
     }
+
+    return defination;
 }
 
-void Parser::parseMemberItemList()
+static const set<int> memberItemFirst =
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    Lexer::T_INT,
+    Lexer::T_VOID,
+    Lexer::T_POINT,
+    Lexer::T_FLOAT,
+    Lexer::T_STRING,
+    Lexer::T_LIST,
+    Lexer::T_ENUM,
+    Lexer::T_IDENTIFIER
+};
 
-    set<int> first = {Lexer::T_INT, Lexer::T_VOID, Lexer::T_POINT,
-                      Lexer::T_FLOAT, Lexer::T_STRING, Lexer::T_LIST,
-                      Lexer::T_ENUM, Lexer::T_IDENTIFIER};
-
-    while (curToken().isIn(first))
+void Parser::parseMemberItemList(unique_ptr<ClassDefinationDecl> &defination)
+{
+    while (curToken().isIn(memberItemFirst))
     {
-        parseMemberItem();
-    }
-
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(MemberItemList, m_indent, oldIndex, m_index);
+        parseMemberItem(defination);
     }
 }
 
@@ -305,7 +300,6 @@ static const set<int> typeFirst =
     Lexer::T_VOID,
     Lexer::T_IDENTIFIER
 };
-static const set<int> &functionDefinationFirst = typeFirst;
 
 //memberItem  // Int | Void | Point | Float | String | List | Enum | Identifier
 //    : propertyDefination    // Int | Point | Float | String | List
@@ -313,25 +307,23 @@ static const set<int> &functionDefinationFirst = typeFirst;
 //    | enumDefination        // Enum
 //    ;
 
-void Parser::parseMemberItem()
+void Parser::parseMemberItem(unique_ptr<ClassDefinationDecl> &defination)
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<EnumDecl> enumDecl;
+    unique_ptr<FieldDecl> fieldDecl;
+    unique_ptr<FunctionDecl> functionDecl;
 
     if (curToken().is(Lexer::T_ENUM))
     {
-        parseEnumDefination();
+        enumDecl = parseEnumDefination();
     }
     else if (tryMemberItemAlt1())
     {
-        parsePropertyDefination();
+        fieldDecl = parsePropertyDefination();
     }
     else if (tryMemberItemAlt2())
     {
-        parseFunctionDefination();
+        functionDecl = parseFunctionDefination();
     }
     else
     {
@@ -344,8 +336,22 @@ void Parser::parseMemberItem()
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(MemberItem, m_indent, oldIndex, m_index);
+        if (enumDecl)
+        {
+            defination->enumList.push_back(move(enumDecl));
+        }
+        else if (fieldDecl)
+        {
+            defination->fieldList.push_back(move(fieldDecl));
+        }
+        else if (functionDecl)
+        {
+            defination->functionList.push_back(move(functionDecl));
+        }
+        else
+        {
+            assert(false);
+        }
     }
 }
 
@@ -359,7 +365,7 @@ bool Parser::tryMemberItemAlt1()
     {
         parsePropertyDefination();
     }
-    catch (ParseException e)
+    catch (ParseException &e)
     {
         fprintf(stderr, "tryMemberItemAlt1 fail: %s\n", e.what());
         result = false;
@@ -381,7 +387,7 @@ bool Parser::tryMemberItemAlt2()
     {
         parseFunctionDefination();
     }
-    catch (ParseException e)
+    catch (ParseException &e)
     {
         fprintf(stderr, "tryMemberItemAlt2 fail: %s\n", e.what());
         result = false;
@@ -393,27 +399,29 @@ bool Parser::tryMemberItemAlt2()
     return result;
 }
 
-void Parser::parsePropertyDefination()
+std::unique_ptr<FieldDecl> Parser::parsePropertyDefination()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    string name1;
+    string name2;
+    TypeInfo ti;
+    unique_ptr<Expr> initExpr;
 
-    parsePropertyType();
+    ti = parsePropertyType();
     match(Lexer::T_IDENTIFIER);
+    name1 = token(m_index - 1).str;
+
     if (curToken().is(Lexer::T_COLON))
     {
         match(Lexer::T_COLON);
-        parseInitializer();
+        initExpr = parseInitializer();
     }
     else if (curToken().is(Lexer::T_DOT))
     {
         match(Lexer::T_DOT);
         match(Lexer::T_IDENTIFIER);
+        name2 = token(m_index - 1).str;
         match(Lexer::T_COLON);
-        parseInitializer();
+        initExpr = parseInitializer();
     }
     else
     {
@@ -424,20 +432,32 @@ void Parser::parsePropertyDefination()
         throw ParseException(buf);
     }
 
+    unique_ptr<FieldDecl> fieldDecl;
+
     if (!trying())
     {
-        decIndent();
-        pushParseResult(PropertyDefination, m_indent, oldIndex, m_index);
+        if (name2 == "")
+        {
+            fieldDecl.reset(new FieldDecl);
+            fieldDecl->name = name1;
+        }
+        else
+        {
+            ScopeFieldDecl *sfd = new ScopeFieldDecl;
+            sfd->name = name2;
+            sfd->scopeName = name1;
+            fieldDecl.reset(sfd);
+        }
+        fieldDecl->type = ti;
+        fieldDecl->expr = move(initExpr);
     }
+
+    return fieldDecl;
 }
 
-void Parser::parsePropertyType()
+TypeInfo Parser::parsePropertyType()
 {
     int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
 
     switch(curTokenType())
     {
@@ -454,26 +474,23 @@ void Parser::parsePropertyType()
     {
         char buf[BUF_LEN];
         Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a type token at line %d column %d",
-                 tok.line, tok.column);
+        snprintf(buf, sizeof(buf), "expect a type token at line %d column %d(%s)",
+                 tok.line, tok.column, tok.str.c_str());
         throw ParseException(buf);
     }
     }
 
-    if (!trying())
+    TypeInfo ti;
+    for (int i = oldIndex; i < m_index; i++)
     {
-        decIndent();
-        pushParseResult(PropertyType, m_indent, oldIndex, m_index);
+        ti.name += (token(i).str + " ");
     }
+    return ti;
 }
 
-void Parser::parseType()
+TypeInfo Parser::parseType()
 {
     int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
 
     switch(curTokenType())
     {
@@ -498,47 +515,51 @@ void Parser::parseType()
     }
     }
 
-    if (!trying())
+    TypeInfo ti;
+    for (int i = oldIndex; i < m_index; i++)
     {
-        decIndent();
-        pushParseResult(Type, m_indent, oldIndex, m_index);
+        ti.name += (token(i).str + " ");
     }
+    return ti;
 }
 
 void Parser::parseListType()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
-
     match(Lexer::T_LIST);
     match(Lexer::T_LT);
     parsePropertyType();
     match(Lexer::T_GT);
-
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(ListType, m_indent, oldIndex, m_index);
-    }
 }
 
-void Parser::parseLiteral()
+std::unique_ptr<Expr> Parser::parseLiteral()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> stringExpr;
+    unique_ptr<Expr> intExpr;
+    unique_ptr<Expr> floatExpr;
 
     switch(curTokenType())
     {
     case Lexer::T_STRING_LITERAL:
+    {
+        match(curTokenType());
+        string s = token(m_index - 1).str;
+        stringExpr.reset(new StringLiteral(s));
+        break;
+    }
     case Lexer::T_NUMBER_LITERAL:
     {
         match(curTokenType());
+        string s = token(m_index - 1).str;
+        if (s.find('.') == string::npos)
+        {
+            int i = stoi(s);
+            intExpr.reset(new IntegerLiteral(i));
+        }
+        else
+        {
+            float f = stof(s);
+            floatExpr.reset(new FloatLiteral(f));
+        }
         break;
     }
     default:
@@ -551,97 +572,111 @@ void Parser::parseLiteral()
     }
     }
 
+    unique_ptr<Expr> expr;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(Literal, m_indent, oldIndex, m_index);
+        if (stringExpr)
+        {
+            expr = move(stringExpr);
+        }
+        else if (intExpr)
+        {
+            expr = move(intExpr);
+        }
+        else if (floatExpr)
+        {
+            expr = move(floatExpr);
+        }
+        else
+        {
+            assert(false);
+        }
     }
+
+    return expr;
 }
 
 static const set<int> &paramListFirst = typeFirst;
 
-void Parser::parseFunctionDefination()
+std::unique_ptr<FunctionDecl> Parser::parseFunctionDefination()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    string name;
+    TypeInfo ti;
+    vector<unique_ptr<ParamDecl>> paramList;
+    unique_ptr<Stmt> body;
 
-    parseType();
+    ti = parseType();
     match(Lexer::T_IDENTIFIER);
+    name = token(m_index - 1).str;
     match(Lexer::T_L_PAREN);
     if (curToken().isIn(paramListFirst))
     {
-        parseParamList();
+        parseParamList(paramList);
     }
     match(Lexer::T_R_PAREN);
-    parseCompoundStatement();
+    body = parseCompoundStatement();
 
+    unique_ptr<FunctionDecl> decl;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(FunctionDefination, m_indent, oldIndex, m_index);
+        decl.reset(new FunctionDecl(name,
+                                    ti,
+                                    move(paramList),
+                                    unique_ptr<CompoundStmt>(dynamic_cast<CompoundStmt *>(body.release()))));
     }
+    return decl;
 }
 
-void Parser::parseParamList()
+void Parser::parseParamList(std::vector<std::unique_ptr<ParamDecl>> &paramList)
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    vector<unique_ptr<ParamDecl>> pl;
 
-    parseParamItem();
+    pl.push_back(parseParamItem());
     while (curToken().is(Lexer::T_COMMA))
     {
         match(Lexer::T_COMMA);
-        parseParamItem();
+        pl.push_back(parseParamItem());
     }
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(ParamList, m_indent, oldIndex, m_index);
+        paramList = move(pl);
     }
 }
 
-void Parser::parseParamItem()
+std::unique_ptr<ParamDecl> Parser::parseParamItem()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    TypeInfo ti;
+    string name;
 
-    parseType();
+    ti = parseType();
     match(Lexer::T_IDENTIFIER);
+    name = token(m_index - 1).str;
 
+    unique_ptr<ParamDecl> decl;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(ParamItem, m_indent, oldIndex, m_index);
+        decl.reset(new ParamDecl(name, ti));
     }
+
+    return decl;
 }
 
-void Parser::parseCompoundStatement()
+std::unique_ptr<Stmt> Parser::parseCompoundStatement()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    vector<unique_ptr<Stmt>> stmts;
 
     match(Lexer::T_L_BRACE);
-    parseBlockItemList();
+    parseBlockItemList(stmts);
     match(Lexer::T_R_BRACE);
 
+    unique_ptr<Stmt> stmt;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(CompoundStatement, m_indent, oldIndex, m_index);
+        stmt.reset(new CompoundStmt(move(stmts)));
     }
+
+    return stmt;
 }
 
 static const set<int> blockItemFirst =
@@ -664,23 +699,11 @@ static const set<int> blockItemFirst =
     Lexer::T_L_PAREN
 };
 
-void Parser::parseBlockItemList()
+void Parser::parseBlockItemList(std::vector<std::unique_ptr<Stmt>> &stmts)
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
-
     while (curToken().isIn(blockItemFirst))
     {
-        parseBlockItem();
-    }
-
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(BlockItemList, m_indent, oldIndex, m_index);
+        parseBlockItem(stmts);
     }
 }
 
@@ -689,21 +712,16 @@ void Parser::parseBlockItemList()
 //    | statement     // LBrace | If | While | Continue | Break | Return | Identifier | StringLiteral | NumberLiteral | LParen
 //    ;
 
-void Parser::parseBlockItem()
+void Parser::parseBlockItem(std::vector<std::unique_ptr<Stmt>> &stmts)
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
-
+    unique_ptr<Stmt> stmt;
     if (tryBlockItemAlt1())
     {
-        parseDeclaration();
+        stmt = parseDeclaration();
     }
     else if (tryBlockItemAlt2())
     {
-        parseStatement();
+        stmt = parseStatement();
     }
     else
     {
@@ -717,8 +735,7 @@ void Parser::parseBlockItem()
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(BlockItem, m_indent, oldIndex, m_index);
+        stmts.push_back(move(stmt));
     }
 }
 
@@ -732,7 +749,7 @@ bool Parser::tryBlockItemAlt1()
     {
         parseDeclaration();
     }
-    catch (ParseException e)
+    catch (ParseException &e)
     {
         fprintf(stderr, "tryBlockItemAlt1 fail: %s\n", e.what());
         result = false;
@@ -754,7 +771,7 @@ bool Parser::tryBlockItemAlt2()
     {
         parseStatement();
     }
-    catch (ParseException e)
+    catch (ParseException &e)
     {
         fprintf(stderr, "tryBlockItemAlt2 fail: %s\n", e.what());
         result = false;
@@ -766,28 +783,27 @@ bool Parser::tryBlockItemAlt2()
     return result;
 }
 
-void Parser::parseDeclaration()
+std::unique_ptr<Stmt> Parser::parseDeclaration()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<VarDecl> decl(new VarDecl);
 
-    parseType();
+    decl->type = parseType();
     match(Lexer::T_IDENTIFIER);
+    decl->name = token(m_index - 1).str;
     if (curToken().is(Lexer::T_ASSIGN))
     {
         match(Lexer::T_ASSIGN);
-        parseInitializer();
+        decl->expr = parseInitializer();
     }
     match(Lexer::T_SEMICOLON);
 
+    unique_ptr<Stmt> stmt;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(Declaration, m_indent, oldIndex, m_index);
+        stmt.reset(new DeclStmt(move(decl)));
     }
+
+    return stmt;
 }
 
 static const set<int> expressionFirst =
@@ -813,24 +829,24 @@ static const set<int> initializerListFirst =
     Lexer::T_L_BRACE
 };
 
-void Parser::parseInitializer()
+std::unique_ptr<Expr> Parser::parseInitializer()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> expr;
 
     if (curToken().isIn(expressionFirst))
     {
-        parseExpression();
+        expr = parseExpression();
     }
     else if (curToken().is(Lexer::T_L_BRACE))
     {
         match(Lexer::T_L_BRACE);
         if (curToken().isIn(initializerListFirst))
         {
-            parseInitializerList();
+            expr = parseInitializerList();
+        }
+        else
+        {
+            expr.reset(new InitListExpr({}));
         }
         match(Lexer::T_R_BRACE);
     }
@@ -843,33 +859,27 @@ void Parser::parseInitializer()
         throw ParseException(buf);
     }
 
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(Initializer, m_indent, oldIndex, m_index);
-    }
+    return expr;
 }
 
-void Parser::parseInitializerList()
+std::unique_ptr<Expr> Parser::parseInitializerList()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    vector<unique_ptr<Expr>> exprs;
 
-    parseInitializer();
+    exprs.push_back(parseInitializer());
     while (curToken().is(Lexer::T_COMMA))
     {
         match(Lexer::T_COMMA);
-        parseInitializer();
+        exprs.push_back(parseInitializer());
     }
 
+    unique_ptr<Expr> expr;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(InitializerList, m_indent, oldIndex, m_index);
+        expr.reset(new InitListExpr(move(exprs)));
     }
+
+    return expr;
 }
 
 //expression  // Identifier | StringLiteral | NumberLiteral | LParen | Plus | Minus | Not
@@ -877,153 +887,272 @@ void Parser::parseInitializerList()
 //    | postfixExpression Assign expression   // Identifier | StringLiteral | NumberLiteral | LParen | Plus | Minus | Not
 //    ;
 
-void Parser::parseExpression()
+std::unique_ptr<Expr> Parser::parseExpression()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> expr = parseLogicalOrExpression();
 
-    parseLogicalOrExpression();
-
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(Expression, m_indent, oldIndex, m_index);
-    }
+    return expr;
 }
 
-void Parser::parseLogicalOrExpression()
+std::unique_ptr<Expr> Parser::parseLogicalOrExpression()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> expr;
+    vector<unique_ptr<Expr>> andExprs;
 
-    parseLogicalAndExpression();
+    andExprs.push_back(parseLogicalAndExpression());
     while (curToken().is(Lexer::T_OR_OR))
     {
         match(Lexer::T_OR_OR);
-        parseLogicalAndExpression();
+        andExprs.push_back(parseLogicalAndExpression());
     }
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(LogicalOrExpression, m_indent, oldIndex, m_index);
+        const size_t andExprCount = andExprs.size();
+        assert(andExprCount != 0);
+
+        if (andExprCount == 1)
+        {
+            expr = std::move(andExprs[0]);
+        }
+        else
+        {
+            for (size_t i = 0; i < andExprCount - 1; i++)
+            {
+                BinaryOperatorExpr *op = new BinaryOperatorExpr;
+                op->type = BinaryOperatorExpr::Type::LogicalOr;
+                op->left = move(andExprs[i]);
+                op->right = move(andExprs[i + 1]);
+                andExprs[i + 1].reset(op);
+            }
+            expr = move(andExprs.back());
+        }
     }
+    return expr;
 }
 
-void Parser::parseLogicalAndExpression()
+std::unique_ptr<Expr> Parser::parseLogicalAndExpression()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> expr;
+    vector<unique_ptr<Expr>> eqExprs;
 
-    parseEqualityExpression();
+    eqExprs.push_back(parseEqualityExpression());
     while (curToken().is(Lexer::T_AND_AND))
     {
         match(Lexer::T_AND_AND);
-        parseEqualityExpression();
+        eqExprs.push_back(parseEqualityExpression());
     }
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(LogicalAndExpression, m_indent, oldIndex, m_index);
+        const size_t eqExprCount = eqExprs.size();
+        assert(eqExprCount != 0);
+
+        if (eqExprCount == 1)
+        {
+            expr = move(eqExprs[0]);
+        }
+        else
+        {
+            for (size_t i = 0; i < eqExprCount - 1; i++)
+            {
+                BinaryOperatorExpr *op = new BinaryOperatorExpr;
+                op->type = BinaryOperatorExpr::Type::LogicalAnd;
+                op->left = move(eqExprs[i]);
+                op->right = move(eqExprs[i + 1]);
+                eqExprs[i + 1].reset(op);
+            }
+            expr = move(eqExprs.back());
+        }
     }
+
+    return expr;
 }
 
-void Parser::parseEqualityExpression()
+static BinaryOperatorExpr::Type tokenTypeToBinaryOpType(int tokenType)
 {
-    int oldIndex = m_index;
-    if (!trying())
+    static const map<int, BinaryOperatorExpr::Type> MAP =
     {
-        incIndent();
-    }
+        { Lexer::T_AND_AND,     BinaryOperatorExpr::Type::LogicalAnd },
+        { Lexer::T_OR_OR,       BinaryOperatorExpr::Type::LogicalOr },
+        { Lexer::T_EQUAL,       BinaryOperatorExpr::Type::Equal },
+        { Lexer::T_NOT_EQUAL,   BinaryOperatorExpr::Type::NotEqual },
+        { Lexer::T_LT,          BinaryOperatorExpr::Type::LessThan },
+        { Lexer::T_GT,          BinaryOperatorExpr::Type::GreaterThan },
+        { Lexer::T_LE,          BinaryOperatorExpr::Type::LessEqual },
+        { Lexer::T_GE,          BinaryOperatorExpr::Type::GreaterEqual },
+        { Lexer::T_PLUS,        BinaryOperatorExpr::Type::Plus },
+        { Lexer::T_MINUS,       BinaryOperatorExpr::Type::Minus },
+        { Lexer::T_STAR,        BinaryOperatorExpr::Type::Multiply },
+        { Lexer::T_SLASH,       BinaryOperatorExpr::Type::Divide },
+        { Lexer::T_REMAINDER,   BinaryOperatorExpr::Type::Remainder}
+    };
 
-    parseRelationalExpression();
+    auto iter = MAP.find(tokenType);
+    assert(iter != MAP.end());
+    return iter->second;
+}
+
+std::unique_ptr<Expr> Parser::parseEqualityExpression()
+{
+    unique_ptr<Expr> expr;
+    vector<unique_ptr<Expr>> relExprs;
+    vector<int> tokens;
+
+    relExprs.push_back(parseRelationalExpression());
     while (curToken().isIn({Lexer::T_EQUAL, Lexer::T_NOT_EQUAL}))
     {
         match(curTokenType());
-        parseRelationalExpression();
+        tokens.push_back(token(m_index - 1).type);
+        relExprs.push_back(parseRelationalExpression());
     }
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(EqualityExpression, m_indent, oldIndex, m_index);
+        const size_t relExprCount = relExprs.size();
+        const size_t tokenCount = tokens.size();
+
+        assert(relExprCount == tokenCount + 1);
+        assert(relExprCount != 0);
+
+        if (relExprCount == 1)
+        {
+            expr = move(relExprs[0]);
+        }
+        else
+        {
+            for (size_t i = 0; i < relExprCount - 1; i++)
+            {
+                BinaryOperatorExpr *op = new BinaryOperatorExpr;
+                op->type = tokenTypeToBinaryOpType(tokens[i]);
+                op->left = move(relExprs[i]);
+                op->right = move(relExprs[i + 1]);
+                relExprs[i + 1].reset(op);
+            }
+            expr = move(relExprs.back());
+        }
     }
+    return expr;
 }
 
-void Parser::parseRelationalExpression()
+std::unique_ptr<Expr> Parser::parseRelationalExpression()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> expr;
+    vector<unique_ptr<Expr>> subExprs;
+    vector<int> tokens;
 
-    parseAdditiveExpression();
+    subExprs.push_back(parseAdditiveExpression());
     while (curToken().isIn({Lexer::T_LT, Lexer::T_GT, Lexer::T_LE, Lexer::T_GE}))
     {
         match(curTokenType());
-        parseAdditiveExpression();
+        tokens.push_back(token(m_index - 1).type);
+        subExprs.push_back(parseAdditiveExpression());
     }
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(RelationalExpression, m_indent, oldIndex, m_index);
+        const size_t subExprCount = subExprs.size();
+        const size_t tokenCount = tokens.size();
+        assert(subExprCount != 0);
+        assert(subExprCount == tokenCount + 1);
+        if (subExprCount == 1)
+        {
+            expr = move(subExprs[0]);
+        }
+        else
+        {
+            for (size_t i = 0; i < subExprCount - 1; i++)
+            {
+                BinaryOperatorExpr *op = new BinaryOperatorExpr;
+                op->type = tokenTypeToBinaryOpType(tokens[i]);
+                op->left = move(subExprs[i]);
+                op->right = move(subExprs[i + 1]);
+                subExprs[i + 1].reset(op);
+            }
+            expr = move(subExprs.back());
+        }
     }
+    return expr;
 }
 
-void Parser::parseAdditiveExpression()
+std::unique_ptr<Expr> Parser::parseAdditiveExpression()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> expr;
+    vector<unique_ptr<Expr>> subExprs;
+    vector<int> tokens;
 
-    parseMultiplicativeExpression();
+    subExprs.push_back(parseMultiplicativeExpression());
     while (curToken().isIn({Lexer::T_PLUS, Lexer::T_MINUS}))
     {
         match(curTokenType());
-        parseMultiplicativeExpression();
+        tokens.push_back(token(m_index - 1).type);
+        subExprs.push_back(parseMultiplicativeExpression());
     }
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(AdditiveExpression, m_indent, oldIndex, m_index);
+        const size_t subExprCount = subExprs.size();
+        const size_t tokenCount = tokens.size();
+        assert(subExprCount != 0);
+        assert(subExprCount == tokenCount + 1);
+        if (subExprCount == 1)
+        {
+            expr = move(subExprs[0]);
+        }
+        else
+        {
+            for (size_t i = 0; i < subExprCount - 1; i++)
+            {
+                BinaryOperatorExpr *op = new BinaryOperatorExpr;
+                op->type = tokenTypeToBinaryOpType(tokens[i]);
+                op->left = move(subExprs[i]);
+                op->right = move(subExprs[i + 1]);
+                subExprs[i + 1].reset(op);
+            }
+            expr = move(subExprs.back());
+        }
     }
+    return expr;
 }
 
-void Parser::parseMultiplicativeExpression()
+std::unique_ptr<Expr> Parser::parseMultiplicativeExpression()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> expr;
+    vector<unique_ptr<Expr>> subExprs;
+    vector<int> tokens;
 
-    parseUnaryExpression();
+    subExprs.push_back(parseUnaryExpression());
     while (curToken().isIn({Lexer::T_STAR, Lexer::T_SLASH, Lexer::T_REMAINDER}))
     {
         match(curTokenType());
-        parseUnaryExpression();
+        tokens.push_back(token(m_index - 1).type);
+        subExprs.push_back(parseUnaryExpression());
     }
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(MultiplicativeExpression, m_indent, oldIndex, m_index);
+        const size_t subExprCount = subExprs.size();
+        const size_t tokenCount = tokens.size();
+        assert(subExprCount != 0);
+        assert(subExprCount == tokenCount + 1);
+        if (subExprCount == 1)
+        {
+            expr = move(subExprs[0]);
+        }
+        else
+        {
+            for (size_t i = 0; i < subExprCount - 1; i++)
+            {
+                BinaryOperatorExpr *op = new BinaryOperatorExpr;
+                op->type = tokenTypeToBinaryOpType(tokens[i]);
+                op->left = move(subExprs[i]);
+                op->right = move(subExprs[i + 1]);
+                subExprs[i + 1].reset(op);
+            }
+            expr = move(subExprs.back());
+        }
     }
+    return expr;
 }
 
 static const set<int> postfixExpressionFirst =
@@ -1041,22 +1170,34 @@ static const set<int> unaryOperatorFirst =
     Lexer::T_NOT
 };
 
-void Parser::parseUnaryExpression()
+static UnaryOperatorExpr::Type tokenTypeToUnaryOpType(int tokenType)
 {
-    int oldIndex = m_index;
-    if (!trying())
+    static const map<int, UnaryOperatorExpr::Type> MAP =
     {
-        incIndent();
-    }
+        { Lexer::T_PLUS,    UnaryOperatorExpr::Type::Positive },
+        { Lexer::T_MINUS,   UnaryOperatorExpr::Type::Negative },
+        { Lexer::T_NOT,     UnaryOperatorExpr::Type::Not }
+    };
 
+    auto iter = MAP.find(tokenType);
+    assert(iter != MAP.end());
+    return iter->second;
+}
+
+std::unique_ptr<Expr> Parser::parseUnaryExpression()
+{
+    unique_ptr<Expr> expr;
     if (curToken().isIn(postfixExpressionFirst))
     {
-        parsePostfixExpression();
+        expr = parsePostfixExpression();
     }
     else if (curToken().isIn(unaryOperatorFirst))
     {
+        UnaryOperatorExpr *op = new UnaryOperatorExpr;
         parseUnaryOperator();
-        parseUnaryExpression();
+        op->type = tokenTypeToUnaryOpType(token(m_index - 1).type);
+        op->expr = parseUnaryExpression();
+        expr.reset(op);
     }
     else
     {
@@ -1067,21 +1208,11 @@ void Parser::parseUnaryExpression()
         throw ParseException(buf);
     }
 
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(UnaryExpression, m_indent, oldIndex, m_index);
-    }
+    return expr;
 }
 
 void Parser::parseUnaryOperator()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
-
     switch (curTokenType())
     {
     case Lexer::T_PLUS:
@@ -1100,31 +1231,36 @@ void Parser::parseUnaryOperator()
         throw ParseException(buf);
     }
     }
-
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(UnaryOperator, m_indent, oldIndex, m_index);
-    }
 }
 
 static const set<int> argumentExpressionListFirst = expressionFirst;
-void Parser::parsePostfixExpression()
+std::unique_ptr<Expr> Parser::parsePostfixExpression()
 {
-    int oldIndex = m_index;
-    if (!trying())
+    enum PostfixType
     {
-        incIndent();
-    }
+        Call,
+        Subscript,
+        Member
+    };
 
-    parsePrimaryExpression();
+    unique_ptr<Expr> expr;
+    vector<unique_ptr<Expr>> subExprs;
+    vector<int> types;
+
+    subExprs.push_back(parsePrimaryExpression());
     while (curToken().isIn({Lexer::T_L_BRACKET, Lexer::T_L_PAREN, Lexer::T_DOT}))
     {
         int type = curTokenType();
         if (type == Lexer::T_L_BRACKET)
         {
             match(Lexer::T_L_BRACKET);
-            parseExpression();
+
+            unique_ptr<ListSubscriptExpr> lse;
+            lse->indexExpr = parseExpression();
+
+            subExprs.push_back(unique_ptr<Expr>(lse.release()));
+            types.push_back(Subscript);
+
             match(Lexer::T_R_BRACKET);
         }
         else if (type == Lexer::T_L_PAREN)
@@ -1132,7 +1268,12 @@ void Parser::parsePostfixExpression()
             match(Lexer::T_L_PAREN);
             if (curToken().isIn(argumentExpressionListFirst))
             {
-                parseArgumentExpressionList();
+                unique_ptr<CallExpr> callExpr(new CallExpr);
+
+                parseArgumentExpressionList(callExpr);
+                subExprs.push_back(unique_ptr<Expr>(callExpr.release()));
+
+                types.push_back(Call);
             }
             match(Lexer::T_R_PAREN);
         }
@@ -1140,37 +1281,85 @@ void Parser::parsePostfixExpression()
         {
             match(Lexer::T_DOT);
             match(Lexer::T_IDENTIFIER);
+
+            unique_ptr<MemberExpr> memberExpr(new MemberExpr);
+            memberExpr->name = token(m_index - 1).str;
+
+            subExprs.push_back(unique_ptr<Expr>(memberExpr.release()));
+            types.push_back(Member);
         }
     }
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(PostfixExpression, m_indent, oldIndex, m_index);
+        const size_t subExprCount = subExprs.size();
+        const size_t typeCount = types.size();
+        assert(subExprCount != 0);
+        assert(subExprCount == typeCount + 1);
+
+        if (subExprCount == 1)
+        {
+            expr = move(subExprs[0]);
+        }
+        else
+        {
+            for (size_t i = 0; i < subExprCount - 1; i++)
+            {
+                Expr *p = subExprs[i + 1].get();
+                if (types[i] == Call)
+                {
+                    dynamic_cast<CallExpr *>(p)->funcExpr
+                            = move(subExprs[i]);
+                }
+                else if (types[i] == Subscript)
+                {
+                    dynamic_cast<ListSubscriptExpr *>(p)->listExpr
+                            = move(subExprs[i]);
+                }
+                else if (types[i] == Member)
+                {
+                    dynamic_cast<MemberExpr *>(p)->instanceExpr
+                            = move(subExprs[i]);
+                }
+                else
+                {
+                    assert(false);
+                }
+            }
+            expr = move(subExprs.back());
+        }
     }
+    return expr;
 }
 
-void Parser::parsePrimaryExpression()
+std::unique_ptr<Expr> Parser::parsePrimaryExpression()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> expr;
+
+    unique_ptr<Expr> refExpr;
+    unique_ptr<Expr> literalExpr;
+    unique_ptr<Expr> parenExpr;
 
     switch (curTokenType())
     {
-    case Lexer::T_IDENTIFIER: match(Lexer::T_IDENTIFIER); break;
+    case Lexer::T_IDENTIFIER:
+    {
+        match(Lexer::T_IDENTIFIER);
+        string idName = token(m_index - 1).str;
+        refExpr.reset(new RefExpr);
+        dynamic_cast<RefExpr *>(refExpr.get())->name = idName;
+        break;
+    }
     case Lexer::T_STRING_LITERAL:
     case Lexer::T_NUMBER_LITERAL:
     {
-        parseLiteral();
+        literalExpr = parseLiteral();
         break;
     }
     case Lexer::T_L_PAREN:
     {
         match(Lexer::T_L_PAREN);
-        parseExpression();
+        parenExpr = parseExpression();
         match(Lexer::T_R_PAREN);
         break;
     }
@@ -1186,30 +1375,40 @@ void Parser::parsePrimaryExpression()
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(PrimaryExpression, m_indent, oldIndex, m_index);
+        if (refExpr)
+        {
+            expr = move(refExpr);
+        }
+        else if (literalExpr)
+        {
+            expr = move(literalExpr);
+        }
+        else if (parenExpr)
+        {
+            expr = move(parenExpr);
+        }
     }
+
+    return expr;
 }
 
-void Parser::parseArgumentExpressionList()
+void Parser::parseArgumentExpressionList(std::unique_ptr<CallExpr> &callExpr)
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    vector<unique_ptr<Expr>> exprs;
 
-    parseExpression();
+    exprs.push_back(parseExpression());
     while (curToken().is(Lexer::T_COMMA))
     {
         match(Lexer::T_COMMA);
-        parseExpression();
+        exprs.push_back(parseExpression());
     }
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(ArgumentExpressionList, m_indent, oldIndex, m_index);
+        for (size_t i = 0; i < exprs.size(); i++)
+        {
+            callExpr->paramList.push_back(move(exprs[i]));
+        }
     }
 }
 
@@ -1221,27 +1420,23 @@ static const set<int> assignStatementFirst =
     Lexer::T_L_PAREN
 };
 
-void Parser::parseStatement()
+std::unique_ptr<Stmt> Parser::parseStatement()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Stmt> s;
 
     switch (curTokenType())
     {
-    case Lexer::T_L_BRACE:  parseCompoundStatement();   break;
-    case Lexer::T_IF:       parseSelectionStatement();  break;
-    case Lexer::T_WHILE:    parseIterationStatement();  break;
+    case Lexer::T_L_BRACE:  s = parseCompoundStatement();   break;
+    case Lexer::T_IF:       s = parseSelectionStatement();  break;
+    case Lexer::T_WHILE:    s = parseIterationStatement();  break;
     case Lexer::T_CONTINUE:
     case Lexer::T_BREAK:
-    case Lexer::T_RETURN:   parseJumpStatement();       break;
+    case Lexer::T_RETURN:   s = parseJumpStatement();       break;
     default:
     {
         if (curToken().isIn(assignStatementFirst))
         {
-            parseAssignmentStatement();
+            s = parseExprStatement();
         }
         else
         {
@@ -1254,36 +1449,36 @@ void Parser::parseStatement()
     }
     }
 
+    unique_ptr<Stmt> stmt;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(Statement, m_indent, oldIndex, m_index);
+        stmt = move(s);
     }
+
+    return stmt;
 }
 
-void Parser::parseSelectionStatement()
+std::unique_ptr<Stmt> Parser::parseSelectionStatement()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> condition;
+    unique_ptr<Stmt> thenStmt;
+    unique_ptr<Stmt> elseStmt;
 
     match(Lexer::T_IF);
     match(Lexer::T_L_PAREN);
-    parseExpression();
+    condition = parseExpression();
     match(Lexer::T_R_PAREN);
-    parseCompoundStatement();
+    thenStmt = parseCompoundStatement();
     if (curToken().is(Lexer::T_ELSE))
     {
         match(Lexer::T_ELSE);
         if (curToken().is(Lexer::T_L_BRACE))
         {
-            parseCompoundStatement();
+            elseStmt = parseCompoundStatement();
         }
         else if (curToken().is(Lexer::T_IF))
         {
-            parseSelectionStatement();
+            elseStmt = parseSelectionStatement();
         }
         else
         {
@@ -1295,41 +1490,38 @@ void Parser::parseSelectionStatement()
         }
     }
 
+    unique_ptr<Stmt> stmt;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(SelectionStatement, m_indent, oldIndex, m_index);
+        stmt.reset(new IfStmt(move(condition), move(thenStmt), move(elseStmt)));
     }
+
+    return stmt;
 }
 
-void Parser::parseIterationStatement()
+std::unique_ptr<Stmt> Parser::parseIterationStatement()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> condition;
+    unique_ptr<Stmt> bodyStmt;
 
     match(Lexer::T_WHILE);
     match(Lexer::T_L_PAREN);
-    parseExpression();
+    condition = parseExpression();
     match(Lexer::T_R_PAREN);
-    parseCompoundStatement();
+    bodyStmt = parseCompoundStatement();
 
+    unique_ptr<Stmt> stmt;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(IterationStatement, m_indent, oldIndex, m_index);
+        stmt.reset(new WhileStmt(move(condition), move(bodyStmt)));
     }
+
+    return stmt;
 }
 
-void Parser::parseJumpStatement()
+std::unique_ptr<Stmt> Parser::parseJumpStatement()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Stmt> s;
 
     switch (curTokenType())
     {
@@ -1337,12 +1529,14 @@ void Parser::parseJumpStatement()
     {
         match(Lexer::T_CONTINUE);
         match(Lexer::T_SEMICOLON);
+        s.reset(new ContinueStmt);
         break;
     }
     case Lexer::T_BREAK:
     {
         match(Lexer::T_BREAK);
         match(Lexer::T_SEMICOLON);
+        s.reset(new BreakStmt);
         break;
     }
     case Lexer::T_RETURN:
@@ -1350,7 +1544,8 @@ void Parser::parseJumpStatement()
         match(Lexer::T_RETURN);
         if (curToken().isIn(expressionFirst))
         {
-            parseExpression();
+            unique_ptr<Expr> expr = parseExpression();
+            s.reset(new ReturnStmt(move(expr)));
         }
         match(Lexer::T_SEMICOLON);
         break;
@@ -1365,166 +1560,160 @@ void Parser::parseJumpStatement()
     }
     }
 
+    unique_ptr<Stmt> stmt;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(JumpStatement, m_indent, oldIndex, m_index);
+        assert(s);
+        stmt = move(s);
     }
+
+    return stmt;
 }
 
-void Parser::parseAssignmentStatement()
+std::unique_ptr<Stmt> Parser::parseExprStatement()
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    unique_ptr<Expr> left;
+    unique_ptr<Expr> right;
 
-    parsePostfixExpression();
+    left = parsePostfixExpression();
     if (curToken().is(Lexer::T_ASSIGN))
     {
         match(Lexer::T_ASSIGN);
-        parseExpression();
+        right = parseExpression();
     }
     match(Lexer::T_SEMICOLON);
 
+    unique_ptr<Stmt> stmt;
     if (!trying())
     {
-        decIndent();
-        pushParseResult(AssignmentStatement, m_indent, oldIndex, m_index);
+        unique_ptr<Expr> expr;
+        if (right)
+        {
+            expr.reset(new BinaryOperatorExpr(BinaryOperatorExpr::Type::Assign,
+                                              move(left), move(right)));
+        }
+        else
+        {
+            expr = move(left);
+        }
+        stmt.reset(new ExprStmt(move(expr)));
     }
+
+    return stmt;
 }
 
-void Parser::parseEnumDefination()
+std::unique_ptr<EnumDecl> Parser::parseEnumDefination()
 {
-    int oldIndex = m_index;
+    unique_ptr<EnumDecl> enumDecl;
+    string enumName;
+
     if (!trying())
     {
-        incIndent();
+        enumDecl.reset(new EnumDecl);
     }
 
     match(Lexer::T_ENUM);
     match(Lexer::T_IDENTIFIER);
+    enumName = token(m_index - 1).str;
+
     match(Lexer::T_L_BRACE);
-    parseEnumConstantList();
+    parseEnumConstantList(enumDecl);
     match(Lexer::T_R_BRACE);
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(EnumDefination, m_indent, oldIndex, m_index);
+        enumDecl->name = enumName;
     }
+
+    return enumDecl;
 }
 
-void Parser::parseEnumConstantList()
+void Parser::parseEnumConstantList(std::unique_ptr<EnumDecl> &enumDecl)
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
-
-    parseEnumConstant();
+    parseEnumConstant(enumDecl);
     while (curToken().is(Lexer::T_COMMA))
     {
         match(Lexer::T_COMMA);
-        parseEnumConstant();
-    }
-
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(EnumConstantList, m_indent, oldIndex, m_index);
+        parseEnumConstant(enumDecl);
     }
 }
 
-void Parser::parseEnumConstant()
+void Parser::parseEnumConstant(std::unique_ptr<EnumDecl> &enumDecl)
 {
-    int oldIndex = m_index;
+    unique_ptr<EnumConstantDecl> ecd;
+    string ecName;
+
     if (!trying())
     {
-        incIndent();
+        ecd.reset(new EnumConstantDecl);
     }
 
     match(Lexer::T_IDENTIFIER);
+    ecName = token(m_index - 1).str;
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(EnumConstant, m_indent, oldIndex, m_index);
+        ecd->name = ecName;
+        enumDecl->constantList.push_back(move(ecd));
     }
 }
 
-void Parser::parseClassInstance()
+std::unique_ptr<ClassInstanceDecl> Parser::parseClassInstance()
 {
-    int oldIndex = m_index;
+    unique_ptr<ClassInstanceDecl> instanceDecl;
+
     if (!trying())
     {
-        incIndent();
+        instanceDecl.reset(new ClassInstanceDecl);
     }
 
     match(Lexer::T_IDENTIFIER);
     match(Lexer::T_L_BRACE);
-    parseBindingItemList();
+    parseBindingItemList(instanceDecl);
     match(Lexer::T_R_BRACE);
 
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(ClassInstance, m_indent, oldIndex, m_index);
-    }
+    return instanceDecl;
 }
 
-void Parser::parseBindingItemList()
+void Parser::parseBindingItemList(std::unique_ptr<ClassInstanceDecl> &instanceDecl)
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
-
-    parseBindingItem();
+    parseBindingItem(instanceDecl);
     while (curToken().is(Lexer::T_IDENTIFIER))
     {
-        parseBindingItem();
-    }
-
-    if (!trying())
-    {
-        decIndent();
-        pushParseResult(BindingItemList, m_indent, oldIndex, m_index);
+        parseBindingItem(instanceDecl);
     }
 }
 
-void Parser::parseBindingItem()
+void Parser::parseBindingItem(std::unique_ptr<ClassInstanceDecl> &instanceDecl)
 {
-    int oldIndex = m_index;
-    if (!trying())
-    {
-        incIndent();
-    }
+    string name1;
+    string name2;
+    unique_ptr<Expr> expr;
+    unique_ptr<ClassInstanceDecl> subInstance;
 
     match(Lexer::T_IDENTIFIER);
+    name1 = token(m_index - 1).str;
     switch (curTokenType())
     {
     case Lexer::T_COLON:
     {
         match(Lexer::T_COLON);
-        parseInitializer();
+        expr = parseInitializer();
         break;
     }
     case Lexer::T_DOT:
     {
         match(Lexer::T_DOT);
         match(Lexer::T_IDENTIFIER);
+        name2 = token(m_index - 1).str;
         match(Lexer::T_COLON);
-        parseInitializer();
+        expr = parseInitializer();
         break;
     }
     case Lexer::T_L_BRACE:
     {
         m_index--;
-        parseClassInstance();
+        subInstance = parseClassInstance();
         break;
     }
     default:
@@ -1539,7 +1728,22 @@ void Parser::parseBindingItem()
 
     if (!trying())
     {
-        decIndent();
-        pushParseResult(BindingItem, m_indent, oldIndex, m_index);
+        if (subInstance)
+        {
+            instanceDecl->instanceList.push_back(move(subInstance));
+        }
+        else
+        {
+            assert(name1 != "");
+            assert(expr);
+            if (name2 == "")
+            {
+                instanceDecl->bindingList.emplace_back(new BindingDecl(name1, move(expr)));
+            }
+            else
+            {
+                instanceDecl->bindingList.emplace_back(new ScopeBindingDecl(name1, name2, move(expr)));
+            }
+        }
     }
 }

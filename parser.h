@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "ast.h"
 #include "lexer.h"
 
 #include <map>
@@ -76,7 +77,7 @@ public:
         SelectionStatement,
         IterationStatement,
         JumpStatement,
-        AssignmentStatement,
+        ExprStatement,
         EnumDefination,
         EnumConstantList,
         EnumConstant,
@@ -115,68 +116,62 @@ private:
     int getMemory(int index, ParserRule rule);
     void updateMemory(int index, ParserRule rule, int result);
 
-    void pushParseResult(ParserRule rule, int indent, int begin, int end);
-    void pushParseResult(ParserRule rule, const std::string &info);
-
-    void incIndent();
-    void decIndent();
     void incTrying();
     void decTrying();
     bool trying() const { return m_trying > 0; }
 
 private:
-    void parseDocument();
-    void parseClassDefination();
-    void parseMemberItemList();
-    void parseMemberItem();
+    std::unique_ptr<DocumentDecl> parseDocument();
+    std::unique_ptr<ClassDefinationDecl> parseClassDefination();
+    void parseMemberItemList(std::unique_ptr<ClassDefinationDecl> &defination);
+    void parseMemberItem(std::unique_ptr<ClassDefinationDecl> &defination);
     bool tryMemberItemAlt1();
     bool tryMemberItemAlt2();
-    void parsePropertyDefination();
-    void parsePropertyType();
-    void parseType();
+    std::unique_ptr<FieldDecl> parsePropertyDefination();
+    TypeInfo parsePropertyType();
+    TypeInfo parseType();
     void parseListType();
-    void parseLiteral();
-    void parseFunctionDefination();
-    void parseParamList();
-    void parseParamItem();
-    void parseCompoundStatement();
-    void parseBlockItemList();
-    void parseBlockItem();
+    std::unique_ptr<Expr> parseLiteral();
+    std::unique_ptr<FunctionDecl> parseFunctionDefination();
+    void parseParamList(std::vector<std::unique_ptr<ParamDecl> > &paramList);
+    std::unique_ptr<ParamDecl> parseParamItem();
+    std::unique_ptr<Stmt> parseCompoundStatement();
+    void parseBlockItemList(std::vector<std::unique_ptr<Stmt> > &stmts);
+    void parseBlockItem(std::vector<std::unique_ptr<Stmt>> &stmts);
     bool tryBlockItemAlt1();
     bool tryBlockItemAlt2();
-    void parseDeclaration();
-    void parseInitializer();
-    void parseInitializerList();
-    void parseExpression();
-    void parseLogicalOrExpression();
-    void parseLogicalAndExpression();
-    void parseEqualityExpression();
-    void parseRelationalExpression();
-    void parseAdditiveExpression();
-    void parseMultiplicativeExpression();
-    void parseUnaryExpression();
+    std::unique_ptr<Stmt> parseDeclaration();
+    std::unique_ptr<Expr> parseInitializer();
+    std::unique_ptr<Expr> parseInitializerList();
+    std::unique_ptr<Expr> parseExpression();
+    std::unique_ptr<Expr> parseLogicalOrExpression();
+    std::unique_ptr<Expr> parseLogicalAndExpression();
+    std::unique_ptr<Expr> parseEqualityExpression();
+    std::unique_ptr<Expr> parseRelationalExpression();
+    std::unique_ptr<Expr> parseAdditiveExpression();
+    std::unique_ptr<Expr> parseMultiplicativeExpression();
+    std::unique_ptr<Expr> parseUnaryExpression();
     void parseUnaryOperator();
-    void parsePostfixExpression();
-    void parsePrimaryExpression();
-    void parseArgumentExpressionList();
-    void parseStatement();
-    void parseSelectionStatement();
-    void parseIterationStatement();
-    void parseJumpStatement();
-    void parseAssignmentStatement();
-    void parseEnumDefination();
-    void parseEnumConstantList();
-    void parseEnumConstant();
-    void parseClassInstance();
-    void parseBindingItemList();
-    void parseBindingItem();
+    std::unique_ptr<Expr> parsePostfixExpression();
+    std::unique_ptr<Expr> parsePrimaryExpression();
+    void parseArgumentExpressionList(std::unique_ptr<CallExpr> &callExpr);
+    std::unique_ptr<Stmt> parseStatement();
+    std::unique_ptr<Stmt> parseSelectionStatement();
+    std::unique_ptr<Stmt> parseIterationStatement();
+    std::unique_ptr<Stmt> parseJumpStatement();
+    std::unique_ptr<Stmt> parseExprStatement();
+    std::unique_ptr<EnumDecl> parseEnumDefination();
+    void parseEnumConstantList(std::unique_ptr<EnumDecl> &enumDecl);
+    void parseEnumConstant(std::unique_ptr<EnumDecl> &enumDecl);
+    std::unique_ptr<ClassInstanceDecl> parseClassInstance();
+    void parseBindingItemList(std::unique_ptr<ClassInstanceDecl> &instanceDecl);
+    void parseBindingItem(std::unique_ptr<ClassInstanceDecl> &instanceDecl);
 
 private:
     std::vector<Token> m_tokens;
     int m_index = 0;
-    int m_indent = 0;
     std::map<int, std::map<int, int>> m_memory;
-    std::vector<std::string> m_parseResult;
     int m_trying = 0;
+    std::unique_ptr<DocumentDecl> m_document;
 };
 

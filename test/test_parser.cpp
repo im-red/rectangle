@@ -72,7 +72,7 @@ TEST(parser, PARSE_DEFINATION_RECT)
     Lexer l;
     l.setCode(code);
     p.setTokens(l.tokens());
-    p.parseRule(Parser::Document, 0);
+    p.parse();
 }
 
 TEST(parser, PARSE_INSTANCE_RECT)
@@ -86,5 +86,5 @@ TEST(parser, PARSE_INSTANCE_RECT)
     Lexer l;
     l.setCode(code);
     p.setTokens(l.tokens());
-    p.parseRule(Parser::Document, 0);
+    p.parse();
 }

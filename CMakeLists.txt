@@ -15,4 +15,5 @@ add_executable(rectangle
     driver.cpp
     parser.cpp
     parsertypestring.cpp
+    ast.cpp
 )

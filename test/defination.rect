@@ -2,7 +2,8 @@
 def Rectangle {
     enum LineType {
         Solid,
-        Dot
+        Dot,
+        Dash
     }
     int x: 0
     int y: 0
@@ -29,8 +30,10 @@ def Rectangle {
     string getDasharray(int type) {
         if (border.type == Solid) {
             return "";
-        } else {
+        } else if (border.type == Dot) {
             return "5,5";
+        } else {
+            return "2,1";
         }
     }
 }
