@@ -244,7 +244,7 @@ struct ScopeFieldDecl : public FieldDecl
     std::string scopeName;
 };
 
-struct ParamDecl : public FieldDecl
+struct ParamDecl : public Printable
 {
     ParamDecl(const std::string &n, const TypeInfo &t) : name(n), type(t) {}
     void doPrint(int) const override
