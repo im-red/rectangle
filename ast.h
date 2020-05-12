@@ -217,12 +217,12 @@ struct VarDecl : public Printable
     std::unique_ptr<Expr> expr;
 };
 
-struct FieldDecl : public Printable
+struct PropertyDecl : public Printable
 {
-    ~FieldDecl() override;
+    ~PropertyDecl() override;
     void doPrint(int indent) const override
     {
-        printf("FieldDecl(%s %s)\n", type.name.c_str(), name.c_str());
+        printf("PropertyDecl(%s %s)\n", type.name.c_str(), name.c_str());
         if (expr)
         {
             expr->print(indent + 1);
@@ -234,11 +234,11 @@ struct FieldDecl : public Printable
     std::unique_ptr<Expr> expr;
 };
 
-struct ScopeFieldDecl : public FieldDecl
+struct ScopedPropertyDecl : public PropertyDecl
 {
     void doPrint(int indent) const override
     {
-        printf("ScopeFieldDecl(%s %s.%s)\n", type.name.c_str(), scopeName.c_str(), name.c_str());
+        printf("ScopedPropertyDecl(%s %s.%s)\n", type.name.c_str(), scopeName.c_str(), name.c_str());
         expr->print(indent + 1);
     }
     std::string scopeName;
@@ -424,7 +424,7 @@ struct ClassDefinationDecl : public Printable
     void doPrint(int indent) const override
     {
         printf("ClassDefinationDecl(%s)\n", name.c_str());
-        for (auto &p : fieldList)
+        for (auto &p : propertyList)
         {
             p->print(indent + 1);
         }
@@ -439,7 +439,7 @@ struct ClassDefinationDecl : public Printable
     }
 
     std::string name;
-    std::vector<std::unique_ptr<FieldDecl>> fieldList;
+    std::vector<std::unique_ptr<PropertyDecl>> propertyList;
     std::vector<std::unique_ptr<FunctionDecl>> functionList;
     std::vector<std::unique_ptr<EnumDecl>> enumList;
 };

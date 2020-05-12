@@ -127,7 +127,7 @@ private:
     void parseMemberItem(std::unique_ptr<ClassDefinationDecl> &defination);
     bool tryMemberItemAlt1();
     bool tryMemberItemAlt2();
-    std::unique_ptr<FieldDecl> parsePropertyDefination();
+    std::unique_ptr<PropertyDecl> parsePropertyDefination();
     TypeInfo parsePropertyType();
     TypeInfo parseType();
     void parseListType();

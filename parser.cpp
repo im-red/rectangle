@@ -310,7 +310,7 @@ static const set<int> typeFirst =
 void Parser::parseMemberItem(unique_ptr<ClassDefinationDecl> &defination)
 {
     unique_ptr<EnumDecl> enumDecl;
-    unique_ptr<FieldDecl> fieldDecl;
+    unique_ptr<PropertyDecl> propertyDecl;
     unique_ptr<FunctionDecl> functionDecl;
 
     if (curToken().is(Lexer::T_ENUM))
@@ -319,7 +319,7 @@ void Parser::parseMemberItem(unique_ptr<ClassDefinationDecl> &defination)
     }
     else if (tryMemberItemAlt1())
     {
-        fieldDecl = parsePropertyDefination();
+        propertyDecl = parsePropertyDefination();
     }
     else if (tryMemberItemAlt2())
     {
@@ -340,9 +340,9 @@ void Parser::parseMemberItem(unique_ptr<ClassDefinationDecl> &defination)
         {
             defination->enumList.push_back(move(enumDecl));
         }
-        else if (fieldDecl)
+        else if (propertyDecl)
         {
-            defination->fieldList.push_back(move(fieldDecl));
+            defination->propertyList.push_back(move(propertyDecl));
         }
         else if (functionDecl)
         {
@@ -399,7 +399,7 @@ bool Parser::tryMemberItemAlt2()
     return result;
 }
 
-std::unique_ptr<FieldDecl> Parser::parsePropertyDefination()
+std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
 {
     string name1;
     string name2;
@@ -432,27 +432,27 @@ std::unique_ptr<FieldDecl> Parser::parsePropertyDefination()
         throw ParseException(buf);
     }
 
-    unique_ptr<FieldDecl> fieldDecl;
+    unique_ptr<PropertyDecl> propertyDecl;
 
     if (!trying())
     {
         if (name2 == "")
         {
-            fieldDecl.reset(new FieldDecl);
-            fieldDecl->name = name1;
+            propertyDecl.reset(new PropertyDecl);
+            propertyDecl->name = name1;
         }
         else
         {
-            ScopeFieldDecl *sfd = new ScopeFieldDecl;
-            sfd->name = name2;
-            sfd->scopeName = name1;
-            fieldDecl.reset(sfd);
+            ScopedPropertyDecl *spd = new ScopedPropertyDecl;
+            spd->name = name2;
+            spd->scopeName = name1;
+            propertyDecl.reset(spd);
         }
-        fieldDecl->type = ti;
-        fieldDecl->expr = move(initExpr);
+        propertyDecl->type = ti;
+        propertyDecl->expr = move(initExpr);
     }
 
-    return fieldDecl;
+    return propertyDecl;
 }
 
 TypeInfo Parser::parsePropertyType()

@@ -38,7 +38,7 @@ BindingDecl::~BindingDecl()
 
 }
 
-FieldDecl::~FieldDecl()
+PropertyDecl::~PropertyDecl()
 {
 
 }
