@@ -1661,6 +1661,7 @@ void Parser::parseEnumConstant(std::unique_ptr<EnumDecl> &enumDecl)
 std::unique_ptr<ClassInstanceDecl> Parser::parseClassInstance()
 {
     unique_ptr<ClassInstanceDecl> instanceDecl;
+    string className;
 
     if (!trying())
     {
@@ -1668,10 +1669,15 @@ std::unique_ptr<ClassInstanceDecl> Parser::parseClassInstance()
     }
 
     match(Lexer::T_IDENTIFIER);
+    className = token(m_index - 1).str;
     match(Lexer::T_L_BRACE);
     parseBindingItemList(instanceDecl);
     match(Lexer::T_R_BRACE);
 
+    if (!trying())
+    {
+        instanceDecl->className = className;
+    }
     return instanceDecl;
 }
 
