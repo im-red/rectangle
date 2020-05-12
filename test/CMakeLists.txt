@@ -24,6 +24,7 @@ add_executable(test_all
     ../parser.cpp
     ../parsertypestring.cpp
     ../ast.cpp
+    ../option.cpp
 )
 target_link_libraries(test_all ${GTEST_LIBRARIES} pthread)
 

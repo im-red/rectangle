@@ -21,6 +21,8 @@
 #include <vector>
 #include <set>
 
+#include <stdio.h>
+
 struct Token
 {
     Token(int t, const std::string &s, int l, int col)
@@ -33,6 +35,14 @@ struct Token
     bool isIn(const std::set<int> &s) const
     {
         return s.find(type) != s.end();
+    }
+
+    std::string dump()
+    {
+        constexpr int BUF_LEN = 100;
+        char buf[BUF_LEN];
+        snprintf(buf, sizeof(buf), "line %d column %d(%s)", line, column, str.c_str());
+        return std::string(buf);
     }
 
     int type;

@@ -16,6 +16,7 @@
  ********************************************************************************/
 
 #include "parser.h"
+#include "option.h"
 
 #include <assert.h>
 
@@ -367,7 +368,10 @@ bool Parser::tryMemberItemAlt1()
     }
     catch (ParseException &e)
     {
-        fprintf(stderr, "tryMemberItemAlt1 fail: %s\n", e.what());
+        if (option::verbose)
+        {
+            fprintf(stderr, "tryMemberItemAlt1 fail: %s\n", e.what());
+        }
         result = false;
     }
 
@@ -389,7 +393,10 @@ bool Parser::tryMemberItemAlt2()
     }
     catch (ParseException &e)
     {
-        fprintf(stderr, "tryMemberItemAlt2 fail: %s\n", e.what());
+        if (option::verbose)
+        {
+            fprintf(stderr, "tryMemberItemAlt2 fail: %s\n", e.what());
+        }
         result = false;
     }
 
@@ -751,7 +758,10 @@ bool Parser::tryBlockItemAlt1()
     }
     catch (ParseException &e)
     {
-        fprintf(stderr, "tryBlockItemAlt1 fail: %s\n", e.what());
+        if (option::verbose)
+        {
+            fprintf(stderr, "tryBlockItemAlt1 fail: %s\n", e.what());
+        }
         result = false;
     }
 
@@ -773,7 +783,10 @@ bool Parser::tryBlockItemAlt2()
     }
     catch (ParseException &e)
     {
-        fprintf(stderr, "tryBlockItemAlt2 fail: %s\n", e.what());
+        if (option::verbose)
+        {
+            fprintf(stderr, "tryBlockItemAlt2 fail: %s\n", e.what());
+        }
         result = false;
     }
 
