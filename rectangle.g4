@@ -1,11 +1,11 @@
 grammar rectangle;
 
 document    // Def | Identifier
-    : classDefination EOF   // Def
-    | classInstance EOF     // Identifier
+    : componentDefination EOF   // Def
+    | componentInstance EOF     // Identifier
     ;
 
-classDefination     // Def
+componentDefination     // Def
     : Def Identifier LBrace memberItemList RBrace
     ;
 
@@ -214,7 +214,7 @@ enumConstant    // Identifier
     : Identifier
     ;
 
-classInstance   // Identifier
+componentInstance   // Identifier
     : Identifier LBrace bindingItemList RBrace
     ;
 
@@ -225,7 +225,7 @@ bindingItemList // Identifier ( Colon | Dot | LBrace)
 bindingItem // Identifier ( Colon | Dot | LBrace)
     : Identifier Colon initializer                  // Identifier Colon
     | Identifier Dot Identifier Colon initializer   // Identifier Dot
-    | classInstance                                 // Identifier LBrace
+    | componentInstance                                 // Identifier LBrace
     ;
 
 If : 'if';

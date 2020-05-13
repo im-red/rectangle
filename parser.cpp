@@ -63,7 +63,7 @@ bool Parser::parseRule(Parser::ParserRule rule, int index)
         switch(rule)
         {
         case Document:                  parseDocument();                    break;
-        case ClassDefination:           parseClassDefination();             break;
+        case ComponentDefination:           parseComponentDefination();             break;
         case PropertyDefination:        parsePropertyDefination();          break;
         case Type:                      parseType();                        break;
         case PropertyType:              parsePropertyType();                break;
@@ -92,7 +92,7 @@ bool Parser::parseRule(Parser::ParserRule rule, int index)
         case JumpStatement:             parseJumpStatement();               break;
         case ExprStatement:       parseExprStatement();         break;
         case EnumDefination:            parseEnumDefination();              break;
-        case ClassInstance:             parseClassInstance();               break;
+        case ComponentInstance:             parseComponentInstance();               break;
         default :
         {
             fprintf(stderr, "Invalid ParserRule: %d\n", rule);
@@ -183,8 +183,8 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
 {
     unique_ptr<DocumentDecl> doc;
 
-    unique_ptr<ClassDefinationDecl> def;
-    unique_ptr<ClassInstanceDecl> instance;
+    unique_ptr<ComponentDefinationDecl> def;
+    unique_ptr<ComponentInstanceDecl> instance;
 
     if (!trying())
     {
@@ -195,12 +195,12 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
     {
     case Lexer::T_DEF:
     {
-        def = parseClassDefination();
+        def = parseComponentDefination();
         break;
     }
     case Lexer::T_IDENTIFIER:
     {
-        instance = parseClassInstance();
+        instance = parseComponentInstance();
         break;
     }
     default:
@@ -218,12 +218,12 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
     {
         if (def)
         {
-            doc->type = DocumentDecl::DocumentType::ClassDefination;
+            doc->type = DocumentDecl::DocumentType::ComponentDefination;
             doc->defination = move(def);
         }
         else if (instance)
         {
-            doc->type = DocumentDecl::DocumentType::ClassInstance;
+            doc->type = DocumentDecl::DocumentType::ComponentInstance;
             doc->instance = move(instance);
         }
         else
@@ -235,19 +235,19 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
     return doc;
 }
 
-std::unique_ptr<ClassDefinationDecl> Parser::parseClassDefination()
+std::unique_ptr<ComponentDefinationDecl> Parser::parseComponentDefination()
 {
-    unique_ptr<ClassDefinationDecl> defination;
-    string className;
+    unique_ptr<ComponentDefinationDecl> defination;
+    string typeName;
 
     if (!trying())
     {
-        defination.reset(new ClassDefinationDecl);
+        defination.reset(new ComponentDefinationDecl);
     }
 
     match(Lexer::T_DEF);
     match(Lexer::T_IDENTIFIER);
-    className = token(m_index - 1).str;
+    typeName = token(m_index - 1).str;
 
     match(Lexer::T_L_BRACE);
     parseMemberItemList(defination);
@@ -255,7 +255,7 @@ std::unique_ptr<ClassDefinationDecl> Parser::parseClassDefination()
 
     if (!trying())
     {
-        defination->name = className;
+        defination->name = typeName;
     }
 
     return defination;
@@ -273,7 +273,7 @@ static const set<int> memberItemFirst =
     Lexer::T_IDENTIFIER
 };
 
-void Parser::parseMemberItemList(unique_ptr<ClassDefinationDecl> &defination)
+void Parser::parseMemberItemList(unique_ptr<ComponentDefinationDecl> &defination)
 {
     while (curToken().isIn(memberItemFirst))
     {
@@ -308,7 +308,7 @@ static const set<int> typeFirst =
 //    | enumDefination        // Enum
 //    ;
 
-void Parser::parseMemberItem(unique_ptr<ClassDefinationDecl> &defination)
+void Parser::parseMemberItem(unique_ptr<ComponentDefinationDecl> &defination)
 {
     unique_ptr<EnumDecl> enumDecl;
     unique_ptr<PropertyDecl> propertyDecl;
@@ -1671,30 +1671,30 @@ void Parser::parseEnumConstant(std::unique_ptr<EnumDecl> &enumDecl)
     }
 }
 
-std::unique_ptr<ClassInstanceDecl> Parser::parseClassInstance()
+std::unique_ptr<ComponentInstanceDecl> Parser::parseComponentInstance()
 {
-    unique_ptr<ClassInstanceDecl> instanceDecl;
-    string className;
+    unique_ptr<ComponentInstanceDecl> instanceDecl;
+    string typeName;
 
     if (!trying())
     {
-        instanceDecl.reset(new ClassInstanceDecl);
+        instanceDecl.reset(new ComponentInstanceDecl);
     }
 
     match(Lexer::T_IDENTIFIER);
-    className = token(m_index - 1).str;
+    typeName = token(m_index - 1).str;
     match(Lexer::T_L_BRACE);
     parseBindingItemList(instanceDecl);
     match(Lexer::T_R_BRACE);
 
     if (!trying())
     {
-        instanceDecl->className = className;
+        instanceDecl->typeName = typeName;
     }
     return instanceDecl;
 }
 
-void Parser::parseBindingItemList(std::unique_ptr<ClassInstanceDecl> &instanceDecl)
+void Parser::parseBindingItemList(std::unique_ptr<ComponentInstanceDecl> &instanceDecl)
 {
     parseBindingItem(instanceDecl);
     while (curToken().is(Lexer::T_IDENTIFIER))
@@ -1703,12 +1703,12 @@ void Parser::parseBindingItemList(std::unique_ptr<ClassInstanceDecl> &instanceDe
     }
 }
 
-void Parser::parseBindingItem(std::unique_ptr<ClassInstanceDecl> &instanceDecl)
+void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDecl)
 {
     string name1;
     string name2;
     unique_ptr<Expr> expr;
-    unique_ptr<ClassInstanceDecl> subInstance;
+    unique_ptr<ComponentInstanceDecl> subInstance;
 
     match(Lexer::T_IDENTIFIER);
     name1 = token(m_index - 1).str;
@@ -1732,7 +1732,7 @@ void Parser::parseBindingItem(std::unique_ptr<ClassInstanceDecl> &instanceDecl)
     case Lexer::T_L_BRACE:
     {
         m_index--;
-        subInstance = parseClassInstance();
+        subInstance = parseComponentInstance();
         break;
     }
     default:

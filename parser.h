@@ -44,7 +44,7 @@ public:
     enum ParserRule
     {
         Document,
-        ClassDefination,
+        ComponentDefination,
         MemberItemList,
         MemberItem,
         PropertyDefination,
@@ -81,7 +81,7 @@ public:
         EnumDefination,
         EnumConstantList,
         EnumConstant,
-        ClassInstance,
+        ComponentInstance,
         BindingItemList,
         BindingItem,
         RuleCount
@@ -122,9 +122,9 @@ private:
 
 private:
     std::unique_ptr<DocumentDecl> parseDocument();
-    std::unique_ptr<ClassDefinationDecl> parseClassDefination();
-    void parseMemberItemList(std::unique_ptr<ClassDefinationDecl> &defination);
-    void parseMemberItem(std::unique_ptr<ClassDefinationDecl> &defination);
+    std::unique_ptr<ComponentDefinationDecl> parseComponentDefination();
+    void parseMemberItemList(std::unique_ptr<ComponentDefinationDecl> &defination);
+    void parseMemberItem(std::unique_ptr<ComponentDefinationDecl> &defination);
     bool tryMemberItemAlt1();
     bool tryMemberItemAlt2();
     std::unique_ptr<PropertyDecl> parsePropertyDefination();
@@ -163,9 +163,9 @@ private:
     std::unique_ptr<EnumDecl> parseEnumDefination();
     void parseEnumConstantList(std::unique_ptr<EnumDecl> &enumDecl);
     void parseEnumConstant(std::unique_ptr<EnumDecl> &enumDecl);
-    std::unique_ptr<ClassInstanceDecl> parseClassInstance();
-    void parseBindingItemList(std::unique_ptr<ClassInstanceDecl> &instanceDecl);
-    void parseBindingItem(std::unique_ptr<ClassInstanceDecl> &instanceDecl);
+    std::unique_ptr<ComponentInstanceDecl> parseComponentInstance();
+    void parseBindingItemList(std::unique_ptr<ComponentInstanceDecl> &instanceDecl);
+    void parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDecl);
 
 private:
     std::vector<Token> m_tokens;

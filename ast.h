@@ -419,11 +419,11 @@ struct EnumDecl : public Printable
     std::vector<std::unique_ptr<EnumConstantDecl>> constantList;
 };
 
-struct ClassDefinationDecl : public Printable
+struct ComponentDefinationDecl : public Printable
 {
     void doPrint(int indent) const override
     {
-        printf("ClassDefinationDecl(%s)\n", name.c_str());
+        printf("ComponentDefinationDecl(%s)\n", name.c_str());
         for (auto &p : propertyList)
         {
             p->print(indent + 1);
@@ -474,11 +474,11 @@ struct ScopeBindingDecl : public BindingDecl
     std::string scopeName;
 };
 
-struct ClassInstanceDecl : public Printable
+struct ComponentInstanceDecl : public Printable
 {
     void doPrint(int indent) const override
     {
-        printf("ClassInstanceDecl(%s)\n",className.c_str());
+        printf("ComponentInstanceDecl(%s)\n",typeName.c_str());
         for (auto &p : bindingList)
         {
             p->print(indent + 1);
@@ -489,9 +489,9 @@ struct ClassInstanceDecl : public Printable
         }
     }
 
-    std::string className;
+    std::string typeName;
     std::vector<std::unique_ptr<BindingDecl>> bindingList;
-    std::vector<std::unique_ptr<ClassInstanceDecl>> instanceList;
+    std::vector<std::unique_ptr<ComponentInstanceDecl>> instanceList;
 };
 
 struct DocumentDecl : public Printable
@@ -499,7 +499,7 @@ struct DocumentDecl : public Printable
     void doPrint(int indent) const override
     {
         printf("DocumentDecl\n");
-        if (type == DocumentType::ClassDefination)
+        if (type == DocumentType::ComponentDefination)
         {
             defination->print(indent + 1);
         }
@@ -511,11 +511,11 @@ struct DocumentDecl : public Printable
 
     enum class DocumentType
     {
-        ClassDefination,
-        ClassInstance
+        ComponentDefination,
+        ComponentInstance
     };
 
     DocumentType type;
-    std::unique_ptr<ClassDefinationDecl> defination;
-    std::unique_ptr<ClassInstanceDecl> instance;
+    std::unique_ptr<ComponentDefinationDecl> defination;
+    std::unique_ptr<ComponentInstanceDecl> instance;
 };

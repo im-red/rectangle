@@ -58,7 +58,7 @@ TEST(parser, CLASS_INSTANCE)
     Lexer l;
     l.setCode(code);
     p.setTokens(l.tokens());
-    p.parseRule(Parser::ClassInstance, 0);
+    p.parseRule(Parser::ComponentInstance, 0);
 }
 
 TEST(parser, PARSE_DEFINATION_RECT)

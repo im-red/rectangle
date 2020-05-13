@@ -11,7 +11,7 @@ std::string Parser::parserRuleString(ParserRule rule)
     static const std::map<int, std::string> STRING_MAP =
     {
         ENUM_ELEMENT(Document),
-        ENUM_ELEMENT(ClassDefination),
+        ENUM_ELEMENT(ComponentDefination),
         ENUM_ELEMENT(MemberItemList),
         ENUM_ELEMENT(MemberItem),
         ENUM_ELEMENT(PropertyDefination),
@@ -48,7 +48,7 @@ std::string Parser::parserRuleString(ParserRule rule)
         ENUM_ELEMENT(EnumDefination),
         ENUM_ELEMENT(EnumConstantList),
         ENUM_ELEMENT(EnumConstant),
-        ENUM_ELEMENT(ClassInstance),
+        ENUM_ELEMENT(ComponentInstance),
         ENUM_ELEMENT(BindingItemList),
         ENUM_ELEMENT(BindingItem)
     };
