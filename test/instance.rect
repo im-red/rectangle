@@ -6,4 +6,11 @@ Rectangle {
     height: (10 + 1) * width
     border.type: Rectangle.Dot
     points: {{0, 0}, {width, height}, {width / 2, height / 2}}
+    Rectangle {
+        x: 0
+        y: 0
+        width: parent.width / 2
+        height: parent.height / 2
+        border.type: parent.border.type
+    }
 }
