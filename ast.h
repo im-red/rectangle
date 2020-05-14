@@ -460,14 +460,14 @@ struct BindingDecl : public Printable
     std::unique_ptr<Expr> expr;
 };
 
-struct ScopeBindingDecl : public BindingDecl
+struct ScopedBindingDecl : public BindingDecl
 {
-    ScopeBindingDecl(const std::string &sn, const std::string &n, std::unique_ptr<Expr> &&e)
+    ScopedBindingDecl(const std::string &sn, const std::string &n, std::unique_ptr<Expr> &&e)
         : BindingDecl(n, move(e)), scopeName(sn)
     {}
     void doPrint(int indent) const override
     {
-        printf("BindingDecl(%s.%s)\n",scopeName.c_str(), name.c_str());
+        printf("ScopedBindingDecl(%s.%s)\n",scopeName.c_str(), name.c_str());
         expr->print(indent + 1);
     }
 

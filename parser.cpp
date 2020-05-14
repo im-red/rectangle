@@ -1761,7 +1761,7 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
             }
             else
             {
-                instanceDecl->bindingList.emplace_back(new ScopeBindingDecl(name1, name2, move(expr)));
+                instanceDecl->bindingList.emplace_back(new ScopedBindingDecl(name1, name2, move(expr)));
             }
         }
     }
