@@ -234,14 +234,14 @@ struct PropertyDecl : public Printable
     std::unique_ptr<Expr> expr;
 };
 
-struct ScopedPropertyDecl : public PropertyDecl
+struct GroupedPropertyDecl : public PropertyDecl
 {
     void doPrint(int indent) const override
     {
-        printf("ScopedPropertyDecl(%s %s.%s)\n", type.name.c_str(), scopeName.c_str(), name.c_str());
+        printf("GroupedPropertyDecl(%s %s.%s)\n", type.name.c_str(), groupName.c_str(), name.c_str());
         expr->print(indent + 1);
     }
-    std::string scopeName;
+    std::string groupName;
 };
 
 struct ParamDecl : public Printable
@@ -460,18 +460,18 @@ struct BindingDecl : public Printable
     std::unique_ptr<Expr> expr;
 };
 
-struct ScopedBindingDecl : public BindingDecl
+struct GroupedBindingDecl : public BindingDecl
 {
-    ScopedBindingDecl(const std::string &sn, const std::string &n, std::unique_ptr<Expr> &&e)
-        : BindingDecl(n, move(e)), scopeName(sn)
+    GroupedBindingDecl(const std::string &sn, const std::string &n, std::unique_ptr<Expr> &&e)
+        : BindingDecl(n, move(e)), groupName(sn)
     {}
     void doPrint(int indent) const override
     {
-        printf("ScopedBindingDecl(%s.%s)\n",scopeName.c_str(), name.c_str());
+        printf("GroupedBindingDecl(%s.%s)\n",groupName.c_str(), name.c_str());
         expr->print(indent + 1);
     }
 
-    std::string scopeName;
+    std::string groupName;
 };
 
 struct ComponentInstanceDecl : public Printable

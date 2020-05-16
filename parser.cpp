@@ -450,9 +450,9 @@ std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
         }
         else
         {
-            ScopedPropertyDecl *spd = new ScopedPropertyDecl;
+            GroupedPropertyDecl *spd = new GroupedPropertyDecl;
             spd->name = name2;
-            spd->scopeName = name1;
+            spd->groupName = name1;
             propertyDecl.reset(spd);
         }
         propertyDecl->type = ti;
@@ -1761,7 +1761,7 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
             }
             else
             {
-                instanceDecl->bindingList.emplace_back(new ScopedBindingDecl(name1, name2, move(expr)));
+                instanceDecl->bindingList.emplace_back(new GroupedBindingDecl(name1, name2, move(expr)));
             }
         }
     }
