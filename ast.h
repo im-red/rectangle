@@ -21,9 +21,9 @@
 #include <memory>
 #include <vector>
 
-struct Printable
+struct ASTNode
 {
-    virtual ~Printable();
+    virtual ~ASTNode();
     virtual void print(int indent) const
     {
         std::string space(indent, ' ');
@@ -36,7 +36,7 @@ struct Printable
     }
 };
 
-struct Expr : public Printable
+struct Expr : public ASTNode
 {
     enum class Category
     {
@@ -237,7 +237,7 @@ struct TypeInfo
     std::string name;
 };
 
-struct VarDecl : public Printable
+struct VarDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
@@ -253,7 +253,7 @@ struct VarDecl : public Printable
     std::unique_ptr<Expr> expr;
 };
 
-struct PropertyDecl : public Printable
+struct PropertyDecl : public ASTNode
 {
     ~PropertyDecl() override;
     void doPrint(int indent) const override
@@ -280,7 +280,7 @@ struct GroupedPropertyDecl : public PropertyDecl
     std::string groupName;
 };
 
-struct ParamDecl : public Printable
+struct ParamDecl : public ASTNode
 {
     ParamDecl(const std::string &n, const TypeInfo &t) : name(n), type(t) {}
     void doPrint(int) const override
@@ -292,7 +292,7 @@ struct ParamDecl : public Printable
     TypeInfo type;
 };
 
-struct Stmt : public Printable
+struct Stmt : public ASTNode
 {
     virtual ~Stmt();
 };
@@ -406,7 +406,7 @@ struct ExprStmt : public Stmt
     std::unique_ptr<Expr> expr;
 };
 
-struct FunctionDecl : public Printable
+struct FunctionDecl : public ASTNode
 {
     FunctionDecl(const std::string &n,
                  const TypeInfo &rt,
@@ -430,7 +430,7 @@ struct FunctionDecl : public Printable
     std::unique_ptr<CompoundStmt> body;
 };
 
-struct EnumConstantDecl : public Printable
+struct EnumConstantDecl : public ASTNode
 {
     void doPrint(int) const override
     {
@@ -440,7 +440,7 @@ struct EnumConstantDecl : public Printable
     std::string name;
 };
 
-struct EnumDecl : public Printable
+struct EnumDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
@@ -455,7 +455,7 @@ struct EnumDecl : public Printable
     std::vector<std::unique_ptr<EnumConstantDecl>> constantList;
 };
 
-struct ComponentDefinationDecl : public Printable
+struct ComponentDefinationDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
@@ -480,7 +480,7 @@ struct ComponentDefinationDecl : public Printable
     std::vector<std::unique_ptr<EnumDecl>> enumList;
 };
 
-struct BindingDecl : public Printable
+struct BindingDecl : public ASTNode
 {
     BindingDecl(const std::string &n, std::unique_ptr<Expr> &&e)
         : name(n), expr(move(e))
@@ -510,7 +510,7 @@ struct GroupedBindingDecl : public BindingDecl
     std::string groupName;
 };
 
-struct ComponentInstanceDecl : public Printable
+struct ComponentInstanceDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
@@ -530,7 +530,7 @@ struct ComponentInstanceDecl : public Printable
     std::vector<std::unique_ptr<ComponentInstanceDecl>> instanceList;
 };
 
-struct DocumentDecl : public Printable
+struct DocumentDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {

@@ -43,7 +43,7 @@ PropertyDecl::~PropertyDecl()
 
 }
 
-Printable::~Printable()
+ASTNode::~ASTNode()
 {
 
 }
