@@ -38,12 +38,34 @@ struct Printable
 
 struct Expr : public Printable
 {
+    enum class Category
+    {
+        Invalid,
+        Integer,
+        Float,
+        String,
+        InitList,
+        BinaryOperator,
+        UnaryOperator,
+        Call,
+        ListSubscript,
+        Member,
+        Ref
+    };
+
+    Expr(Category cat = Category::Invalid) : m_category(cat) {}
     virtual ~Expr();
+    Category category() const { return m_category; }
+
+    Category m_category = Category::Invalid;
 };
 
 struct IntegerLiteral : public Expr
 {
-    explicit IntegerLiteral(int i) : value(i) {}
+    explicit IntegerLiteral(int i)
+        : Expr(Category::Integer)
+        , value(i)
+    {}
     void doPrint(int) const override
     {
         printf("IntegerLiteral(%d)\n", value);
@@ -54,7 +76,10 @@ struct IntegerLiteral : public Expr
 
 struct FloatLiteral : public Expr
 {
-    explicit FloatLiteral(float f) : value(f) {}
+    explicit FloatLiteral(float f)
+        : Expr(Category::Float)
+        , value(f)
+    {}
     void doPrint(int) const override
     {
         printf("FloatLiteral(%f)\n", value);
@@ -65,7 +90,10 @@ struct FloatLiteral : public Expr
 
 struct StringLiteral : public Expr
 {
-    explicit StringLiteral(const std::string &s) : value(s) {}
+    explicit StringLiteral(const std::string &s)
+        : Expr(Category::String)
+        , value(s)
+    {}
     void doPrint(int) const override
     {
         printf("StringLiteral(%s)\n", value.c_str());
@@ -76,7 +104,10 @@ struct StringLiteral : public Expr
 
 struct InitListExpr : public Expr
 {
-    explicit InitListExpr(std::vector<std::unique_ptr<Expr>> &&l) : exprList(move(l)) {}
+    explicit InitListExpr(std::vector<std::unique_ptr<Expr>> &&l)
+        : Expr(Category::InitList)
+        , exprList(move(l))
+    {}
     void doPrint(int indent) const override
     {
         printf("InitListExpr\n");
@@ -109,9 +140,9 @@ struct BinaryOperatorExpr : public Expr
         Assign
     };
 
-    BinaryOperatorExpr() {}
+    BinaryOperatorExpr() : Expr(Category::BinaryOperator) {}
     BinaryOperatorExpr(Type t, std::unique_ptr<Expr> &&l, std::unique_ptr<Expr> &&r)
-        : type(t), left(move(l)), right(move(r))
+        : Expr(Category::BinaryOperator), type(t), left(move(l)), right(move(r))
     {}
     static std::string typeString(Type type);
     void doPrint(int indent) const override
@@ -135,6 +166,7 @@ struct UnaryOperatorExpr : public Expr
         Not
     };
 
+    UnaryOperatorExpr() : Expr(Category::UnaryOperator) {}
     static std::string typeString(Type type);
     void doPrint(int indent) const override
     {
@@ -148,6 +180,7 @@ struct UnaryOperatorExpr : public Expr
 
 struct CallExpr : public Expr
 {
+    CallExpr() : Expr(Category::Call) {}
     void doPrint(int indent) const override
     {
         printf("CallExpr\n");
@@ -164,6 +197,7 @@ struct CallExpr : public Expr
 
 struct ListSubscriptExpr : public Expr
 {
+    ListSubscriptExpr() : Expr(Category::ListSubscript) {}
     void doPrint(int indent) const override
     {
         printf("ListSubscriptExpr\n");
@@ -176,6 +210,7 @@ struct ListSubscriptExpr : public Expr
 
 struct MemberExpr : public Expr
 {
+    MemberExpr() : Expr(Category::Member) {}
     void doPrint(int indent) const override
     {
         printf("MemberExpr(%s)\n", name.c_str());
@@ -188,6 +223,7 @@ struct MemberExpr : public Expr
 
 struct RefExpr : public Expr
 {
+    RefExpr() : Expr(Category::Ref) {}
     void doPrint(int) const override
     {
         printf("RefExpr(%s)\n", name.c_str());

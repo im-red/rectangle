@@ -63,7 +63,7 @@ bool Parser::parseRule(Parser::ParserRule rule, int index)
         switch(rule)
         {
         case Document:                  parseDocument();                    break;
-        case ComponentDefination:           parseComponentDefination();             break;
+        case ComponentDefination:       parseComponentDefination();         break;
         case PropertyDefination:        parsePropertyDefination();          break;
         case Type:                      parseType();                        break;
         case PropertyType:              parsePropertyType();                break;
@@ -90,9 +90,9 @@ bool Parser::parseRule(Parser::ParserRule rule, int index)
         case SelectionStatement:        parseSelectionStatement();          break;
         case IterationStatement:        parseIterationStatement();          break;
         case JumpStatement:             parseJumpStatement();               break;
-        case ExprStatement:       parseExprStatement();         break;
+        case ExprStatement:             parseExprStatement();               break;
         case EnumDefination:            parseEnumDefination();              break;
-        case ComponentInstance:             parseComponentInstance();               break;
+        case ComponentInstance:         parseComponentInstance();           break;
         default :
         {
             fprintf(stderr, "Invalid ParserRule: %d\n", rule);
