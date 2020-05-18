@@ -24,7 +24,7 @@ def Rectangle {
         r.stroke_width = border.width;
         r.stroke = border.color;
         r.stroke_dasharray = getDasharray(border.type);
-        print(r.stroke_dasharray);
+        printString(r.stroke_dasharray);
         drawRect(r);
     }
     string getDasharray(int type) {

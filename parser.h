@@ -128,9 +128,9 @@ private:
     bool tryMemberItemAlt1();
     bool tryMemberItemAlt2();
     std::unique_ptr<PropertyDecl> parsePropertyDefination();
-    TypeInfo parsePropertyType();
-    TypeInfo parseType();
-    void parseListType();
+    std::unique_ptr<TypeInfo> parsePropertyType();
+    std::unique_ptr<TypeInfo> parseType();
+    std::unique_ptr<TypeInfo> parseListType();
     std::unique_ptr<Expr> parseLiteral();
     std::unique_ptr<FunctionDecl> parseFunctionDefination();
     void parseParamList(std::vector<std::unique_ptr<ParamDecl> > &paramList);

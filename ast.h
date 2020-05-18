@@ -21,6 +21,14 @@
 #include <memory>
 #include <vector>
 
+class SymbolException : public std::runtime_error
+{
+public:
+    explicit SymbolException(const std::string &s)
+        : std::runtime_error(s)
+    {}
+};
+
 struct ASTNode
 {
     virtual ~ASTNode();
@@ -34,6 +42,56 @@ struct ASTNode
     {
 
     }
+};
+
+class TypeInfo
+{
+public:
+    enum class Category
+    {
+        Int,
+        Void,
+        Point,
+        Float,
+        String,
+        List,
+        Custom
+    };
+
+public:
+    explicit TypeInfo(Category cat);
+    virtual ~TypeInfo();
+
+    virtual std::string toString() const;
+
+    Category category() const;
+
+private:
+    Category m_category;
+};
+
+class ListTypeInfo : public TypeInfo
+{
+public:
+    explicit ListTypeInfo(std::unique_ptr<TypeInfo> &&ele);
+    TypeInfo *elementType() const { return m_elementType.get(); }
+
+    std::string toString() const override;
+
+private:
+    std::unique_ptr<TypeInfo> m_elementType;
+};
+
+class CustomTypeInfo : public TypeInfo
+{
+public:
+    explicit CustomTypeInfo(const std::string &name);
+    std::string name() const { return m_name; }
+
+    std::string toString() const override;
+
+private:
+    std::string m_name;
 };
 
 struct Expr : public ASTNode
@@ -53,11 +111,11 @@ struct Expr : public ASTNode
         Ref
     };
 
-    Expr(Category cat = Category::Invalid) : m_category(cat) {}
+    Expr(Category cat = Category::Invalid) : category(cat) {}
     virtual ~Expr();
-    Category category() const { return m_category; }
 
-    Category m_category = Category::Invalid;
+    Category category = Category::Invalid;
+    std::unique_ptr<TypeInfo> typeInfo;
 };
 
 struct IntegerLiteral : public Expr
@@ -65,7 +123,9 @@ struct IntegerLiteral : public Expr
     explicit IntegerLiteral(int i)
         : Expr(Category::Integer)
         , value(i)
-    {}
+    {
+
+    }
     void doPrint(int) const override
     {
         printf("IntegerLiteral(%d)\n", value);
@@ -79,7 +139,9 @@ struct FloatLiteral : public Expr
     explicit FloatLiteral(float f)
         : Expr(Category::Float)
         , value(f)
-    {}
+    {
+
+    }
     void doPrint(int) const override
     {
         printf("FloatLiteral(%f)\n", value);
@@ -93,7 +155,9 @@ struct StringLiteral : public Expr
     explicit StringLiteral(const std::string &s)
         : Expr(Category::String)
         , value(s)
-    {}
+    {
+
+    }
     void doPrint(int) const override
     {
         printf("StringLiteral(%s)\n", value.c_str());
@@ -232,16 +296,11 @@ struct RefExpr : public Expr
     std::string name;
 };
 
-struct TypeInfo
-{
-    std::string name;
-};
-
 struct VarDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
-        printf("VarDecl(%s %s)\n", type.name.c_str(), name.c_str());
+        printf("VarDecl(%s %s)\n", type->toString().c_str(), name.c_str());
         if (expr)
         {
             expr->print(indent);
@@ -249,7 +308,7 @@ struct VarDecl : public ASTNode
     }
 
     std::string name;
-    TypeInfo type;
+    std::unique_ptr<TypeInfo> type;
     std::unique_ptr<Expr> expr;
 };
 
@@ -258,7 +317,7 @@ struct PropertyDecl : public ASTNode
     ~PropertyDecl() override;
     void doPrint(int indent) const override
     {
-        printf("PropertyDecl(%s %s)\n", type.name.c_str(), name.c_str());
+        printf("PropertyDecl(%s %s)\n", type->toString().c_str(), name.c_str());
         if (expr)
         {
             expr->print(indent + 1);
@@ -266,7 +325,7 @@ struct PropertyDecl : public ASTNode
     }
 
     std::string name;
-    TypeInfo type;
+    std::unique_ptr<TypeInfo> type;
     std::unique_ptr<Expr> expr;
 };
 
@@ -274,7 +333,7 @@ struct GroupedPropertyDecl : public PropertyDecl
 {
     void doPrint(int indent) const override
     {
-        printf("GroupedPropertyDecl(%s %s.%s)\n", type.name.c_str(), groupName.c_str(), name.c_str());
+        printf("GroupedPropertyDecl(%s %s.%s)\n", type->toString().c_str(), groupName.c_str(), name.c_str());
         expr->print(indent + 1);
     }
     std::string groupName;
@@ -282,14 +341,14 @@ struct GroupedPropertyDecl : public PropertyDecl
 
 struct ParamDecl : public ASTNode
 {
-    ParamDecl(const std::string &n, const TypeInfo &t) : name(n), type(t) {}
+    ParamDecl(const std::string &n, std::unique_ptr<TypeInfo> &&t) : name(n), type(move(t)) {}
     void doPrint(int) const override
     {
-        printf("ParamDecl(%s %s)\n", type.name.c_str(), name.c_str());
+        printf("ParamDecl(%s %s)\n", type->toString().c_str(), name.c_str());
     }
 
     std::string name;
-    TypeInfo type;
+    std::unique_ptr<TypeInfo> type;
 };
 
 struct Stmt : public ASTNode
@@ -409,14 +468,14 @@ struct ExprStmt : public Stmt
 struct FunctionDecl : public ASTNode
 {
     FunctionDecl(const std::string &n,
-                 const TypeInfo &rt,
+                 std::unique_ptr<TypeInfo> &&rt,
                  std::vector<std::unique_ptr<ParamDecl>> &&pl,
                  std::unique_ptr<CompoundStmt> &&b)
-        : name(n), returnType(rt), paramList(move(pl)), body(move(b))
+        : name(n), returnType(move(rt)), paramList(move(pl)), body(move(b))
     {}
     void doPrint(int indent) const override
     {
-        printf("FunctionDecl(%s %s)\n", returnType.name.c_str(), name.c_str());
+        printf("FunctionDecl(%s %s)\n", returnType->toString().c_str(), name.c_str());
         for (auto &p : paramList)
         {
             p->print(indent + 1);
@@ -425,7 +484,7 @@ struct FunctionDecl : public ASTNode
     }
 
     std::string name;
-    TypeInfo returnType;
+    std::unique_ptr<TypeInfo> returnType;
     std::vector<std::unique_ptr<ParamDecl>> paramList;
     std::unique_ptr<CompoundStmt> body;
 };
@@ -514,7 +573,7 @@ struct ComponentInstanceDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
-        printf("ComponentInstanceDecl(%s)\n",typeName.c_str());
+        printf("ComponentInstanceDecl(%s)\n",componentName.c_str());
         for (auto &p : bindingList)
         {
             p->print(indent + 1);
@@ -525,7 +584,7 @@ struct ComponentInstanceDecl : public ASTNode
         }
     }
 
-    std::string typeName;
+    std::string componentName;
     std::vector<std::unique_ptr<BindingDecl>> bindingList;
     std::vector<std::unique_ptr<ComponentInstanceDecl>> instanceList;
 };
@@ -535,7 +594,7 @@ struct DocumentDecl : public ASTNode
     void doPrint(int indent) const override
     {
         printf("DocumentDecl\n");
-        if (type == DocumentType::ComponentDefination)
+        if (type == Type::Defination)
         {
             defination->print(indent + 1);
         }
@@ -545,13 +604,13 @@ struct DocumentDecl : public ASTNode
         }
     }
 
-    enum class DocumentType
+    enum class Type
     {
-        ComponentDefination,
-        ComponentInstance
+        Defination,
+        Instance
     };
 
-    DocumentType type;
+    Type type;
     std::unique_ptr<ComponentDefinationDecl> defination;
     std::unique_ptr<ComponentInstanceDecl> instance;
 };

@@ -89,3 +89,64 @@ string UnaryOperatorExpr::typeString(UnaryOperatorExpr::Type type)
 
     return iter->second;
 }
+
+TypeInfo::TypeInfo(TypeInfo::Category cat)
+    : m_category(cat)
+{
+
+}
+
+TypeInfo::~TypeInfo()
+{
+
+}
+
+std::string TypeInfo::toString() const
+{
+    static const map<Category, string> MAP =
+    {
+        { Category::Int,    "int" },
+        { Category::Void,   "void" },
+        { Category::Point,  "point" },
+        { Category::Float,  "float" },
+        { Category::String, "string" },
+        { Category::List,   "list" },
+        { Category::Custom, "custom" }
+    };
+
+    static auto iter = MAP.find(category());
+    assert(iter != MAP.end());
+
+    return iter->second;
+}
+
+TypeInfo::Category TypeInfo::category() const
+{
+    return m_category;
+}
+
+ListTypeInfo::ListTypeInfo(std::unique_ptr<TypeInfo> &&ele)
+    : TypeInfo(Category::List)
+    , m_elementType(move(ele))
+{
+
+}
+
+string ListTypeInfo::toString() const
+{
+    static const string elementTypeString = m_elementType->toString();
+    static const string result = "list<" + elementTypeString + ">";
+    return result;
+}
+
+CustomTypeInfo::CustomTypeInfo(const string &name)
+    : TypeInfo(Category::Custom)
+    , m_name(name)
+{
+
+}
+
+string CustomTypeInfo::toString() const
+{
+    return m_name;
+}

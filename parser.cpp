@@ -218,12 +218,12 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
     {
         if (def)
         {
-            doc->type = DocumentDecl::DocumentType::ComponentDefination;
+            doc->type = DocumentDecl::Type::Defination;
             doc->defination = move(def);
         }
         else if (instance)
         {
-            doc->type = DocumentDecl::DocumentType::ComponentInstance;
+            doc->type = DocumentDecl::Type::Instance;
             doc->instance = move(instance);
         }
         else
@@ -410,7 +410,7 @@ std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
 {
     string name1;
     string name2;
-    TypeInfo ti;
+    unique_ptr<TypeInfo> ti;
     unique_ptr<Expr> initExpr;
 
     ti = parsePropertyType();
@@ -455,28 +455,35 @@ std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
             spd->groupName = name1;
             propertyDecl.reset(spd);
         }
-        propertyDecl->type = ti;
+        propertyDecl->type = move(ti);
         propertyDecl->expr = move(initExpr);
     }
 
     return propertyDecl;
 }
 
-TypeInfo Parser::parsePropertyType()
+std::unique_ptr<TypeInfo> Parser::parsePropertyType()
 {
-    int oldIndex = m_index;
+    unique_ptr<TypeInfo> result;
 
     switch(curTokenType())
     {
     case Lexer::T_INT:
+        result.reset(new TypeInfo(TypeInfo::Category::Int));
+        [[clang::fallthrough]];
     case Lexer::T_POINT:
+        result.reset(new TypeInfo(TypeInfo::Category::Point));
+        [[clang::fallthrough]];
     case Lexer::T_FLOAT:
+        result.reset(new TypeInfo(TypeInfo::Category::Float));
+        [[clang::fallthrough]];
     case Lexer::T_STRING:
-    {
+        result.reset(new TypeInfo(TypeInfo::Category::String));
         match(curTokenType());
         break;
-    }
-    case Lexer::T_LIST: parseListType(); break;
+    case Lexer::T_LIST:
+        result = parseListType();
+        break;
     default:
     {
         char buf[BUF_LEN];
@@ -487,55 +494,74 @@ TypeInfo Parser::parsePropertyType()
     }
     }
 
-    TypeInfo ti;
-    for (int i = oldIndex; i < m_index; i++)
+    if (trying())
     {
-        ti.name += (token(i).str + " ");
+        result.reset();
     }
-    return ti;
+
+    return result;
 }
 
-TypeInfo Parser::parseType()
+std::unique_ptr<TypeInfo> Parser::parseType()
 {
-    int oldIndex = m_index;
+    unique_ptr<TypeInfo> result;
 
     switch(curTokenType())
     {
     case Lexer::T_INT:
+        result.reset(new TypeInfo(TypeInfo::Category::Int));
+        [[clang::fallthrough]];
     case Lexer::T_VOID:
+        result.reset(new TypeInfo(TypeInfo::Category::Void));
+        [[clang::fallthrough]];
     case Lexer::T_POINT:
+        result.reset(new TypeInfo(TypeInfo::Category::Point));
+        [[clang::fallthrough]];
     case Lexer::T_FLOAT:
+        result.reset(new TypeInfo(TypeInfo::Category::Float));
+        [[clang::fallthrough]];
     case Lexer::T_STRING:
+        result.reset(new TypeInfo(TypeInfo::Category::String));
+        [[clang::fallthrough]];
     case Lexer::T_IDENTIFIER:
-    {
+        result.reset(new CustomTypeInfo(curToken().str));
         match(curTokenType());
         break;
-    }
-    case Lexer::T_LIST: parseListType(); break;
+    case Lexer::T_LIST:
+        result = parseListType();
+        break;
     default:
     {
         char buf[BUF_LEN];
         Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a type token at line %d column %d",
-                 tok.line, tok.column);
+        snprintf(buf, sizeof(buf), "expect a type token at line %d column %d(%s)",
+                 tok.line, tok.column, tok.str.c_str());
         throw ParseException(buf);
     }
     }
 
-    TypeInfo ti;
-    for (int i = oldIndex; i < m_index; i++)
+    if (trying())
     {
-        ti.name += (token(i).str + " ");
+        result.reset();
     }
-    return ti;
+
+    return result;
 }
 
-void Parser::parseListType()
+std::unique_ptr<TypeInfo> Parser::parseListType()
 {
     match(Lexer::T_LIST);
     match(Lexer::T_LT);
-    parsePropertyType();
+    unique_ptr<TypeInfo> ele = parsePropertyType();
     match(Lexer::T_GT);
+
+    unique_ptr<TypeInfo> result;
+    if (!trying())
+    {
+        result.reset(new ListTypeInfo(move(ele)));
+    }
+
+    return result;
 }
 
 std::unique_ptr<Expr> Parser::parseLiteral()
@@ -608,7 +634,7 @@ static const set<int> &paramListFirst = typeFirst;
 std::unique_ptr<FunctionDecl> Parser::parseFunctionDefination()
 {
     string name;
-    TypeInfo ti;
+    unique_ptr<TypeInfo> ti;
     vector<unique_ptr<ParamDecl>> paramList;
     unique_ptr<Stmt> body;
 
@@ -627,7 +653,7 @@ std::unique_ptr<FunctionDecl> Parser::parseFunctionDefination()
     if (!trying())
     {
         decl.reset(new FunctionDecl(name,
-                                    ti,
+                                    move(ti),
                                     move(paramList),
                                     unique_ptr<CompoundStmt>(dynamic_cast<CompoundStmt *>(body.release()))));
     }
@@ -653,7 +679,7 @@ void Parser::parseParamList(std::vector<std::unique_ptr<ParamDecl>> &paramList)
 
 std::unique_ptr<ParamDecl> Parser::parseParamItem()
 {
-    TypeInfo ti;
+    std::unique_ptr<TypeInfo> ti;
     string name;
 
     ti = parseType();
@@ -663,7 +689,7 @@ std::unique_ptr<ParamDecl> Parser::parseParamItem()
     unique_ptr<ParamDecl> decl;
     if (!trying())
     {
-        decl.reset(new ParamDecl(name, ti));
+        decl.reset(new ParamDecl(name, move(ti)));
     }
 
     return decl;
@@ -1689,7 +1715,7 @@ std::unique_ptr<ComponentInstanceDecl> Parser::parseComponentInstance()
 
     if (!trying())
     {
-        instanceDecl->typeName = typeName;
+        instanceDecl->componentName = typeName;
     }
     return instanceDecl;
 }
