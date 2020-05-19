@@ -469,21 +469,34 @@ std::unique_ptr<TypeInfo> Parser::parsePropertyType()
     switch(curTokenType())
     {
     case Lexer::T_INT:
+    {
         result.reset(new TypeInfo(TypeInfo::Category::Int));
-        [[clang::fallthrough]];
+        match(curTokenType());
+        break;
+    }
     case Lexer::T_POINT:
+    {
         result.reset(new TypeInfo(TypeInfo::Category::Point));
-        [[clang::fallthrough]];
+        match(curTokenType());
+        break;
+    }
     case Lexer::T_FLOAT:
+    {
         result.reset(new TypeInfo(TypeInfo::Category::Float));
-        [[clang::fallthrough]];
+        match(curTokenType());
+        break;
+    }
     case Lexer::T_STRING:
+    {
         result.reset(new TypeInfo(TypeInfo::Category::String));
         match(curTokenType());
         break;
+    }
     case Lexer::T_LIST:
+    {
         result = parseListType();
         break;
+    }
     default:
     {
         char buf[BUF_LEN];
@@ -509,27 +522,46 @@ std::unique_ptr<TypeInfo> Parser::parseType()
     switch(curTokenType())
     {
     case Lexer::T_INT:
+    {
         result.reset(new TypeInfo(TypeInfo::Category::Int));
-        [[clang::fallthrough]];
+        match(curTokenType());
+        break;
+    }
     case Lexer::T_VOID:
+    {
         result.reset(new TypeInfo(TypeInfo::Category::Void));
-        [[clang::fallthrough]];
+        match(curTokenType());
+        break;
+    }
     case Lexer::T_POINT:
+    {
         result.reset(new TypeInfo(TypeInfo::Category::Point));
-        [[clang::fallthrough]];
+        match(curTokenType());
+        break;
+    }
     case Lexer::T_FLOAT:
+    {
         result.reset(new TypeInfo(TypeInfo::Category::Float));
-        [[clang::fallthrough]];
+        match(curTokenType());
+        break;
+    }
     case Lexer::T_STRING:
+    {
         result.reset(new TypeInfo(TypeInfo::Category::String));
-        [[clang::fallthrough]];
+        match(curTokenType());
+        break;
+    }
     case Lexer::T_IDENTIFIER:
+    {
         result.reset(new CustomTypeInfo(curToken().str));
         match(curTokenType());
         break;
+    }
     case Lexer::T_LIST:
+    {
         result = parseListType();
         break;
+    }
     default:
     {
         char buf[BUF_LEN];

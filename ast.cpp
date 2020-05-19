@@ -114,7 +114,7 @@ std::string TypeInfo::toString() const
         { Category::Custom, "custom" }
     };
 
-    static auto iter = MAP.find(category());
+    auto iter = MAP.find(category());
     assert(iter != MAP.end());
 
     return iter->second;
@@ -134,8 +134,8 @@ ListTypeInfo::ListTypeInfo(std::unique_ptr<TypeInfo> &&ele)
 
 string ListTypeInfo::toString() const
 {
-    static const string elementTypeString = m_elementType->toString();
-    static const string result = "list<" + elementTypeString + ">";
+    const string elementTypeString = m_elementType->toString();
+    const string result = "list<" + elementTypeString + ">";
     return result;
 }
 
