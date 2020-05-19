@@ -125,9 +125,9 @@ TypeInfo::Category TypeInfo::category() const
     return m_category;
 }
 
-ListTypeInfo::ListTypeInfo(std::unique_ptr<TypeInfo> &&ele)
+ListTypeInfo::ListTypeInfo(const std::shared_ptr<TypeInfo> &ele)
     : TypeInfo(Category::List)
-    , m_elementType(move(ele))
+    , m_elementType(ele)
 {
 
 }

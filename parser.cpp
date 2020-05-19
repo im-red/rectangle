@@ -410,7 +410,7 @@ std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
 {
     string name1;
     string name2;
-    unique_ptr<TypeInfo> ti;
+    shared_ptr<TypeInfo> ti;
     unique_ptr<Expr> initExpr;
 
     ti = parsePropertyType();
@@ -462,9 +462,9 @@ std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
     return propertyDecl;
 }
 
-std::unique_ptr<TypeInfo> Parser::parsePropertyType()
+std::shared_ptr<TypeInfo> Parser::parsePropertyType()
 {
-    unique_ptr<TypeInfo> result;
+    shared_ptr<TypeInfo> result;
 
     switch(curTokenType())
     {
@@ -515,9 +515,9 @@ std::unique_ptr<TypeInfo> Parser::parsePropertyType()
     return result;
 }
 
-std::unique_ptr<TypeInfo> Parser::parseType()
+std::shared_ptr<TypeInfo> Parser::parseType()
 {
-    unique_ptr<TypeInfo> result;
+    shared_ptr<TypeInfo> result;
 
     switch(curTokenType())
     {
@@ -580,17 +580,17 @@ std::unique_ptr<TypeInfo> Parser::parseType()
     return result;
 }
 
-std::unique_ptr<TypeInfo> Parser::parseListType()
+std::shared_ptr<TypeInfo> Parser::parseListType()
 {
     match(Lexer::T_LIST);
     match(Lexer::T_LT);
-    unique_ptr<TypeInfo> ele = parsePropertyType();
+    shared_ptr<TypeInfo> ele = parsePropertyType();
     match(Lexer::T_GT);
 
-    unique_ptr<TypeInfo> result;
+    shared_ptr<TypeInfo> result;
     if (!trying())
     {
-        result.reset(new ListTypeInfo(move(ele)));
+        result.reset(new ListTypeInfo(ele));
     }
 
     return result;
@@ -666,7 +666,7 @@ static const set<int> &paramListFirst = typeFirst;
 std::unique_ptr<FunctionDecl> Parser::parseFunctionDefination()
 {
     string name;
-    unique_ptr<TypeInfo> ti;
+    shared_ptr<TypeInfo> ti;
     vector<unique_ptr<ParamDecl>> paramList;
     unique_ptr<Stmt> body;
 
@@ -711,7 +711,7 @@ void Parser::parseParamList(std::vector<std::unique_ptr<ParamDecl>> &paramList)
 
 std::unique_ptr<ParamDecl> Parser::parseParamItem()
 {
-    std::unique_ptr<TypeInfo> ti;
+    shared_ptr<TypeInfo> ti;
     string name;
 
     ti = parseType();

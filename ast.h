@@ -73,13 +73,13 @@ private:
 class ListTypeInfo : public TypeInfo
 {
 public:
-    explicit ListTypeInfo(std::unique_ptr<TypeInfo> &&ele);
-    TypeInfo *elementType() const { return m_elementType.get(); }
+    explicit ListTypeInfo(const std::shared_ptr<TypeInfo> &ele);
+    std::shared_ptr<TypeInfo> elementType() const { return m_elementType; }
 
     std::string toString() const override;
 
 private:
-    std::unique_ptr<TypeInfo> m_elementType;
+    std::shared_ptr<TypeInfo> m_elementType;
 };
 
 class CustomTypeInfo : public TypeInfo
@@ -115,7 +115,7 @@ struct Expr : public ASTNode
     virtual ~Expr();
 
     Category category = Category::Invalid;
-    std::unique_ptr<TypeInfo> typeInfo;
+    std::shared_ptr<TypeInfo> typeInfo;
 };
 
 struct IntegerLiteral : public Expr
@@ -308,7 +308,7 @@ struct VarDecl : public ASTNode
     }
 
     std::string name;
-    std::unique_ptr<TypeInfo> type;
+    std::shared_ptr<TypeInfo> type;
     std::unique_ptr<Expr> expr;
 };
 
@@ -325,7 +325,7 @@ struct PropertyDecl : public ASTNode
     }
 
     std::string name;
-    std::unique_ptr<TypeInfo> type;
+    std::shared_ptr<TypeInfo> type;
     std::unique_ptr<Expr> expr;
 };
 
@@ -341,14 +341,14 @@ struct GroupedPropertyDecl : public PropertyDecl
 
 struct ParamDecl : public ASTNode
 {
-    ParamDecl(const std::string &n, std::unique_ptr<TypeInfo> &&t) : name(n), type(move(t)) {}
+    ParamDecl(const std::string &n, const std::shared_ptr<TypeInfo> &t) : name(n), type(t) {}
     void doPrint(int) const override
     {
         printf("ParamDecl(%s %s)\n", type->toString().c_str(), name.c_str());
     }
 
     std::string name;
-    std::unique_ptr<TypeInfo> type;
+    std::shared_ptr<TypeInfo> type;
 };
 
 struct Stmt : public ASTNode
@@ -468,7 +468,7 @@ struct ExprStmt : public Stmt
 struct FunctionDecl : public ASTNode
 {
     FunctionDecl(const std::string &n,
-                 std::unique_ptr<TypeInfo> &&rt,
+                 const std::shared_ptr<TypeInfo> &rt,
                  std::vector<std::unique_ptr<ParamDecl>> &&pl,
                  std::unique_ptr<CompoundStmt> &&b)
         : name(n), returnType(move(rt)), paramList(move(pl)), body(move(b))
@@ -484,7 +484,7 @@ struct FunctionDecl : public ASTNode
     }
 
     std::string name;
-    std::unique_ptr<TypeInfo> returnType;
+    std::shared_ptr<TypeInfo> returnType;
     std::vector<std::unique_ptr<ParamDecl>> paramList;
     std::unique_ptr<CompoundStmt> body;
 };
