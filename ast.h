@@ -62,9 +62,18 @@ public:
     explicit TypeInfo(Category cat);
     virtual ~TypeInfo();
 
-    virtual std::string toString() const;
-
     Category category() const;
+    bool operator==(const TypeInfo &rhs) const
+    {
+        return m_category == rhs.m_category && toString() == rhs.toString();
+    }
+    bool operator!=(const TypeInfo &rhs) const
+    {
+        return !operator==(rhs);
+    }
+
+    virtual std::string toString() const;
+    virtual bool assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const;
 
 private:
     Category m_category;
@@ -77,6 +86,7 @@ public:
     std::shared_ptr<TypeInfo> elementType() const { return m_elementType; }
 
     std::string toString() const override;
+    bool assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const override;
 
 private:
     std::shared_ptr<TypeInfo> m_elementType;
@@ -186,7 +196,7 @@ struct InitListExpr : public Expr
 
 struct BinaryOperatorExpr : public Expr
 {
-    enum class Type
+    enum class Op
     {
         LogicalAnd,
         LogicalOr,
@@ -205,25 +215,25 @@ struct BinaryOperatorExpr : public Expr
     };
 
     BinaryOperatorExpr() : Expr(Category::BinaryOperator) {}
-    BinaryOperatorExpr(Type t, std::unique_ptr<Expr> &&l, std::unique_ptr<Expr> &&r)
-        : Expr(Category::BinaryOperator), type(t), left(move(l)), right(move(r))
+    BinaryOperatorExpr(Op t, std::unique_ptr<Expr> &&l, std::unique_ptr<Expr> &&r)
+        : Expr(Category::BinaryOperator), op(t), left(move(l)), right(move(r))
     {}
-    static std::string typeString(Type type);
+    static std::string typeString(Op op);
     void doPrint(int indent) const override
     {
-        printf("BinaryOperatorExpr(%s)\n", typeString(type).c_str());
+        printf("BinaryOperatorExpr(%s)\n", typeString(op).c_str());
         left->print(indent + 1);
         right->print(indent + 1);
     }
 
-    Type type;
+    Op op;
     std::unique_ptr<Expr> left;
     std::unique_ptr<Expr> right;
 };
 
 struct UnaryOperatorExpr : public Expr
 {
-    enum Type
+    enum Op
     {
         Positive,
         Negative,
@@ -231,14 +241,14 @@ struct UnaryOperatorExpr : public Expr
     };
 
     UnaryOperatorExpr() : Expr(Category::UnaryOperator) {}
-    static std::string typeString(Type type);
+    static std::string typeString(Op op);
     void doPrint(int indent) const override
     {
-        printf("UnaryOperatorExpr(%s)\n", typeString(type).c_str());
+        printf("UnaryOperatorExpr(%s)\n", typeString(op).c_str());
         expr->print(indent + 1);
     }
 
-    Type type;
+    Op op;
     std::unique_ptr<Expr> expr;
 };
 
@@ -307,8 +317,8 @@ struct VarDecl : public ASTNode
         }
     }
 
-    std::string name;
     std::shared_ptr<TypeInfo> type;
+    std::string name;
     std::unique_ptr<Expr> expr;
 };
 

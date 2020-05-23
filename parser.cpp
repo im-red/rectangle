@@ -991,7 +991,7 @@ std::unique_ptr<Expr> Parser::parseLogicalOrExpression()
             for (size_t i = 0; i < andExprCount - 1; i++)
             {
                 BinaryOperatorExpr *op = new BinaryOperatorExpr;
-                op->type = BinaryOperatorExpr::Type::LogicalOr;
+                op->op = BinaryOperatorExpr::Op::LogicalOr;
                 op->left = move(andExprs[i]);
                 op->right = move(andExprs[i + 1]);
                 andExprs[i + 1].reset(op);
@@ -1028,7 +1028,7 @@ std::unique_ptr<Expr> Parser::parseLogicalAndExpression()
             for (size_t i = 0; i < eqExprCount - 1; i++)
             {
                 BinaryOperatorExpr *op = new BinaryOperatorExpr;
-                op->type = BinaryOperatorExpr::Type::LogicalAnd;
+                op->op = BinaryOperatorExpr::Op::LogicalAnd;
                 op->left = move(eqExprs[i]);
                 op->right = move(eqExprs[i + 1]);
                 eqExprs[i + 1].reset(op);
@@ -1040,23 +1040,23 @@ std::unique_ptr<Expr> Parser::parseLogicalAndExpression()
     return expr;
 }
 
-static BinaryOperatorExpr::Type tokenTypeToBinaryOpType(int tokenType)
+static BinaryOperatorExpr::Op tokenTypeToBinaryOpType(int tokenType)
 {
-    static const map<int, BinaryOperatorExpr::Type> MAP =
+    static const map<int, BinaryOperatorExpr::Op> MAP =
     {
-        { Lexer::T_AND_AND,     BinaryOperatorExpr::Type::LogicalAnd },
-        { Lexer::T_OR_OR,       BinaryOperatorExpr::Type::LogicalOr },
-        { Lexer::T_EQUAL,       BinaryOperatorExpr::Type::Equal },
-        { Lexer::T_NOT_EQUAL,   BinaryOperatorExpr::Type::NotEqual },
-        { Lexer::T_LT,          BinaryOperatorExpr::Type::LessThan },
-        { Lexer::T_GT,          BinaryOperatorExpr::Type::GreaterThan },
-        { Lexer::T_LE,          BinaryOperatorExpr::Type::LessEqual },
-        { Lexer::T_GE,          BinaryOperatorExpr::Type::GreaterEqual },
-        { Lexer::T_PLUS,        BinaryOperatorExpr::Type::Plus },
-        { Lexer::T_MINUS,       BinaryOperatorExpr::Type::Minus },
-        { Lexer::T_STAR,        BinaryOperatorExpr::Type::Multiply },
-        { Lexer::T_SLASH,       BinaryOperatorExpr::Type::Divide },
-        { Lexer::T_REMAINDER,   BinaryOperatorExpr::Type::Remainder}
+        { Lexer::T_AND_AND,     BinaryOperatorExpr::Op::LogicalAnd },
+        { Lexer::T_OR_OR,       BinaryOperatorExpr::Op::LogicalOr },
+        { Lexer::T_EQUAL,       BinaryOperatorExpr::Op::Equal },
+        { Lexer::T_NOT_EQUAL,   BinaryOperatorExpr::Op::NotEqual },
+        { Lexer::T_LT,          BinaryOperatorExpr::Op::LessThan },
+        { Lexer::T_GT,          BinaryOperatorExpr::Op::GreaterThan },
+        { Lexer::T_LE,          BinaryOperatorExpr::Op::LessEqual },
+        { Lexer::T_GE,          BinaryOperatorExpr::Op::GreaterEqual },
+        { Lexer::T_PLUS,        BinaryOperatorExpr::Op::Plus },
+        { Lexer::T_MINUS,       BinaryOperatorExpr::Op::Minus },
+        { Lexer::T_STAR,        BinaryOperatorExpr::Op::Multiply },
+        { Lexer::T_SLASH,       BinaryOperatorExpr::Op::Divide },
+        { Lexer::T_REMAINDER,   BinaryOperatorExpr::Op::Remainder}
     };
 
     auto iter = MAP.find(tokenType);
@@ -1095,7 +1095,7 @@ std::unique_ptr<Expr> Parser::parseEqualityExpression()
             for (size_t i = 0; i < relExprCount - 1; i++)
             {
                 BinaryOperatorExpr *op = new BinaryOperatorExpr;
-                op->type = tokenTypeToBinaryOpType(tokens[i]);
+                op->op = tokenTypeToBinaryOpType(tokens[i]);
                 op->left = move(relExprs[i]);
                 op->right = move(relExprs[i + 1]);
                 relExprs[i + 1].reset(op);
@@ -1135,7 +1135,7 @@ std::unique_ptr<Expr> Parser::parseRelationalExpression()
             for (size_t i = 0; i < subExprCount - 1; i++)
             {
                 BinaryOperatorExpr *op = new BinaryOperatorExpr;
-                op->type = tokenTypeToBinaryOpType(tokens[i]);
+                op->op = tokenTypeToBinaryOpType(tokens[i]);
                 op->left = move(subExprs[i]);
                 op->right = move(subExprs[i + 1]);
                 subExprs[i + 1].reset(op);
@@ -1175,7 +1175,7 @@ std::unique_ptr<Expr> Parser::parseAdditiveExpression()
             for (size_t i = 0; i < subExprCount - 1; i++)
             {
                 BinaryOperatorExpr *op = new BinaryOperatorExpr;
-                op->type = tokenTypeToBinaryOpType(tokens[i]);
+                op->op = tokenTypeToBinaryOpType(tokens[i]);
                 op->left = move(subExprs[i]);
                 op->right = move(subExprs[i + 1]);
                 subExprs[i + 1].reset(op);
@@ -1215,7 +1215,7 @@ std::unique_ptr<Expr> Parser::parseMultiplicativeExpression()
             for (size_t i = 0; i < subExprCount - 1; i++)
             {
                 BinaryOperatorExpr *op = new BinaryOperatorExpr;
-                op->type = tokenTypeToBinaryOpType(tokens[i]);
+                op->op = tokenTypeToBinaryOpType(tokens[i]);
                 op->left = move(subExprs[i]);
                 op->right = move(subExprs[i + 1]);
                 subExprs[i + 1].reset(op);
@@ -1241,13 +1241,13 @@ static const set<int> unaryOperatorFirst =
     Lexer::T_NOT
 };
 
-static UnaryOperatorExpr::Type tokenTypeToUnaryOpType(int tokenType)
+static UnaryOperatorExpr::Op tokenTypeToUnaryOpType(int tokenType)
 {
-    static const map<int, UnaryOperatorExpr::Type> MAP =
+    static const map<int, UnaryOperatorExpr::Op> MAP =
     {
-        { Lexer::T_PLUS,    UnaryOperatorExpr::Type::Positive },
-        { Lexer::T_MINUS,   UnaryOperatorExpr::Type::Negative },
-        { Lexer::T_NOT,     UnaryOperatorExpr::Type::Not }
+        { Lexer::T_PLUS,    UnaryOperatorExpr::Op::Positive },
+        { Lexer::T_MINUS,   UnaryOperatorExpr::Op::Negative },
+        { Lexer::T_NOT,     UnaryOperatorExpr::Op::Not }
     };
 
     auto iter = MAP.find(tokenType);
@@ -1266,7 +1266,7 @@ std::unique_ptr<Expr> Parser::parseUnaryExpression()
     {
         UnaryOperatorExpr *op = new UnaryOperatorExpr;
         parseUnaryOperator();
-        op->type = tokenTypeToUnaryOpType(token(m_index - 1).type);
+        op->op = tokenTypeToUnaryOpType(token(m_index - 1).type);
         op->expr = parseUnaryExpression();
         expr.reset(op);
     }
@@ -1326,7 +1326,7 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
         {
             match(Lexer::T_L_BRACKET);
 
-            unique_ptr<ListSubscriptExpr> lse;
+            unique_ptr<ListSubscriptExpr> lse(new ListSubscriptExpr);
             lse->indexExpr = parseExpression();
 
             subExprs.push_back(unique_ptr<Expr>(lse.release()));
@@ -1660,7 +1660,7 @@ std::unique_ptr<Stmt> Parser::parseExprStatement()
         unique_ptr<Expr> expr;
         if (right)
         {
-            expr.reset(new BinaryOperatorExpr(BinaryOperatorExpr::Type::Assign,
+            expr.reset(new BinaryOperatorExpr(BinaryOperatorExpr::Op::Assign,
                                               move(left), move(right)));
         }
         else

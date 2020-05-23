@@ -49,24 +49,24 @@ ASTNode::~ASTNode()
 }
 
 #define ENUM_ELEMENT(x) { x, #x }
-std::string BinaryOperatorExpr::typeString(BinaryOperatorExpr::Type type)
+std::string BinaryOperatorExpr::typeString(BinaryOperatorExpr::Op type)
 {
-    static const map<Type, string> MAP =
+    static const map<Op, string> MAP =
     {
-        { Type::LogicalAnd, "&&" },
-        { Type::LogicalOr, "||" },
-        { Type::Equal, "==" },
-        { Type::NotEqual, "!=" },
-        { Type::LessThan, "<" },
-        { Type::GreaterThan, ">" },
-        { Type::LessEqual, "<=" },
-        { Type::GreaterEqual, ">=" },
-        { Type::Plus, "+" },
-        { Type::Minus, "-" },
-        { Type::Multiply, "*" },
-        { Type::Divide, "/" },
-        { Type::Remainder, "%" },
-        { Type::Assign, "=" }
+        { Op::LogicalAnd, "&&" },
+        { Op::LogicalOr, "||" },
+        { Op::Equal, "==" },
+        { Op::NotEqual, "!=" },
+        { Op::LessThan, "<" },
+        { Op::GreaterThan, ">" },
+        { Op::LessEqual, "<=" },
+        { Op::GreaterEqual, ">=" },
+        { Op::Plus, "+" },
+        { Op::Minus, "-" },
+        { Op::Multiply, "*" },
+        { Op::Divide, "/" },
+        { Op::Remainder, "%" },
+        { Op::Assign, "=" }
     };
 
     auto iter = MAP.find(type);
@@ -75,13 +75,13 @@ std::string BinaryOperatorExpr::typeString(BinaryOperatorExpr::Type type)
     return iter->second;
 }
 
-string UnaryOperatorExpr::typeString(UnaryOperatorExpr::Type type)
+string UnaryOperatorExpr::typeString(UnaryOperatorExpr::Op type)
 {
-    static const map<Type, string> MAP =
+    static const map<Op, string> MAP =
     {
-        ENUM_ELEMENT(Type::Positive),
-        ENUM_ELEMENT(Type::Negative),
-        ENUM_ELEMENT(Type::Not)
+        ENUM_ELEMENT(Op::Positive),
+        ENUM_ELEMENT(Op::Negative),
+        ENUM_ELEMENT(Op::Not)
     };
 
     auto iter = MAP.find(type);
@@ -125,6 +125,28 @@ TypeInfo::Category TypeInfo::category() const
     return m_category;
 }
 
+bool TypeInfo::assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const
+{
+    if (operator==(*rhs))
+    {
+        return true;
+    }
+    if (rhs->m_category == TypeInfo::Category::Void)
+    {
+        return true;
+    }
+    if (m_category == Category::Point && rhs->m_category == Category::List)
+    {
+        ListTypeInfo *lti = dynamic_cast<ListTypeInfo *>(rhs.get());
+        assert(lti != nullptr);
+        if (lti->elementType()->category() == Category::Int)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 ListTypeInfo::ListTypeInfo(const std::shared_ptr<TypeInfo> &ele)
     : TypeInfo(Category::List)
     , m_elementType(ele)
@@ -137,6 +159,18 @@ string ListTypeInfo::toString() const
     const string elementTypeString = m_elementType->toString();
     const string result = "list<" + elementTypeString + ">";
     return result;
+}
+
+bool ListTypeInfo::assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const
+{
+    if (rhs->category() != Category::List)
+    {
+        return false;
+    }
+
+    ListTypeInfo *lti = dynamic_cast<ListTypeInfo *>(rhs.get());
+    assert(lti != nullptr);
+    return elementType()->assignCompatible(lti->elementType());
 }
 
 CustomTypeInfo::CustomTypeInfo(const string &name)
