@@ -55,7 +55,8 @@ public:
         Float,
         String,
         List,
-        Custom
+        Group,
+        Custom,
     };
 
 public:
@@ -102,6 +103,20 @@ public:
 
 private:
     std::string m_name;
+};
+
+class GroupTypeInfo : public TypeInfo
+{
+public:
+    GroupTypeInfo(const std::string &name, const std::shared_ptr<TypeInfo> &component);
+    std::string name() const { return m_name; }
+    std::shared_ptr<TypeInfo> componentType() const { return m_componentType; }
+
+    std::string toString() const override;
+
+private:
+    std::string m_name;
+    std::shared_ptr<TypeInfo> m_componentType;
 };
 
 struct Expr : public ASTNode
@@ -363,12 +378,29 @@ struct ParamDecl : public ASTNode
 
 struct Stmt : public ASTNode
 {
+public:
+    enum class Category
+    {
+        Invalid,
+        Compound,
+        Decl,
+        If,
+        While,
+        Break,
+        Continue,
+        Return,
+        Expr
+    };
+
+    Stmt(Category cat) : category(cat) {}
     virtual ~Stmt();
+
+    Category category;
 };
 
 struct CompoundStmt : public Stmt
 {
-    explicit CompoundStmt(std::vector<std::unique_ptr<Stmt>> &&sl) : stmtList(move(sl)) {}
+    explicit CompoundStmt(std::vector<std::unique_ptr<Stmt>> &&sl) : Stmt(Category::Compound), stmtList(move(sl)) {}
     void doPrint(int indent) const override
     {
         printf("CompoundStmt\n");
@@ -383,7 +415,7 @@ struct CompoundStmt : public Stmt
 
 struct DeclStmt : public Stmt
 {
-    explicit DeclStmt(std::unique_ptr<VarDecl> &&vd) : decl(std::move(vd)) {}
+    explicit DeclStmt(std::unique_ptr<VarDecl> &&vd) : Stmt(Category::Decl), decl(std::move(vd)) {}
     void doPrint(int indent) const override
     {
         printf("DeclStmt\n");
@@ -398,7 +430,7 @@ struct IfStmt : public Stmt
     IfStmt(std::unique_ptr<Expr> &&cond,
            std::unique_ptr<Stmt> &&ts,
            std::unique_ptr<Stmt> &&es)
-        : condition(move(cond)), thenStmt(move(ts)), elseStmt(move(es))
+        : Stmt(Category::If), condition(move(cond)), thenStmt(move(ts)), elseStmt(move(es))
     {}
     void doPrint(int indent) const override
     {
@@ -419,7 +451,7 @@ struct IfStmt : public Stmt
 struct WhileStmt : public Stmt
 {
     WhileStmt(std::unique_ptr<Expr> &&cond, std::unique_ptr<Stmt> &&bs)
-        : condition(move(cond)), bodyStmt(move(bs))
+        : Stmt(Category::While), condition(move(cond)), bodyStmt(move(bs))
     {}
     void doPrint(int indent) const override
     {
@@ -434,6 +466,7 @@ struct WhileStmt : public Stmt
 
 struct BreakStmt : public Stmt
 {
+    BreakStmt() : Stmt(Category::Break) {}
     void doPrint(int) const override
     {
         printf("BreakStmt\n");
@@ -442,6 +475,7 @@ struct BreakStmt : public Stmt
 
 struct ContinueStmt : public Stmt
 {
+    ContinueStmt() : Stmt(Category::Continue) {}
     void doPrint(int) const override
     {
         printf("ContinueStmt\n");
@@ -450,7 +484,7 @@ struct ContinueStmt : public Stmt
 
 struct ReturnStmt : public Stmt
 {
-    explicit ReturnStmt(std::unique_ptr<Expr> &&re) : returnExpr(move(re)) {}
+    explicit ReturnStmt(std::unique_ptr<Expr> &&re) : Stmt(Category::Return), returnExpr(move(re)) {}
     void doPrint(int indent) const override
     {
         printf("ReturnStmt\n");
@@ -465,7 +499,7 @@ struct ReturnStmt : public Stmt
 
 struct ExprStmt : public Stmt
 {
-    explicit ExprStmt(std::unique_ptr<Expr> &&e) : expr(move(e)) {}
+    explicit ExprStmt(std::unique_ptr<Expr> &&e) : Stmt(Category::Expr), expr(move(e)) {}
     void doPrint(int indent) const override
     {
         printf("ExprStmt\n");
