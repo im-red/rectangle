@@ -44,11 +44,11 @@ bool Parser::parse()
     try
     {
         m_document = parseDocument();
-        m_document->print(0);
     }
     catch (ParseException &e)
     {
         result = false;
+        m_document.reset();
         fprintf(stderr, "%s\n", e.what());
     }
     return result;

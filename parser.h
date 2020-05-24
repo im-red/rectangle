@@ -100,6 +100,15 @@ public:
     bool parse();
     bool parseRule(ParserRule rule, int index);
 
+    void print() const
+    {
+        if (m_document)
+        {
+            m_document->print(0);
+        }
+    }
+    DocumentDecl *document() const { return m_document.get(); }
+
     static std::string parserRuleString(ParserRule rule);
     static std::string parserErrorString(ParserError err);
 
