@@ -13,18 +13,33 @@ pkg_check_modules(GTEST REQUIRED gtest_main)
 include_directories(.)
 include_directories(..)
 
-add_executable(test_all
-    test_lexer.cpp 
+set(RECT_SRCS
     ../lexer.cpp 
     ../lexerkeyword.cpp 
     ../lexertypestring.cpp
-    test_driver.cpp
     ../driver.cpp
-    test_parser.cpp
     ../parser.cpp
     ../parsertypestring.cpp
     ../ast.cpp
     ../option.cpp
+    ../symbol.cpp
+    ../symboltypestring.cpp
 )
-target_link_libraries(test_all ${GTEST_LIBRARIES} pthread)
 
+add_library(common
+    ${RECT_SRCS}
+)
+
+add_executable(test_all
+    test_lexer.cpp 
+    test_driver.cpp
+    test_parser.cpp
+    test_symbol.cpp
+)
+
+add_executable(test_symbol
+    test_symbol.cpp
+)
+
+target_link_libraries(test_all common ${GTEST_LIBRARIES} pthread)
+target_link_libraries(test_symbol common ${GTEST_LIBRARIES} pthread)

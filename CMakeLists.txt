@@ -17,4 +17,6 @@ add_executable(rectangle
     parsertypestring.cpp
     ast.cpp
     option.cpp
+    symbol.cpp
+    symboltypestring.cpp
 )

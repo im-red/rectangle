@@ -20,17 +20,17 @@ def Rectangle {
         r.y = y;
         r.width = width;
         r.height = height;
-        r.fill = color;
+        r.fill_color = color;
         r.stroke_width = border.width;
-        r.stroke = border.color;
+        r.stroke_color = border.color;
         r.stroke_dasharray = getDasharray(border.type);
         printString(r.stroke_dasharray);
         drawRect(r);
     }
     string getDasharray(int type) {
-        if (border.type == Solid) {
+        if (type == Solid) {
             return "";
-        } else if (border.type == Dot) {
+        } else if (type == Dot) {
             return "5,5";
         } else {
             return "2,1";
