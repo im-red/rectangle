@@ -870,7 +870,17 @@ void SymbolVisitor::visitHeader(FunctionDecl *fd)
 {
     assert(fd != nullptr);
 
-    shared_ptr<Symbol> methodSym(new Symbol(Symbol::Category::Method, fd->name, fd->returnType));
+    shared_ptr<Scope> componentScope = curScope();
+    shared_ptr<Symbol> componentSymbol = dynamic_pointer_cast<Symbol>(componentScope);
+    assert(componentSymbol);
+
+    vector<shared_ptr<TypeInfo>> paramTypes;
+    for (auto &p : fd->paramList)
+    {
+        paramTypes.push_back(p->type);
+    }
+
+    shared_ptr<Symbol> methodSym(new MethodSymbol(fd->name, fd->returnType, componentSymbol, paramTypes));
     curScope()->define(methodSym);
 }
 

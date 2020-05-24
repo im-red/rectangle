@@ -81,6 +81,26 @@ private:
     std::shared_ptr<TypeInfo> m_typeInfo;
 };
 
+class MethodSymbol : public Symbol
+{
+public:
+    MethodSymbol(const std::string &name,
+                 const std::shared_ptr<TypeInfo> &ti,
+                 const std::shared_ptr<Symbol> &componentSymbol,
+                 const std::vector<std::shared_ptr<TypeInfo>> &paramTypes)
+        : Symbol(Symbol::Category::Method, name, ti)
+        , m_componentSymbol(componentSymbol)
+        , m_paramTypes(paramTypes)
+    {}
+
+    std::shared_ptr<Symbol> componentSymbol() const { return m_componentSymbol; }
+    std::vector<std::shared_ptr<TypeInfo>> paramTypes() const { return m_paramTypes; }
+
+private:
+    std::shared_ptr<Symbol> m_componentSymbol;
+    std::vector<std::shared_ptr<TypeInfo>> m_paramTypes;
+};
+
 class Scope
 {
 public:
