@@ -550,14 +550,13 @@ void SymbolVisitor::visit(CallExpr *e)
         {
             throw SymbolException("visit CallExpr exception: No symbol for typeName: " + typeName);
         }
-        if (!instanceTypeSymbol->isScope())
+        std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
+        if (!scopeSym)
         {
             throw SymbolException("visit CallExpr exception: " + typeName + " is a "
                                   + Symbol::symbolCategoryString(instanceTypeSymbol->category())
                                   + ", doesn't contains method");
         }
-        std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
-        assert(scopeSym != nullptr);
         std::shared_ptr<Symbol> method = scopeSym->resolve(m->name);
         if (!method)
         {
@@ -635,14 +634,14 @@ void SymbolVisitor::visit(MemberExpr *e)
         }
     }
 
-    if (!instanceTypeSymbol->isScope())
+    std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
+    if (!scopeSym)
     {
         throw SymbolException("visit MemberExpr exception: " + typeString + " is a "
                               + Symbol::symbolCategoryString(instanceTypeSymbol->category())
                               + ", doesn't contains member");
     }
-    std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
-    assert(scopeSym != nullptr);
+
     std::shared_ptr<Symbol> member = scopeSym->resolve(e->name);
     if (!member)
     {
