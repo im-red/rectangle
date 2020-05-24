@@ -51,31 +51,6 @@ public:
     Symbol(Category cat, const std::string &n, std::shared_ptr<TypeInfo> ti = std::shared_ptr<TypeInfo>());
     virtual ~Symbol();
 
-    bool hasType() const
-    {
-        if (m_category == Category::Variable
-                || m_category == Category::PropertyGroup
-                || m_category == Category::Property
-                || m_category == Category::Member
-                || m_category == Category::Method
-                || m_category == Category::InstanceId
-                || m_category == Category::Function)
-        {
-            return true;
-        }
-        return false;
-    }
-    bool isScope() const
-    {
-        if (m_category == Category::Struct
-                || m_category == Category::Component
-                || m_category == Category::PropertyGroup
-                || m_category == Category::InstanceId)
-        {
-            return true;
-        }
-        return false;
-    }
     std::string symbolString() const
     {
         constexpr int BUF_LEN = 200;
