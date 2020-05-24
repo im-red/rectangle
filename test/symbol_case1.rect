@@ -1,0 +1,15 @@
+def Rectangle {
+    enum LineType {
+        Solid,
+        Dot,
+        Dash
+    }
+    int border.type: Solid
+    void draw() {
+        Rectangle r;
+        getDasharray(r.border.type);
+    }
+    string getDasharray(int type) {
+        return "";
+    }
+}

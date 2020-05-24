@@ -14,7 +14,7 @@ using namespace std;
 
 TEST(symbol, DEFINATION_RECT)
 {
-    ifstream t("../defination.rect");
+    ifstream t("../symbol_case1.rect");
     stringstream buffer;
     buffer << t.rdbuf();
     string code = buffer.str();

@@ -101,6 +101,22 @@ private:
     std::vector<std::shared_ptr<TypeInfo>> m_paramTypes;
 };
 
+class FunctionSymbol : public Symbol
+{
+public:
+    FunctionSymbol(const std::string &name,
+                   const std::shared_ptr<TypeInfo> &ti,
+                   const std::vector<std::shared_ptr<TypeInfo>> &paramTypes)
+        : Symbol(Symbol::Category::Function, name, ti)
+        , m_paramTypes(paramTypes)
+    {}
+
+    std::vector<std::shared_ptr<TypeInfo>> paramTypes() const { return m_paramTypes; }
+
+private:
+    std::vector<std::shared_ptr<TypeInfo>> m_paramTypes;
+};
+
 class Scope
 {
 public:

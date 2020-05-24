@@ -23,6 +23,8 @@
 
 using namespace std;
 
+constexpr int BUF_LEN = 512;
+
 Symbol::Symbol(Category cat, const string &n, std::shared_ptr<TypeInfo> ti)
     : m_category(cat)
     , m_name(n)
@@ -126,12 +128,16 @@ void SymbolVisitor::initGlobalScope()
     }
 
     {
-        shared_ptr<Symbol> printString(new Symbol(Symbol::Category::Function, "printString", make_shared<TypeInfo>(TypeInfo::Category::Void)));
+        shared_ptr<TypeInfo> stringType(new TypeInfo(TypeInfo::Category::String));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, stringType);
+        shared_ptr<Symbol> printString(new FunctionSymbol("printString", make_shared<TypeInfo>(TypeInfo::Category::Void), paramTypes));
         curScope()->define(printString);
     }
 
     {
-        shared_ptr<Symbol> drawRect(new Symbol(Symbol::Category::Function, "drawRect", make_shared<TypeInfo>(TypeInfo::Category::Void)));
+        shared_ptr<TypeInfo> rectType(new CustomTypeInfo("rect"));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, rectType);
+        shared_ptr<Symbol> drawRect(new FunctionSymbol("drawRect", make_shared<TypeInfo>(TypeInfo::Category::Void), paramTypes));
         curScope()->define(drawRect);
     }
 }
@@ -514,25 +520,43 @@ void SymbolVisitor::visit(CallExpr *e)
         throw SymbolException("visit CallExpr exception: CallExpr can only be used in LocalScope or FunctionScope");
     }
 
+    string functionName;
+    vector<shared_ptr<TypeInfo>> paramTypes;
+
     if (e->funcExpr->category == Expr::Category::Ref)
     {
         RefExpr *r = dynamic_cast<RefExpr *>(e->funcExpr.get());
         assert(r != nullptr);
-        std::shared_ptr<Symbol> f = curScope()->resolve(r->name);
-        if (!f)
+        std::shared_ptr<Symbol> func = curScope()->resolve(r->name);
+        if (!func)
         {
             throw SymbolException("visit CallExpr exception: No symbol: " + r->name);
         }
-        if (f->category() != Symbol::Category::Function
-                && f->category() != Symbol::Category::Method)
+
+        if (func->category() == Symbol::Category::Function)
+        {
+            shared_ptr<FunctionSymbol> funcSymbol = dynamic_pointer_cast<FunctionSymbol>(func);
+            assert(funcSymbol);
+            functionName = funcSymbol->name();
+            paramTypes = funcSymbol->paramTypes();
+        }
+        else if (func->category() == Symbol::Category::Method)
+        {
+            shared_ptr<MethodSymbol> methodSymbol = dynamic_pointer_cast<MethodSymbol>(func);
+            assert(methodSymbol);
+            functionName = methodSymbol->name();
+            paramTypes = methodSymbol->paramTypes();
+        }
+        else
         {
             throw SymbolException("visit CallExpr exception: "
                                   + r->name
                                   + " is a "
-                                  + Symbol::symbolCategoryString(f->category()));
+                                  + Symbol::symbolCategoryString(func->category()));
         }
-        printf("ref %s\n", f->symbolString().c_str());
-        e->funcExpr->typeInfo = f->typeInfo();
+
+        printf("ref %s\n", func->symbolString().c_str());
+        e->funcExpr->typeInfo = func->typeInfo();
     }
     else // Expr::Category::Member
     {
@@ -562,6 +586,22 @@ void SymbolVisitor::visit(CallExpr *e)
         {
             throw SymbolException("visit CallExpr exception: " + typeName + " doesn't contains method named " + m->name);
         }
+
+        if (method->category() == Symbol::Category::Method)
+        {
+            shared_ptr<MethodSymbol> methodSymbol = dynamic_pointer_cast<MethodSymbol>(method);
+            assert(methodSymbol);
+            functionName = methodSymbol->name();
+            paramTypes = methodSymbol->paramTypes();
+        }
+        else
+        {
+            throw SymbolException("visit CallExpr exception: "
+                                  + m->name
+                                  + " is a "
+                                  + Symbol::symbolCategoryString(method->category()));
+        }
+
         printf("ref %s\n", method->symbolString().c_str());
         e->funcExpr->typeInfo = method->typeInfo();
     }
@@ -569,6 +609,30 @@ void SymbolVisitor::visit(CallExpr *e)
     for (auto &p : e->paramList)
     {
         visit(p.get());
+    }
+
+    if (paramTypes.size() != e->paramList.size())
+    {
+        char buf[BUF_LEN];
+        snprintf(buf, sizeof(buf), "%s requires %d parameters but is passed %d parameters",
+                 functionName.c_str(),
+                 static_cast<int>(paramTypes.size()),
+                 static_cast<int>(e->paramList.size()));
+        throw SymbolException("visit CallExpr exception: " + string(buf));
+    }
+
+    for (size_t i = 0; i < paramTypes.size(); i++)
+    {
+        if (*paramTypes[i] != *(e->paramList[i]->typeInfo))
+        {
+            char buf[BUF_LEN];
+            snprintf(buf, sizeof(buf), "%s requires %s in %dth parameters but is passed %s",
+                     functionName.c_str(),
+                     paramTypes[i]->toString().c_str(),
+                     static_cast<int>(i),
+                     e->paramList[i]->typeInfo->toString().c_str());
+            throw SymbolException("visit CallExpr exception: " + string(buf));
+        }
     }
 
     e->typeInfo = e->funcExpr->typeInfo;
