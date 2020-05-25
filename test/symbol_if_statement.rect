@@ -1,0 +1,12 @@
+def Rectangle {
+    int x: 0
+    void draw() {
+        if (x == 0) {
+            printString("x == 0");
+        } else if (x <= 1) {
+            printString("x <= 1");
+        } else {
+            printString("other case");
+        }
+    }
+}

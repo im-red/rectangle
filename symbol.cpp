@@ -901,6 +901,11 @@ void SymbolVisitor::visit(IfStmt *is)
     assert(is != nullptr);
 
     visit(is->condition.get());
+    if (is->condition->typeInfo->category() != TypeInfo::Category::Int)
+    {
+        throw SymbolException("IfStmt", "if statement requires type of condition expression is int, but actually "
+                                        + is->condition->typeInfo->toString());
+    }
     visit(is->thenStmt.get());
     if (is->elseStmt)
     {
