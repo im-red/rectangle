@@ -16,6 +16,7 @@
  ********************************************************************************/
 
 #include "symbol.h"
+#include "option.h"
 
 #include <utility>
 
@@ -64,7 +65,7 @@ void SymbolVisitor::setDocuments(std::vector<DocumentDecl *> documents)
 
     m_scopes.clear();
     m_symbols.clear();
-    m_curScope = nullptr;
+    m_curScope.reset();
 
     initGlobalScope();
 }
@@ -74,32 +75,28 @@ std::shared_ptr<Scope> SymbolVisitor::curScope()
     return m_curScope;
 }
 
-void SymbolVisitor::pushScope(std::shared_ptr<Scope> scope)
+void SymbolVisitor::pushScope(const std::shared_ptr<Scope> &scope)
 {
     m_curScope = scope;
+    if (option::verbose)
+    {
+        fprintf(stderr, "pushScope: %p\n", static_cast<void *>(m_curScope.get()));
+    }
 }
 
 void SymbolVisitor::popScope()
 {
     m_curScope = m_curScope->parent();
-}
-
-void SymbolVisitor::save(std::shared_ptr<Symbol> &symbol)
-{
-    m_symbols.push_back(symbol);
-}
-
-void SymbolVisitor::save(std::shared_ptr<Scope> &scope)
-{
-    m_scopes.push_back(scope);
+    if (option::verbose)
+    {
+        fprintf(stderr, "popScope: %p\n", static_cast<void *>(m_curScope.get()));
+    }
 }
 
 void SymbolVisitor::initGlobalScope()
 {
-    {
-        shared_ptr<Scope> globalScope(new Scope(Scope::Category::Global, nullptr));
-        pushScope(globalScope);
-    }
+    shared_ptr<Scope> globalScope(new Scope(Scope::Category::Global, nullptr));
+    pushScope(globalScope);
 
     {
         shared_ptr<Symbol> rect(new ScopeSymbol(Symbol::Category::Struct, "rect", Scope::Category::Struct, curScope()));
@@ -146,14 +143,14 @@ void SymbolVisitor::visit()
 {
     for (auto doc : m_documents)
     {
-        if (doc->type == DocumentDecl::Type::Defination)
+        if (doc && doc->type == DocumentDecl::Type::Defination)
         {
             visit(doc);
         }
     }
     for (auto doc : m_documents)
     {
-        if (doc->type == DocumentDecl::Type::Instance)
+        if (doc && doc->type == DocumentDecl::Type::Instance)
         {
             visit(doc);
         }
@@ -200,7 +197,6 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
         }
 
         popScope();
-        save(sym);
     }
 }
 

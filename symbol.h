@@ -168,11 +168,8 @@ public:
 
 private:
     std::shared_ptr<Scope> curScope();
-    void pushScope(std::shared_ptr<Scope> scope);
+    void pushScope(const std::shared_ptr<Scope> &scope);
     void popScope();
-
-    void save(std::shared_ptr<Symbol> &symbol);
-    void save(std::shared_ptr<Scope> &scope);
 
     void initGlobalScope();
 

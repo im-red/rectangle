@@ -1,5 +1,6 @@
 #include "symbol.h"
 #include "parser.h"
+#include "option.h"
 
 #include <gtest/gtest.h>
 
@@ -36,6 +37,7 @@ TEST(symbol, METHOD_CALL)
 
 TEST(symbol, IF_STATEMENT)
 {
+    option::verbose = true;
     ifstream t("../symbol_if_statement.rect");
     stringstream buffer;
     buffer << t.rdbuf();
