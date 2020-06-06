@@ -347,7 +347,7 @@ void Parser::parseMemberItem(unique_ptr<ComponentDefinationDecl> &defination)
         }
         else if (functionDecl)
         {
-            defination->functionList.push_back(move(functionDecl));
+            defination->methodList.push_back(move(functionDecl));
         }
         else
         {

@@ -192,11 +192,11 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
         {
             visit(p.get());
         }
-        for (auto &f : cdd->functionList)
+        for (auto &f : cdd->methodList)
         {
             visitHeader(f.get());
         }
-        for (auto &f : cdd->functionList)
+        for (auto &f : cdd->methodList)
         {
             visitBody(f.get());
         }
@@ -671,13 +671,13 @@ void SymbolVisitor::visit(MemberExpr *e)
         shared_ptr<Symbol> componentSym = curScope()->resolve(componentName);
         if (!componentSym)
         {
-            throw SymbolException("MemberExpr", "No symbol for componentName " + componentName);
+            throw SymbolException("MemberExpr",
+                                  "No symbol for componentName " + componentName);
         }
         if (componentSym->category() != Symbol::Category::Component)
         {
             throw SymbolException("MemberExpr",
-                                  componentName
-                                  + " is not a component symbol");
+                                  componentName + " is not a component symbol");
         }
         shared_ptr<ScopeSymbol> componentScope = dynamic_pointer_cast<ScopeSymbol>(componentSym);
         assert(componentScope != nullptr);

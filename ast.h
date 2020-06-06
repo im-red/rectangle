@@ -570,7 +570,7 @@ struct ComponentDefinationDecl : public ASTNode
         {
             p->print(indent + 1);
         }
-        for (auto &p : functionList)
+        for (auto &p : methodList)
         {
             p->print(indent + 1);
         }
@@ -582,7 +582,7 @@ struct ComponentDefinationDecl : public ASTNode
 
     std::string name;
     std::vector<std::unique_ptr<PropertyDecl>> propertyList;
-    std::vector<std::unique_ptr<FunctionDecl>> functionList;
+    std::vector<std::unique_ptr<FunctionDecl>> methodList;
     std::vector<std::unique_ptr<EnumDecl>> enumList;
 };
 
