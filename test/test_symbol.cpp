@@ -1,6 +1,7 @@
 #include "symbol.h"
 #include "parser.h"
 #include "option.h"
+#include "symbolvisitor.h"
 
 #include <gtest/gtest.h>
 

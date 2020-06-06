@@ -23,6 +23,7 @@ set(RECT_SRCS
     ../ast.cpp
     ../option.cpp
     ../symbol.cpp
+    ../symbolvisitor.cpp
     ../symboltypestring.cpp
     ../util.cpp
 )
