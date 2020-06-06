@@ -139,6 +139,17 @@ public:
     Scope(Category cat, std::shared_ptr<Scope> p);
     virtual ~Scope();
 
+    virtual std::string scopeString() const
+    {
+        constexpr int BUF_LEN = 200;
+        char buf[BUF_LEN];
+        snprintf(buf, sizeof(buf), "[%d] %s (%s)",
+                 m_scopeId,
+                 scopeCategoryString(m_category).c_str(),
+                 m_scopeName.c_str());
+        return std::string(buf);
+    }
+
     std::shared_ptr<Scope> parent() const { return m_parent; }
     Category category() const { return m_category; }
 
@@ -146,10 +157,21 @@ public:
 
     void define(const std::shared_ptr<Symbol> &sym);
 
+    std::string scopeName() const;
+    void setScopeName(const std::string &scopeName);
+
+    int scopeId() const;
+    void setScopeId(int scopeId);
+
+    static void resetNextScopeId() { m_nextScopeId = 0; }
+
 private:
     std::map<std::string, std::shared_ptr<Symbol>> m_symbols;
     std::shared_ptr<Scope> m_parent = nullptr;
     Category m_category = Category::Invalid;
+    std::string m_scopeName = "anonymous";
+    int m_scopeId = -1;
+    static int m_nextScopeId;
 };
 
 class ScopeSymbol : public Symbol, public Scope
@@ -208,4 +230,7 @@ private:
     std::vector<std::shared_ptr<Scope>> m_scopes;
     std::vector<std::shared_ptr<Symbol>> m_symbols;
     std::shared_ptr<Scope> m_curScope = nullptr;
+
+    bool m_analyzingPropertyDep = false;
+    bool m_analyzingBindingDep = false;
 };

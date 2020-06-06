@@ -15,6 +15,7 @@ using namespace std;
 
 TEST(symbol, METHOD_CALL)
 {
+    option::verbose = true;
     ifstream t("../symbol_method_call.rect");
     stringstream buffer;
     buffer << t.rdbuf();

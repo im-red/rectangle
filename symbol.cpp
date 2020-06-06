@@ -66,6 +66,7 @@ void SymbolVisitor::setDocuments(std::vector<DocumentDecl *> documents)
     m_scopes.clear();
     m_symbols.clear();
     m_curScope.reset();
+    Scope::resetNextScopeId();
 
     initGlobalScope();
 }
@@ -80,17 +81,21 @@ void SymbolVisitor::pushScope(const std::shared_ptr<Scope> &scope)
     m_curScope = scope;
     if (option::verbose)
     {
-        fprintf(stderr, "pushScope: %p\n", static_cast<void *>(m_curScope.get()));
+        fprintf(stderr, "pushScope: %p(%s)\n",
+                static_cast<void *>(m_curScope.get()),
+                m_curScope->scopeString().c_str());
     }
 }
 
 void SymbolVisitor::popScope()
 {
-    m_curScope = m_curScope->parent();
     if (option::verbose)
     {
-        fprintf(stderr, "popScope: %p\n", static_cast<void *>(m_curScope.get()));
+        fprintf(stderr, "popScope: %p(%s)\n",
+                static_cast<void *>(m_curScope.get()),
+                m_curScope->scopeString().c_str());
     }
+    m_curScope = m_curScope->parent();
 }
 
 void SymbolVisitor::initGlobalScope()
@@ -954,6 +959,7 @@ void SymbolVisitor::visitBody(FunctionDecl *fd)
     assert(fd != nullptr);
 
     shared_ptr<Scope> methodScope(new Scope(Scope::Category::Method, curScope()));
+    methodScope->setScopeName(fd->name);
     pushScope(methodScope);
 
     for (auto &p : fd->paramList)
@@ -983,9 +989,12 @@ void SymbolVisitor::visit(EnumDecl *ed)
     }
 }
 
+int Scope::m_nextScopeId = 0;
+
 Scope::Scope(Category cat, std::shared_ptr<Scope> p)
     : m_parent(p)
     , m_category(cat)
+    , m_scopeId(m_nextScopeId++)
 {
 
 }
@@ -1020,9 +1029,29 @@ void Scope::define(const std::shared_ptr<Symbol> &sym)
     m_symbols[sym->name()] = sym;
 }
 
+std::string Scope::scopeName() const
+{
+    return m_scopeName;
+}
+
+void Scope::setScopeName(const std::string &scopeName)
+{
+    m_scopeName = scopeName;
+}
+
+int Scope::scopeId() const
+{
+    return m_scopeId;
+}
+
+void Scope::setScopeId(int scopeId)
+{
+    m_scopeId = scopeId;
+}
+
 ScopeSymbol::ScopeSymbol(Symbol::Category symCat, const string &name, Scope::Category scopeCat, std::shared_ptr<Scope> parent, const std::shared_ptr<TypeInfo> &ti)
     : Symbol(symCat, name, ti)
     , Scope(scopeCat, parent)
 {
-
+    setScopeName(name);
 }
