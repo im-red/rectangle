@@ -22,7 +22,16 @@
 #include <string>
 #include <map>
 
-class Scope;
+class SymbolException : public std::runtime_error
+{
+public:
+    explicit SymbolException(const std::string &s)
+        : std::runtime_error(s)
+    {}
+    SymbolException(const std::string &ast, const std::string &s)
+        : SymbolException("visit " + ast + " exception: " + s)
+    {}
+};
 
 class Symbol
 {
