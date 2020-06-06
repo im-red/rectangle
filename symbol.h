@@ -48,37 +48,21 @@ public:
 public:
     static std::string symbolCategoryString(Category m_category);
 
-    Symbol(Category cat, const std::string &n, std::shared_ptr<TypeInfo> ti = std::shared_ptr<TypeInfo>());
+    Symbol(Category cat, const std::string &n, std::shared_ptr<TypeInfo> ti = std::shared_ptr<TypeInfo>(), ASTNode *ast = nullptr);
     virtual ~Symbol();
 
-    std::string symbolString() const
-    {
-        constexpr int BUF_LEN = 200;
-        char buf[BUF_LEN];
-        if (m_typeInfo)
-        {
-            snprintf(buf, sizeof(buf), "%s <%s:%s>",
-                     symbolCategoryString(m_category).c_str(),
-                     m_name.c_str(),
-                     m_typeInfo->toString().c_str());
-        }
-        else
-        {
-            snprintf(buf, sizeof(buf), "%s <%s>",
-                     symbolCategoryString(m_category).c_str(),
-                     m_name.c_str());
-        }
-        return std::string(buf);
-    }
+    std::string symbolString() const;
 
     Category category() const;
     std::string name() const;
     std::shared_ptr<TypeInfo> typeInfo() const;
+    ASTNode *astNode() const;
 
 private:
     Category m_category = Category::Invalid;
     std::string m_name;
     std::shared_ptr<TypeInfo> m_typeInfo;
+    ASTNode *m_astNode = nullptr;
 };
 
 class MethodSymbol : public Symbol
@@ -177,7 +161,9 @@ private:
 class ScopeSymbol : public Symbol, public Scope
 {
 public:
-    ScopeSymbol(Symbol::Category symCat, const std::string &name, Scope::Category scopeCat, std::shared_ptr<Scope> parent, const std::shared_ptr<TypeInfo> &ti = std::shared_ptr<TypeInfo>());
+    ScopeSymbol(Symbol::Category symCat, const std::string &name,
+                Scope::Category scopeCat, std::shared_ptr<Scope> parent,
+                const std::shared_ptr<TypeInfo> &ti = std::shared_ptr<TypeInfo>());
 };
 
 class SymbolVisitor
@@ -234,5 +220,6 @@ private:
     std::shared_ptr<Scope> m_curScope = nullptr;
 
     bool m_analyzingPropertyDep = false;
+    int m_curProperty = -1;
     bool m_analyzingBindingDep = false;
 };

@@ -4,6 +4,11 @@ namespace option
 {
 
 extern bool verbose;
+extern bool showAst;
+extern bool showSymbolDef;
+extern bool showSymbolRef;
+extern bool showPropertyDep;
+extern bool showScopeStack;
 
 }
 

@@ -15,7 +15,7 @@ using namespace std;
 
 TEST(symbol, METHOD_CALL)
 {
-    option::verbose = true;
+    option::showPropertyDep = true;
     ifstream t("../symbol_method_call.rect");
     stringstream buffer;
     buffer << t.rdbuf();
@@ -38,7 +38,7 @@ TEST(symbol, METHOD_CALL)
 
 TEST(symbol, IF_STATEMENT)
 {
-    option::verbose = true;
+    option::showPropertyDep = true;
     ifstream t("../symbol_if_statement.rect");
     stringstream buffer;
     buffer << t.rdbuf();
@@ -61,7 +61,7 @@ TEST(symbol, IF_STATEMENT)
 
 TEST(symbol, PROPERTY_DEP)
 {
-    option::verbose = true;
+    option::showPropertyDep = true;
     ifstream t("../symbol_property_dep.rect");
     stringstream buffer;
     buffer << t.rdbuf();

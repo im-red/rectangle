@@ -3,6 +3,10 @@ def Rectangle {
     int y: x
     int width: height
     int height: 100
+    int border.test: border.width
+    int border.width: 10
+    string border.color: "#000000"
+    list<int> foo: { x, y, width, height, border.test, border.width }
     void draw() {
     }
 }

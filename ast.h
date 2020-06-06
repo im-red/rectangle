@@ -355,6 +355,9 @@ struct PropertyDecl : public ASTNode
     std::string name;
     std::shared_ptr<TypeInfo> type;
     std::unique_ptr<Expr> expr;
+
+    int index = -1;
+    int initSequence = -1;
 };
 
 struct GroupedPropertyDecl : public PropertyDecl
