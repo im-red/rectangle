@@ -765,7 +765,10 @@ void SymbolVisitor::visit(MemberExpr *e)
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 
-        util::condOutput(option::showPropertyDep, "property [%d] -> [%d]\n", m_curProperty, pd->index);
+        assert(m_curAnalyzingProperty != nullptr);
+        m_curAnalyzingProperty->out.push_back(pd->index);
+        pd->in.push_back(m_curAnalyzingProperty->index);
+        util::condOutput(option::showPropertyDep, "property [%d] -> [%d]\n", m_curAnalyzingProperty->index, pd->index);
     }
 }
 
@@ -789,7 +792,10 @@ void SymbolVisitor::visit(RefExpr *e)
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 
-        util::condOutput(option::showPropertyDep, "property [%d] -> [%d]\n", m_curProperty, pd->index);
+        assert(m_curAnalyzingProperty != nullptr);
+        m_curAnalyzingProperty->out.push_back(pd->index);
+        pd->in.push_back(m_curAnalyzingProperty->index);
+        util::condOutput(option::showPropertyDep, "property [%d] -> [%d]\n", m_curAnalyzingProperty->index, pd->index);
     }
 }
 
@@ -875,7 +881,7 @@ void SymbolVisitor::visitPropertyInitialization(PropertyDecl *pd)
     assert(pd != nullptr);
 
     m_analyzingPropertyDep = true;
-    m_curProperty = pd->index;
+    m_curAnalyzingProperty = pd;
 
     GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
     if (gpd)

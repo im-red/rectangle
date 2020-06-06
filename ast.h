@@ -350,6 +350,8 @@ struct PropertyDecl : public ASTNode
 
     int index = -1;
     int initSequence = -1;
+    std::vector<int> out;
+    std::vector<int> in;
 };
 
 struct GroupedPropertyDecl : public PropertyDecl

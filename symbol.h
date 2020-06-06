@@ -229,6 +229,6 @@ private:
     std::shared_ptr<Scope> m_curScope = nullptr;
 
     bool m_analyzingPropertyDep = false;
-    int m_curProperty = -1;
+    PropertyDecl *m_curAnalyzingProperty = nullptr;
     bool m_analyzingBindingDep = false;
 };
