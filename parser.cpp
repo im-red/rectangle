@@ -17,12 +17,13 @@
 
 #include "parser.h"
 #include "option.h"
+#include "util.h"
 
 #include <assert.h>
 
 using namespace std;
 
-static const int BUF_LEN = 512;
+constexpr int BUF_LEN = 512;
 
 Parser::Parser()
 {
@@ -368,10 +369,7 @@ bool Parser::tryMemberItemAlt1()
     }
     catch (ParseException &e)
     {
-        if (option::verbose)
-        {
-            fprintf(stderr, "tryMemberItemAlt1 fail: %s\n", e.what());
-        }
+        util::condOutput(option::showLLTry, "tryMemberItemAlt1 fail: %s\n", e.what());
         result = false;
     }
 
@@ -393,10 +391,7 @@ bool Parser::tryMemberItemAlt2()
     }
     catch (ParseException &e)
     {
-        if (option::verbose)
-        {
-            fprintf(stderr, "tryMemberItemAlt2 fail: %s\n", e.what());
-        }
+        util::condOutput(option::showLLTry, "tryMemberItemAlt2 fail: %s\n", e.what());
         result = false;
     }
 
@@ -816,10 +811,7 @@ bool Parser::tryBlockItemAlt1()
     }
     catch (ParseException &e)
     {
-        if (option::verbose)
-        {
-            fprintf(stderr, "tryBlockItemAlt1 fail: %s\n", e.what());
-        }
+        util::condOutput(option::showLLTry, "tryBlockItemAlt1 fail: %s\n", e.what());
         result = false;
     }
 
@@ -841,10 +833,7 @@ bool Parser::tryBlockItemAlt2()
     }
     catch (ParseException &e)
     {
-        if (option::verbose)
-        {
-            fprintf(stderr, "tryBlockItemAlt2 fail: %s\n", e.what());
-        }
+        util::condOutput(option::showLLTry, "tryBlockItemAlt2 fail: %s\n", e.what());
         result = false;
     }
 

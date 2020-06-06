@@ -17,6 +17,7 @@
 
 #include "symbol.h"
 #include "option.h"
+#include "util.h"
 
 #include <utility>
 
@@ -32,10 +33,7 @@ Symbol::Symbol(Category cat, const string &n, std::shared_ptr<TypeInfo> ti, ASTN
     , m_typeInfo(ti)
     , m_astNode(ast)
 {
-    if (option::showSymbolDef)
-    {
-        fprintf(stderr, "def %s\n", symbolString().c_str());
-    }
+    util::condOutput(option::showSymbolDef, "def %s\n", symbolString().c_str());
 }
 
 Symbol::~Symbol()
@@ -124,22 +122,16 @@ std::shared_ptr<Scope> SymbolVisitor::curScope()
 void SymbolVisitor::pushScope(const std::shared_ptr<Scope> &scope)
 {
     m_curScope = scope;
-    if (option::showScopeStack)
-    {
-        fprintf(stderr, "pushScope: %p(%s)\n",
-                static_cast<void *>(m_curScope.get()),
-                m_curScope->scopeString().c_str());
-    }
+    util::condOutput(option::showScopeStack, "pushScope: %p(%s)\n",
+                     static_cast<void *>(m_curScope.get()),
+                     m_curScope->scopeString().c_str());
 }
 
 void SymbolVisitor::popScope()
 {
-    if (option::showScopeStack)
-    {
-        fprintf(stderr, "popScope: %p(%s)\n",
-                static_cast<void *>(m_curScope.get()),
-                m_curScope->scopeString().c_str());
-    }
+    util::condOutput(option::showScopeStack, "popScope: %p(%s)\n",
+                     static_cast<void *>(m_curScope.get()),
+                     m_curScope->scopeString().c_str());
     m_curScope = m_curScope->parent();
 }
 
@@ -606,10 +598,7 @@ void SymbolVisitor::visit(CallExpr *e)
                                   + Symbol::symbolCategoryString(func->category()));
         }
 
-        if (option::showSymbolRef)
-        {
-            fprintf(stderr, "ref %s\n", func->symbolString().c_str());
-        }
+        util::condOutput(option::showSymbolRef, "ref %s\n", func->symbolString().c_str());
         e->funcExpr->typeInfo = func->typeInfo();
     }
     else // Expr::Category::Member
@@ -656,10 +645,7 @@ void SymbolVisitor::visit(CallExpr *e)
                                   + Symbol::symbolCategoryString(method->category()));
         }
 
-        if (option::showSymbolRef)
-        {
-            fprintf(stderr, "ref %s\n", method->symbolString().c_str());
-        }
+        util::condOutput(option::showSymbolRef, "ref %s\n", method->symbolString().c_str());
         e->funcExpr->typeInfo = method->typeInfo();
     }
 
@@ -769,10 +755,7 @@ void SymbolVisitor::visit(MemberExpr *e)
         throw SymbolException("MemberExpr", typeString + " doesn't contains member named " + e->name);
     }
 
-    if (option::showSymbolRef)
-    {
-        fprintf(stderr, "ref %s\n", member->symbolString().c_str());
-    }
+    util::condOutput(option::showSymbolRef, "ref %s\n", member->symbolString().c_str());
     e->typeInfo = member->typeInfo();
 
     if (member->category() == Symbol::Category::Property && m_analyzingPropertyDep)
@@ -782,10 +765,7 @@ void SymbolVisitor::visit(MemberExpr *e)
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 
-        if (option::showPropertyDep)
-        {
-            fprintf(stderr, "property [%d] -> [%d]\n", m_curProperty, pd->index);
-        }
+        util::condOutput(option::showPropertyDep, "property [%d] -> [%d]\n", m_curProperty, pd->index);
     }
 }
 
@@ -799,10 +779,7 @@ void SymbolVisitor::visit(RefExpr *e)
         throw SymbolException("RefExpr", "No symbol named " + e->name);
     }
 
-    if (option::showSymbolRef)
-    {
-        fprintf(stderr, "ref %s\n", sym->symbolString().c_str());
-    }
+    util::condOutput(option::showSymbolRef, "ref %s\n", sym->symbolString().c_str());
     e->typeInfo = sym->typeInfo();
 
     if (sym->category() == Symbol::Category::Property && m_analyzingPropertyDep)
@@ -812,10 +789,7 @@ void SymbolVisitor::visit(RefExpr *e)
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 
-        if (option::showPropertyDep)
-        {
-            fprintf(stderr, "property [%d] -> [%d]\n", m_curProperty, pd->index);
-        }
+        util::condOutput(option::showPropertyDep, "property [%d] -> [%d]\n", m_curProperty, pd->index);
     }
 }
 
@@ -841,10 +815,7 @@ void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
         shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, pd->type, pd));
         curScope()->define(propertySym);
 
-        if (option::showPropertyDep)
-        {
-            fprintf(stderr, "property [%d] %s\n", pd->index, propertySym->symbolString().c_str());
-        }
+        util::condOutput(option::showPropertyDep, "property [%d] %s\n", pd->index, propertySym->symbolString().c_str());
     }
 }
 
@@ -864,18 +835,12 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
             // the group is defined as a PropertyGroup, that's good
             std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(group);
             assert(scopeSym != nullptr);
-            if (option::showSymbolRef)
-            {
-                fprintf(stderr, "ref %s\n", scopeSym->symbolString().c_str());
-            }
+            util::condOutput(option::showSymbolRef, "ref %s\n", scopeSym->symbolString().c_str());
 
             shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd));
             scopeSym->define(propertySym);
 
-            if (option::showPropertyDep)
-            {
-                fprintf(stderr, "property [%d] %s\n", gpd->index, propertySym->symbolString().c_str());
-            }
+            util::condOutput(option::showPropertyDep, "property [%d] %s\n", gpd->index, propertySym->symbolString().c_str());
         }
         else
         {
@@ -901,10 +866,7 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
         shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd));
         dynamic_cast<ScopeSymbol *>(groupSym.get())->define(propertySym);
 
-        if (option::showPropertyDep)
-        {
-            fprintf(stderr, "property [%d] %s\n", gpd->index, propertySym->symbolString().c_str());
-        }
+        util::condOutput(option::showPropertyDep, "property [%d] %s\n", gpd->index, propertySym->symbolString().c_str());
     }
 }
 
@@ -1034,7 +996,7 @@ void SymbolVisitor::visit(IfStmt *is)
     if (is->condition->typeInfo->category() != TypeInfo::Category::Int)
     {
         throw SymbolException("IfStmt", "if statement requires type of condition expression is int, but actually "
-                                        + is->condition->typeInfo->toString());
+                              + is->condition->typeInfo->toString());
     }
     visit(is->thenStmt.get());
     if (is->elseStmt)
@@ -1112,9 +1074,10 @@ void SymbolVisitor::visit(EnumDecl *ed)
 {
     assert(ed != nullptr);
 
-    for (auto &e : ed->constantList)
+    for (size_t i = 0; i < ed->constantList.size(); i++)
     {
-        visit(e.get());
+        ed->constantList[i]->value = static_cast<int>(i);
+        visit(ed->constantList[i].get());
     }
 }
 

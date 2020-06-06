@@ -19,4 +19,5 @@ add_executable(rectangle
     option.cpp
     symbol.cpp
     symboltypestring.cpp
+    util.cpp
 )

@@ -24,6 +24,7 @@ set(RECT_SRCS
     ../option.cpp
     ../symbol.cpp
     ../symboltypestring.cpp
+    ../util.cpp
 )
 
 add_library(common

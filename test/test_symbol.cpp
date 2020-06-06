@@ -38,7 +38,6 @@ TEST(symbol, METHOD_CALL)
 
 TEST(symbol, IF_STATEMENT)
 {
-    option::showPropertyDep = true;
     ifstream t("../symbol_if_statement.rect");
     stringstream buffer;
     buffer << t.rdbuf();
@@ -61,7 +60,6 @@ TEST(symbol, IF_STATEMENT)
 
 TEST(symbol, PROPERTY_DEP)
 {
-    option::showPropertyDep = true;
     ifstream t("../symbol_property_dep.rect");
     stringstream buffer;
     buffer << t.rdbuf();
