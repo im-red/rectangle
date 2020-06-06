@@ -1,0 +1,8 @@
+def Rectangle {
+    int x: 0
+    int y: x
+    int width: height
+    int height: 100
+    void draw() {
+    }
+}

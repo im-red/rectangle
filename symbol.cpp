@@ -190,15 +190,19 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
         }
         for (auto &p : cdd->propertyList)
         {
-            visit(p.get());
+            visitPropertyDefination(p.get());
+        }
+        for (auto &p : cdd->propertyList)
+        {
+            visitPropertyInitialization(p.get());
         }
         for (auto &f : cdd->methodList)
         {
-            visitHeader(f.get());
+            visitMethodHeader(f.get());
         }
         for (auto &f : cdd->methodList)
         {
-            visitBody(f.get());
+            visitMethodBody(f.get());
         }
 
         popScope();
@@ -739,25 +743,23 @@ void SymbolVisitor::visit(VarDecl *vd)
     curScope()->define(paramSym);
 }
 
-void SymbolVisitor::visit(PropertyDecl *pd)
+void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
 {
     assert(pd != nullptr);
     GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
     if (gpd)
     {
-        visit(gpd);
+        visitPropertyDefination(gpd);
     }
     else
     {
         string propertyName = pd->name;
         shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, pd->type));
         curScope()->define(propertySym);
-
-        visit(pd->expr.get());
     }
 }
 
-void SymbolVisitor::visit(GroupedPropertyDecl *gpd)
+void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
 {
     assert(gpd != nullptr);
 
@@ -802,6 +804,25 @@ void SymbolVisitor::visit(GroupedPropertyDecl *gpd)
         shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, gpd->type));
         dynamic_cast<ScopeSymbol *>(groupSym.get())->define(propertySym);
     }
+}
+
+void SymbolVisitor::visitPropertyInitialization(PropertyDecl *pd)
+{
+    assert(pd != nullptr);
+    GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
+    if (gpd)
+    {
+        visitPropertyInitialization(gpd);
+    }
+    else
+    {
+        visit(pd->expr.get());
+    }
+}
+
+void SymbolVisitor::visitPropertyInitialization(GroupedPropertyDecl *gpd)
+{
+    assert(gpd != nullptr);
 
     visit(gpd->expr.get());
 }
@@ -936,7 +957,7 @@ void SymbolVisitor::visit(ExprStmt *es)
     visit(es->expr.get());
 }
 
-void SymbolVisitor::visitHeader(FunctionDecl *fd)
+void SymbolVisitor::visitMethodHeader(FunctionDecl *fd)
 {
     assert(fd != nullptr);
 
@@ -954,7 +975,7 @@ void SymbolVisitor::visitHeader(FunctionDecl *fd)
     curScope()->define(methodSym);
 }
 
-void SymbolVisitor::visitBody(FunctionDecl *fd)
+void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
 {
     assert(fd != nullptr);
 

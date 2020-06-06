@@ -208,8 +208,10 @@ private:
     void visit(MemberExpr *me);
     void visit(RefExpr *re);
     void visit(VarDecl *vd);
-    void visit(PropertyDecl *pd);
-    void visit(GroupedPropertyDecl *gpd);
+    void visitPropertyDefination(PropertyDecl *pd);
+    void visitPropertyDefination(GroupedPropertyDecl *gpd);
+    void visitPropertyInitialization(PropertyDecl *pd);
+    void visitPropertyInitialization(GroupedPropertyDecl *gpd);
     void visit(ParamDecl *pd);
     void visit(Stmt *s);
     void visit(CompoundStmt *cs);
@@ -218,8 +220,8 @@ private:
     void visit(WhileStmt *ws);
     void visit(ReturnStmt *rs);
     void visit(ExprStmt *es);
-    void visitHeader(FunctionDecl *fd);
-    void visitBody(FunctionDecl *fd);
+    void visitMethodHeader(FunctionDecl *fd);
+    void visitMethodBody(FunctionDecl *fd);
     void visit(EnumConstantDecl *ecd);
     void visit(EnumDecl *ed);
     void visit(BindingDecl *bd);

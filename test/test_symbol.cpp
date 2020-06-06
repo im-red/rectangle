@@ -58,3 +58,26 @@ TEST(symbol, IF_STATEMENT)
     sv.setDocuments(documents);
     sv.visit();
 }
+
+TEST(symbol, PROPERTY_DEP)
+{
+    option::verbose = true;
+    ifstream t("../symbol_property_dep.rect");
+    stringstream buffer;
+    buffer << t.rdbuf();
+    string code = buffer.str();
+
+    Parser p;
+    Lexer l;
+    l.setCode(code);
+    p.setTokens(l.tokens());
+    p.parse();
+    p.print();
+
+    vector<DocumentDecl *> documents;
+    documents.push_back(p.document());
+
+    SymbolVisitor sv;
+    sv.setDocuments(documents);
+    sv.visit();
+}
