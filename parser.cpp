@@ -369,7 +369,7 @@ bool Parser::tryMemberItemAlt1()
     }
     catch (ParseException &e)
     {
-        util::condOutput(option::showLLTry, "tryMemberItemAlt1 fail: %s\n", e.what());
+        util::condPrint(option::showLLTry, "tryMemberItemAlt1 fail: %s\n", e.what());
         result = false;
     }
 
@@ -391,7 +391,7 @@ bool Parser::tryMemberItemAlt2()
     }
     catch (ParseException &e)
     {
-        util::condOutput(option::showLLTry, "tryMemberItemAlt2 fail: %s\n", e.what());
+        util::condPrint(option::showLLTry, "tryMemberItemAlt2 fail: %s\n", e.what());
         result = false;
     }
 
@@ -811,7 +811,7 @@ bool Parser::tryBlockItemAlt1()
     }
     catch (ParseException &e)
     {
-        util::condOutput(option::showLLTry, "tryBlockItemAlt1 fail: %s\n", e.what());
+        util::condPrint(option::showLLTry, "tryBlockItemAlt1 fail: %s\n", e.what());
         result = false;
     }
 
@@ -833,7 +833,7 @@ bool Parser::tryBlockItemAlt2()
     }
     catch (ParseException &e)
     {
-        util::condOutput(option::showLLTry, "tryBlockItemAlt2 fail: %s\n", e.what());
+        util::condPrint(option::showLLTry, "tryBlockItemAlt2 fail: %s\n", e.what());
         result = false;
     }
 

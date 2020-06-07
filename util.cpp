@@ -23,7 +23,7 @@
 namespace util
 {
 
-void condOutput(bool cond, const char * const fmt, ...)
+void condPrint(bool cond, const char * const fmt, ...)
 {
     if (option::verbose || cond)
     {

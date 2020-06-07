@@ -30,7 +30,7 @@ struct ASTNode
     virtual void print(int indent) const
     {
         std::string space(indent, ' ');
-        util::condOutput(option::showAst, "%s", space.c_str());
+        util::condPrint(option::showAst, "%s", space.c_str());
         doPrint(indent);
     }
     virtual void doPrint(int) const
@@ -148,7 +148,7 @@ struct IntegerLiteral : public Expr
     }
     void doPrint(int) const override
     {
-        util::condOutput(option::showAst, "IntegerLiteral(%d)\n", value);
+        util::condPrint(option::showAst, "IntegerLiteral(%d)\n", value);
     }
 
     int value;
@@ -164,7 +164,7 @@ struct FloatLiteral : public Expr
     }
     void doPrint(int) const override
     {
-        util::condOutput(option::showAst, "FloatLiteral(%f)\n", value);
+        util::condPrint(option::showAst, "FloatLiteral(%f)\n", value);
     }
 
     float value;
@@ -180,7 +180,7 @@ struct StringLiteral : public Expr
     }
     void doPrint(int) const override
     {
-        util::condOutput(option::showAst, "StringLiteral(%s)\n", value.c_str());
+        util::condPrint(option::showAst, "StringLiteral(%s)\n", value.c_str());
     }
 
     std::string value;
@@ -194,7 +194,7 @@ struct InitListExpr : public Expr
     {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "InitListExpr\n");
+        util::condPrint(option::showAst, "InitListExpr\n");
         for (auto &e : exprList)
         {
             e->print(indent + 1);
@@ -231,7 +231,7 @@ struct BinaryOperatorExpr : public Expr
     static std::string typeString(Op op);
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "BinaryOperatorExpr(%s)\n", typeString(op).c_str());
+        util::condPrint(option::showAst, "BinaryOperatorExpr(%s)\n", typeString(op).c_str());
         left->print(indent + 1);
         right->print(indent + 1);
     }
@@ -254,7 +254,7 @@ struct UnaryOperatorExpr : public Expr
     static std::string typeString(Op op);
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "UnaryOperatorExpr(%s)\n", typeString(op).c_str());
+        util::condPrint(option::showAst, "UnaryOperatorExpr(%s)\n", typeString(op).c_str());
         expr->print(indent + 1);
     }
 
@@ -267,7 +267,7 @@ struct CallExpr : public Expr
     CallExpr() : Expr(Category::Call) {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "CallExpr\n");
+        util::condPrint(option::showAst, "CallExpr\n");
         funcExpr->print(indent + 1);
         for (auto &e : paramList)
         {
@@ -284,7 +284,7 @@ struct ListSubscriptExpr : public Expr
     ListSubscriptExpr() : Expr(Category::ListSubscript) {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "ListSubscriptExpr\n");
+        util::condPrint(option::showAst, "ListSubscriptExpr\n");
         listExpr->print(indent + 1);
         indexExpr->print(indent + 1);
     }
@@ -297,7 +297,7 @@ struct MemberExpr : public Expr
     MemberExpr() : Expr(Category::Member) {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "MemberExpr(%s)\n", name.c_str());
+        util::condPrint(option::showAst, "MemberExpr(%s)\n", name.c_str());
         instanceExpr->print(indent + 1);
     }
 
@@ -310,7 +310,7 @@ struct RefExpr : public Expr
     RefExpr() : Expr(Category::Ref) {}
     void doPrint(int) const override
     {
-        util::condOutput(option::showAst, "RefExpr(%s)\n", name.c_str());
+        util::condPrint(option::showAst, "RefExpr(%s)\n", name.c_str());
     }
 
     std::string name;
@@ -320,7 +320,7 @@ struct VarDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "VarDecl(%s %s)\n", type->toString().c_str(), name.c_str());
+        util::condPrint(option::showAst, "VarDecl(%s %s)\n", type->toString().c_str(), name.c_str());
         if (expr)
         {
             expr->print(indent);
@@ -337,7 +337,7 @@ struct PropertyDecl : public ASTNode
     ~PropertyDecl() override;
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "PropertyDecl(%s %s)\n", type->toString().c_str(), name.c_str());
+        util::condPrint(option::showAst, "PropertyDecl(%s %s)\n", type->toString().c_str(), name.c_str());
         if (expr)
         {
             expr->print(indent + 1);
@@ -358,7 +358,7 @@ struct GroupedPropertyDecl : public PropertyDecl
 {
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "GroupedPropertyDecl(%s %s.%s)\n", type->toString().c_str(), groupName.c_str(), name.c_str());
+        util::condPrint(option::showAst, "GroupedPropertyDecl(%s %s.%s)\n", type->toString().c_str(), groupName.c_str(), name.c_str());
         expr->print(indent + 1);
     }
     std::string groupName;
@@ -369,7 +369,7 @@ struct ParamDecl : public ASTNode
     ParamDecl(const std::string &n, const std::shared_ptr<TypeInfo> &t) : name(n), type(t) {}
     void doPrint(int) const override
     {
-        util::condOutput(option::showAst, "ParamDecl(%s %s)\n", type->toString().c_str(), name.c_str());
+        util::condPrint(option::showAst, "ParamDecl(%s %s)\n", type->toString().c_str(), name.c_str());
     }
 
     std::string name;
@@ -403,7 +403,7 @@ struct CompoundStmt : public Stmt
     explicit CompoundStmt(std::vector<std::unique_ptr<Stmt>> &&sl) : Stmt(Category::Compound), stmtList(move(sl)) {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "CompoundStmt\n");
+        util::condPrint(option::showAst, "CompoundStmt\n");
         for (auto &s : stmtList)
         {
             s->print(indent + 1);
@@ -418,7 +418,7 @@ struct DeclStmt : public Stmt
     explicit DeclStmt(std::unique_ptr<VarDecl> &&vd) : Stmt(Category::Decl), decl(std::move(vd)) {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "DeclStmt\n");
+        util::condPrint(option::showAst, "DeclStmt\n");
         decl->print(indent + 1);
     }
 
@@ -434,7 +434,7 @@ struct IfStmt : public Stmt
     {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "IfStmt\n");
+        util::condPrint(option::showAst, "IfStmt\n");
         condition->print(indent + 1);
         thenStmt->print(indent + 1);
         if (elseStmt)
@@ -455,7 +455,7 @@ struct WhileStmt : public Stmt
     {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "WhileStmt\n");
+        util::condPrint(option::showAst, "WhileStmt\n");
         condition->print(indent + 1);
         bodyStmt->print(indent + 1);
     }
@@ -469,7 +469,7 @@ struct BreakStmt : public Stmt
     BreakStmt() : Stmt(Category::Break) {}
     void doPrint(int) const override
     {
-        util::condOutput(option::showAst, "BreakStmt\n");
+        util::condPrint(option::showAst, "BreakStmt\n");
     }
 };
 
@@ -478,7 +478,7 @@ struct ContinueStmt : public Stmt
     ContinueStmt() : Stmt(Category::Continue) {}
     void doPrint(int) const override
     {
-        util::condOutput(option::showAst, "ContinueStmt\n");
+        util::condPrint(option::showAst, "ContinueStmt\n");
     }
 };
 
@@ -487,7 +487,7 @@ struct ReturnStmt : public Stmt
     explicit ReturnStmt(std::unique_ptr<Expr> &&re) : Stmt(Category::Return), returnExpr(move(re)) {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "ReturnStmt\n");
+        util::condPrint(option::showAst, "ReturnStmt\n");
         if (returnExpr)
         {
             returnExpr->print(indent + 1);
@@ -502,7 +502,7 @@ struct ExprStmt : public Stmt
     explicit ExprStmt(std::unique_ptr<Expr> &&e) : Stmt(Category::Expr), expr(move(e)) {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "ExprStmt\n");
+        util::condPrint(option::showAst, "ExprStmt\n");
         expr->print(indent + 1);
     }
 
@@ -519,7 +519,7 @@ struct FunctionDecl : public ASTNode
     {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "FunctionDecl(%s %s)\n", returnType->toString().c_str(), name.c_str());
+        util::condPrint(option::showAst, "FunctionDecl(%s %s)\n", returnType->toString().c_str(), name.c_str());
         for (auto &p : paramList)
         {
             p->print(indent + 1);
@@ -537,7 +537,7 @@ struct EnumConstantDecl : public ASTNode
 {
     void doPrint(int) const override
     {
-        util::condOutput(option::showAst, "EnumConstantDecl(%s)\n", name.c_str());
+        util::condPrint(option::showAst, "EnumConstantDecl(%s)\n", name.c_str());
     }
 
     std::string name;
@@ -548,7 +548,7 @@ struct EnumDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "EnumConstantDecl(%s)\n", name.c_str());
+        util::condPrint(option::showAst, "EnumConstantDecl(%s)\n", name.c_str());
         for (auto &c : constantList)
         {
             c->print(indent + 1);
@@ -563,7 +563,7 @@ struct ComponentDefinationDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "ComponentDefinationDecl(%s)\n", name.c_str());
+        util::condPrint(option::showAst, "ComponentDefinationDecl(%s)\n", name.c_str());
         for (auto &p : propertyList)
         {
             p->print(indent + 1);
@@ -592,7 +592,7 @@ struct BindingDecl : public ASTNode
     ~BindingDecl();
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "BindingDecl(%s)\n", name.c_str());
+        util::condPrint(option::showAst, "BindingDecl(%s)\n", name.c_str());
         expr->print(indent + 1);
     }
 
@@ -607,7 +607,7 @@ struct GroupedBindingDecl : public BindingDecl
     {}
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "GroupedBindingDecl(%s.%s)\n",groupName.c_str(), name.c_str());
+        util::condPrint(option::showAst, "GroupedBindingDecl(%s.%s)\n",groupName.c_str(), name.c_str());
         expr->print(indent + 1);
     }
 
@@ -618,7 +618,7 @@ struct ComponentInstanceDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "ComponentInstanceDecl(%s)\n",componentName.c_str());
+        util::condPrint(option::showAst, "ComponentInstanceDecl(%s)\n",componentName.c_str());
         for (auto &p : bindingList)
         {
             p->print(indent + 1);
@@ -638,7 +638,7 @@ struct DocumentDecl : public ASTNode
 {
     void doPrint(int indent) const override
     {
-        util::condOutput(option::showAst, "DocumentDecl\n");
+        util::condPrint(option::showAst, "DocumentDecl\n");
         if (type == Type::Defination)
         {
             defination->print(indent + 1);
