@@ -125,7 +125,7 @@ struct Expr : public ASTNode
         InitList,
         BinaryOperator,
         UnaryOperator,
-        FunctionCall,
+        Call,
         ListSubscript,
         Member,
         Ref
@@ -262,12 +262,12 @@ struct UnaryOperatorExpr : public Expr
     std::unique_ptr<Expr> expr;
 };
 
-struct FunctionCallExpr : public Expr
+struct CallExpr : public Expr
 {
-    FunctionCallExpr() : Expr(Category::FunctionCall) {}
+    CallExpr() : Expr(Category::Call) {}
     void doPrint(int indent) const override
     {
-        util::condPrint(option::showAst, "FunctionCallExpr\n");
+        util::condPrint(option::showAst, "CallExpr\n");
         funcExpr->print(indent + 1);
         for (auto &e : paramList)
         {

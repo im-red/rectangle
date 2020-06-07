@@ -1328,7 +1328,7 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
             match(Lexer::T_L_PAREN);
             if (curToken().isIn(argumentExpressionListFirst))
             {
-                unique_ptr<FunctionCallExpr> callExpr(new FunctionCallExpr);
+                unique_ptr<CallExpr> callExpr(new CallExpr);
 
                 parseArgumentExpressionList(callExpr);
                 subExprs.push_back(unique_ptr<Expr>(callExpr.release()));
@@ -1368,7 +1368,7 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
                 Expr *p = subExprs[i + 1].get();
                 if (types[i] == Call)
                 {
-                    dynamic_cast<FunctionCallExpr *>(p)->funcExpr
+                    dynamic_cast<CallExpr *>(p)->funcExpr
                             = move(subExprs[i]);
                 }
                 else if (types[i] == Subscript)
@@ -1452,7 +1452,7 @@ std::unique_ptr<Expr> Parser::parsePrimaryExpression()
     return expr;
 }
 
-void Parser::parseArgumentExpressionList(std::unique_ptr<FunctionCallExpr> &callExpr)
+void Parser::parseArgumentExpressionList(std::unique_ptr<CallExpr> &callExpr)
 {
     vector<unique_ptr<Expr>> exprs;
 

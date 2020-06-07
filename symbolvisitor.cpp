@@ -202,9 +202,9 @@ void SymbolVisitor::visit(Expr *e)
         visit(u);
         break;
     }
-    case Expr::Category::FunctionCall:
+    case Expr::Category::Call:
     {
-        FunctionCallExpr *c = dynamic_cast<FunctionCallExpr *>(e);
+        CallExpr *c = dynamic_cast<CallExpr *>(e);
         visit(c);
         break;
     }
@@ -470,7 +470,7 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
     }
 }
 
-void SymbolVisitor::visit(FunctionCallExpr *e)
+void SymbolVisitor::visit(CallExpr *e)
 {
     assert(e != nullptr);
     if (e->funcExpr->category == Expr::Category::Ref
