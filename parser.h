@@ -163,7 +163,7 @@ private:
     void parseUnaryOperator();
     std::unique_ptr<Expr> parsePostfixExpression();
     std::unique_ptr<Expr> parsePrimaryExpression();
-    void parseArgumentExpressionList(std::unique_ptr<CallExpr> &callExpr);
+    void parseArgumentExpressionList(std::unique_ptr<FunctionCallExpr> &callExpr);
     std::unique_ptr<Stmt> parseStatement();
     std::unique_ptr<Stmt> parseSelectionStatement();
     std::unique_ptr<Stmt> parseIterationStatement();

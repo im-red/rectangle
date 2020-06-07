@@ -42,7 +42,7 @@ private:
     void visit(InitListExpr *ile);
     void visit(BinaryOperatorExpr *b);
     void visit(UnaryOperatorExpr *u);
-    void visit(CallExpr *c);
+    void visit(FunctionCallExpr *c);
     void visit(ListSubscriptExpr *lse);
     void visit(MemberExpr *me);
     void visit(RefExpr *re);
