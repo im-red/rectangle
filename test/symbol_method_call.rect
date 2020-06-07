@@ -7,9 +7,18 @@ def Rectangle {
     int border.type: Solid
     void draw() {
         Rectangle r;
+        r.draw();
         getDasharray(r.border.type);
+
+        rect re;
+        drawRect(re);
+
+        test();
     }
     string getDasharray(int type) {
         return "";
+    }
+    void test() {
+
     }
 }

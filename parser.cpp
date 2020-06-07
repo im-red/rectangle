@@ -1326,15 +1326,13 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
         else if (type == Lexer::T_L_PAREN)
         {
             match(Lexer::T_L_PAREN);
+            unique_ptr<CallExpr> callExpr(new CallExpr);
             if (curToken().isIn(argumentExpressionListFirst))
             {
-                unique_ptr<CallExpr> callExpr(new CallExpr);
-
                 parseArgumentExpressionList(callExpr);
-                subExprs.push_back(unique_ptr<Expr>(callExpr.release()));
-
-                types.push_back(Call);
             }
+            subExprs.push_back(unique_ptr<Expr>(callExpr.release()));
+            types.push_back(Call);
             match(Lexer::T_R_PAREN);
         }
         else

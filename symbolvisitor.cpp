@@ -529,7 +529,7 @@ void SymbolVisitor::visit(CallExpr *e)
     }
     else // Expr::Category::Member
     {
-        MemberExpr *m = dynamic_cast<MemberExpr *>(e);
+        MemberExpr *m = dynamic_cast<MemberExpr *>(e->funcExpr.get());
         assert(m != nullptr);
         visit(m->instanceExpr.get());
         shared_ptr<TypeInfo> instanceType = m->instanceExpr->typeInfo;
