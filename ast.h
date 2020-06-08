@@ -509,6 +509,8 @@ struct ExprStmt : public Stmt
     std::unique_ptr<Expr> expr;
 };
 
+struct ComponentDefinationDecl;
+
 struct FunctionDecl : public ASTNode
 {
     FunctionDecl(const std::string &n,
@@ -517,20 +519,13 @@ struct FunctionDecl : public ASTNode
                  std::unique_ptr<CompoundStmt> &&b)
         : name(n), returnType(move(rt)), paramList(move(pl)), body(move(b))
     {}
-    void doPrint(int indent) const override
-    {
-        util::condPrint(option::showAst, "FunctionDecl(%s %s)\n", returnType->toString().c_str(), name.c_str());
-        for (auto &p : paramList)
-        {
-            p->print(indent + 1);
-        }
-        body->print(indent + 1);
-    }
+    void doPrint(int indent) const override;
 
     std::string name;
     std::shared_ptr<TypeInfo> returnType;
     std::vector<std::unique_ptr<ParamDecl>> paramList;
     std::unique_ptr<CompoundStmt> body;
+    ComponentDefinationDecl *component = nullptr;
 };
 
 struct EnumConstantDecl : public ASTNode

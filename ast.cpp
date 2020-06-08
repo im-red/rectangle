@@ -195,3 +195,21 @@ string GroupTypeInfo::toString() const
 {
     return "(" + m_componentType->toString() + "::" + m_name + ")";
 }
+
+void FunctionDecl::doPrint(int indent) const
+{
+    if (component)
+    {
+        util::condPrint(option::showAst, "FunctionDecl(%s %s::%s)\n", returnType->toString().c_str(), component->name.c_str(), name.c_str());
+    }
+    else
+    {
+        util::condPrint(option::showAst, "FunctionDecl(%s %s)\n", returnType->toString().c_str(), name.c_str());
+    }
+
+    for (auto &p : paramList)
+    {
+        p->print(indent + 1);
+    }
+    body->print(indent + 1);
+}

@@ -326,6 +326,7 @@ void Parser::parseMemberItem(unique_ptr<ComponentDefinationDecl> &defination)
     else if (tryMemberItemAlt2())
     {
         functionDecl = parseFunctionDefination();
+        functionDecl->component = defination.get();
     }
     else
     {

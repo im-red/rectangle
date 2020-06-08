@@ -13,6 +13,9 @@ def Rectangle {
         rect re;
         drawRect(re);
 
+        string s = "123";
+        printString(s);
+
         test();
     }
     string getDasharray(int type) {
