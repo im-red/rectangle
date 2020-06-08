@@ -74,6 +74,7 @@ private:
 
     bool m_analyzingPropertyDep = false;
     PropertyDecl *m_curAnalyzingProperty = nullptr;
-    bool m_analyzingBindingDep = false;
+
+    int m_functionLocals = -1;
 };
 

@@ -731,6 +731,8 @@ void SymbolVisitor::visit(VarDecl *vd)
 
     shared_ptr<Symbol> paramSym(new Symbol(Symbol::Category::Variable, vd->name, vd->type));
     curScope()->define(paramSym);
+
+    m_functionLocals++;
 }
 
 void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
@@ -989,7 +991,20 @@ void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
     {
         visit(p.get());
     }
+
+    m_functionLocals = 0;
     visit(fd->body.get());
+
+    string name = fd->name;
+    int args = static_cast<int>(fd->paramList.size());
+    if (fd->component)
+    {
+        name = fd->component->name + "::" + name;
+        args += 1;
+    }
+    int locals = m_functionLocals;
+
+    printf(".def %s args=%d locals=%d\n", name.c_str(), args, locals);
 
     popScope();
 }
