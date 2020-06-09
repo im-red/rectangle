@@ -1606,6 +1606,10 @@ std::unique_ptr<Stmt> Parser::parseJumpStatement()
             unique_ptr<Expr> expr = parseExpression();
             s.reset(new ReturnStmt(move(expr)));
         }
+        else
+        {
+            s.reset(new ReturnStmt(unique_ptr<Expr>()));
+        }
         match(Lexer::T_SEMICOLON);
         break;
     }

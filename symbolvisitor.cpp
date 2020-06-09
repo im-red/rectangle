@@ -732,13 +732,14 @@ void SymbolVisitor::visit(VarDecl *vd)
     shared_ptr<Symbol> paramSym(new Symbol(Symbol::Category::Variable, vd->name, vd->type, vd));
     curScope()->define(paramSym);
 
+    vd->localIndex = m_functionLocals;
+    m_functionLocals++;
+
     if (vd->expr)
     {
         visit(vd->expr.get());
+        printf("lstore %d\n", vd->localIndex);
     }
-
-    vd->localIndex = m_functionLocals;
-    m_functionLocals++;
 }
 
 void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
@@ -957,7 +958,10 @@ void SymbolVisitor::visit(ReturnStmt *rs)
 {
     assert(rs != nullptr);
 
-    visit(rs->returnExpr.get());
+    if (rs->returnExpr)
+    {
+        visit(rs->returnExpr.get());
+    }
 }
 
 void SymbolVisitor::visit(ExprStmt *es)

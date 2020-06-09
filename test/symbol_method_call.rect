@@ -18,6 +18,7 @@ def Rectangle {
         printString(s);
 
         test();
+        return;
     }
     string getDasharray(int type) {
         return "";
