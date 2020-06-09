@@ -330,6 +330,8 @@ struct VarDecl : public ASTNode
     std::shared_ptr<TypeInfo> type;
     std::string name;
     std::unique_ptr<Expr> expr;
+
+    int localIndex = -1;
 };
 
 struct PropertyDecl : public ASTNode

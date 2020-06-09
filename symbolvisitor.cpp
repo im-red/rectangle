@@ -729,9 +729,15 @@ void SymbolVisitor::visit(VarDecl *vd)
 {
     assert(vd != nullptr);
 
-    shared_ptr<Symbol> paramSym(new Symbol(Symbol::Category::Variable, vd->name, vd->type));
+    shared_ptr<Symbol> paramSym(new Symbol(Symbol::Category::Variable, vd->name, vd->type, vd));
     curScope()->define(paramSym);
 
+    if (vd->expr)
+    {
+        visit(vd->expr.get());
+    }
+
+    vd->localIndex = m_functionLocals;
     m_functionLocals++;
 }
 
