@@ -17,11 +17,16 @@
 
 #pragma once
 
+#include <vector>
+#include <string>
+
 #include <stdarg.h>
 
 namespace util
 {
 
 void condPrint(bool cond, const char * const fmt, ...);
+void collectAsm(const char *const fmt, ...);
+std::vector<std::string> dumpAsm();
 
 }

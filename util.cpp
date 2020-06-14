@@ -20,6 +20,8 @@
 
 #include <stdio.h>
 
+using namespace std;
+
 namespace util
 {
 
@@ -32,6 +34,27 @@ void condPrint(bool cond, const char * const fmt, ...)
         vfprintf(stderr, fmt, ap);
         va_end(ap);
     }
+}
+
+static vector<string> asmStorage;
+
+void collectAsm(const char * const fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    constexpr int BUF_LEN = 512;
+    char buf[BUF_LEN];
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+
+    asmStorage.push_back(buf);
+}
+
+std::vector<std::string> dumpAsm()
+{
+    vector<string> result;
+    result.swap(asmStorage);
+    return result;
 }
 
 }
