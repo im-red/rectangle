@@ -680,6 +680,12 @@ std::unique_ptr<FunctionDecl> Parser::parseFunctionDefination()
     unique_ptr<FunctionDecl> decl;
     if (!trying())
     {
+        CompoundStmt *stmts = dynamic_cast<CompoundStmt *>(body.get());
+        assert(stmts != nullptr);
+        if (stmts->stmtList.back()->category != Stmt::Category::Return)
+        {
+            stmts->stmtList.emplace_back(new ReturnStmt(std::unique_ptr<Expr>()));
+        }
         decl.reset(new FunctionDecl(name,
                                     move(ti),
                                     move(paramList),
