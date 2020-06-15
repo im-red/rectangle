@@ -33,9 +33,11 @@ private:
     void popScope();
 
     void initGlobalScope();
+    void initBuiltInStructs();
 
 private:
     void visit(DocumentDecl *dd);
+    void visit(StructDecl *sd);
     void visit(ComponentDefinationDecl *cdd);
     void visit(ComponentInstanceDecl *cid);
     void visit(Expr *e);
@@ -47,6 +49,7 @@ private:
     void visit(MemberExpr *me);
     void visit(RefExpr *re);
     void visit(VarDecl *vd);
+    void visit(FieldDecl *md);
     void visitPropertyDefination(PropertyDecl *pd);
     void visitPropertyDefination(GroupedPropertyDecl *gpd);
     void visitPropertyInitialization(PropertyDecl *pd);
@@ -57,6 +60,8 @@ private:
     void visit(DeclStmt *ds);
     void visit(IfStmt *is);
     void visit(WhileStmt *ws);
+    void visit(BreakStmt *bs);
+    void visit(ContinueStmt *cs);
     void visit(ReturnStmt *rs);
     void visit(ExprStmt *es);
     void visitMethodHeader(FunctionDecl *fd);
@@ -68,6 +73,7 @@ private:
 
 private:
     std::vector<DocumentDecl *> m_documents;
+    std::vector<std::unique_ptr<StructDecl>> m_builtInStructs;
     std::vector<std::shared_ptr<Scope>> m_scopes;
     std::vector<std::shared_ptr<Symbol>> m_symbols;
     std::shared_ptr<Scope> m_curScope = nullptr;
@@ -76,5 +82,21 @@ private:
     PropertyDecl *m_curAnalyzingProperty = nullptr;
 
     int m_functionLocals = -1;
+    int m_labelCounter = 0;
+
+    std::vector<int> m_breakLabels;
+    std::vector<int> m_continueLabels;
+
+    bool m_visitingLvalue = false;
+    enum class LvalueCategory
+    {
+        Invalid,
+        Global,
+        Local,
+        Field,
+        List
+    };
+    LvalueCategory m_lvalueCategory = LvalueCategory::Invalid;
+    int m_lvalueIndex;
 };
 

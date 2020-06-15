@@ -350,7 +350,7 @@ struct PropertyDecl : public ASTNode
     std::shared_ptr<TypeInfo> type;
     std::unique_ptr<Expr> expr;
 
-    int index = -1;
+    int fieldIndex = -1;
     int initSequence = -1;
     std::vector<int> out;
     std::vector<int> in;
@@ -376,6 +376,8 @@ struct ParamDecl : public ASTNode
 
     std::string name;
     std::shared_ptr<TypeInfo> type;
+
+    int localIndex = -1;
 };
 
 struct Stmt : public ASTNode
@@ -581,6 +583,37 @@ struct ComponentDefinationDecl : public ASTNode
     std::vector<std::unique_ptr<EnumDecl>> enumList;
 };
 
+struct FieldDecl : public ASTNode
+{
+    FieldDecl(const std::string &_name, const std::shared_ptr<TypeInfo> &_type)
+        : type(_type), name(_name)
+    {}
+    void doPrint(int) const override
+    {
+        util::condPrint(option::showAst, "FieldDecl(%s %s)\n", type->toString().c_str(), name.c_str());
+    }
+
+    std::shared_ptr<TypeInfo> type;
+    std::string name;
+
+    int fieldIndex = -1;
+};
+
+struct StructDecl : public ASTNode
+{
+    void doPrint(int indent) const override
+    {
+        util::condPrint(option::showAst, "StructDecl(%s)\n", name.c_str());
+        for (auto &p : fieldList)
+        {
+            p->print(indent + 1);
+        }
+    }
+
+    std::string name;
+    std::vector<std::unique_ptr<FieldDecl>> fieldList;
+};
+
 struct BindingDecl : public ASTNode
 {
     BindingDecl(const std::string &n, std::unique_ptr<Expr> &&e)
@@ -640,19 +673,25 @@ struct DocumentDecl : public ASTNode
         {
             defination->print(indent + 1);
         }
-        else
+        else if (type == Type::Instance)
         {
             instance->print(indent + 1);
+        }
+        else
+        {
+            structDecl->print(indent + 1);
         }
     }
 
     enum class Type
     {
         Defination,
-        Instance
+        Instance,
+        Struct
     };
 
     Type type;
     std::unique_ptr<ComponentDefinationDecl> defination;
     std::unique_ptr<ComponentInstanceDecl> instance;
+    std::unique_ptr<StructDecl> structDecl;
 };

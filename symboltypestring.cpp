@@ -27,7 +27,7 @@ std::string Symbol::symbolCategoryString(Category category)
         ENUM_ELEMENT(Category::Variable),
         ENUM_ELEMENT(Category::Parameter),
         ENUM_ELEMENT(Category::Struct),
-        ENUM_ELEMENT(Category::Member),
+        ENUM_ELEMENT(Category::Field),
         ENUM_ELEMENT(Category::Component),
         ENUM_ELEMENT(Category::PropertyGroup),
         ENUM_ELEMENT(Category::Property),

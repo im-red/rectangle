@@ -33,7 +33,7 @@ Symbol::Symbol(Category cat, const string &n, std::shared_ptr<TypeInfo> ti, ASTN
     , m_typeInfo(ti)
     , m_astNode(ast)
 {
-    util::condPrint(option::showSymbolDef, "def %s\n", symbolString().c_str());
+    util::condPrint(option::showSymbolDef, "def: %s\n", symbolString().c_str());
 }
 
 Symbol::~Symbol()
@@ -95,6 +95,11 @@ std::shared_ptr<TypeInfo> Symbol::typeInfo() const
 ASTNode *Symbol::astNode() const
 {
     return m_astNode;
+}
+
+void Symbol::setAstNode(ASTNode *astNode)
+{
+    m_astNode = astNode;
 }
 
 

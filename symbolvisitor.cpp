@@ -25,7 +25,7 @@ constexpr int BUF_LEN = 512;
 
 SymbolVisitor::SymbolVisitor()
 {
-
+    initBuiltInStructs();
 }
 
 void SymbolVisitor::setDocuments(std::vector<DocumentDecl *> documents)
@@ -36,8 +36,6 @@ void SymbolVisitor::setDocuments(std::vector<DocumentDecl *> documents)
     m_symbols.clear();
     m_curScope.reset();
     Scope::resetNextScopeId();
-
-    initGlobalScope();
 }
 
 std::shared_ptr<Scope> SymbolVisitor::curScope()
@@ -67,32 +65,6 @@ void SymbolVisitor::initGlobalScope()
     pushScope(globalScope);
 
     {
-        shared_ptr<Symbol> rect(new ScopeSymbol(Symbol::Category::Struct, "rect", Scope::Category::Struct, curScope()));
-        pushScope(dynamic_pointer_cast<Scope>(rect));
-
-        shared_ptr<Symbol> x(new Symbol(Symbol::Category::Member, "x", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        shared_ptr<Symbol> y(new Symbol(Symbol::Category::Member, "y", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        shared_ptr<Symbol> width(new Symbol(Symbol::Category::Member, "width", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        shared_ptr<Symbol> height(new Symbol(Symbol::Category::Member, "height", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        shared_ptr<Symbol> fill_color(new Symbol(Symbol::Category::Member, "fill_color", make_shared<TypeInfo>(TypeInfo::Category::String)));
-        shared_ptr<Symbol> stroke_color(new Symbol(Symbol::Category::Member, "stroke_color", make_shared<TypeInfo>(TypeInfo::Category::String)));
-        shared_ptr<Symbol> stroke_width(new Symbol(Symbol::Category::Member, "stroke_width", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        shared_ptr<Symbol> stroke_dasharray(new Symbol(Symbol::Category::Member, "stroke_dasharray", make_shared<TypeInfo>(TypeInfo::Category::String)));
-
-        curScope()->define(x);
-        curScope()->define(y);
-        curScope()->define(width);
-        curScope()->define(height);
-        curScope()->define(fill_color);
-        curScope()->define(stroke_color);
-        curScope()->define(stroke_width);
-        curScope()->define(stroke_dasharray);
-
-        popScope();
-        curScope()->define(rect);
-    }
-
-    {
         shared_ptr<TypeInfo> stringType(new TypeInfo(TypeInfo::Category::String));
         vector<shared_ptr<TypeInfo>> paramTypes(1, stringType);
         shared_ptr<Symbol> printString(new FunctionSymbol("printString", make_shared<TypeInfo>(TypeInfo::Category::Void), paramTypes));
@@ -105,10 +77,60 @@ void SymbolVisitor::initGlobalScope()
         shared_ptr<Symbol> drawRect(new FunctionSymbol("drawRect", make_shared<TypeInfo>(TypeInfo::Category::Void), paramTypes));
         curScope()->define(drawRect);
     }
+
+    {
+        shared_ptr<TypeInfo> ptType(new CustomTypeInfo("pt"));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, ptType);
+        shared_ptr<Symbol> drawPt(new FunctionSymbol("drawPt", make_shared<TypeInfo>(TypeInfo::Category::Void), paramTypes));
+        curScope()->define(drawPt);
+    }
+
+    {
+        shared_ptr<TypeInfo> voidType(new TypeInfo(TypeInfo::Category::Void));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, voidType);
+        shared_ptr<Symbol> len(new FunctionSymbol("len", make_shared<TypeInfo>(TypeInfo::Category::Int), paramTypes));
+        curScope()->define(len);
+    }
+}
+
+void SymbolVisitor::initBuiltInStructs()
+{
+    {
+        unique_ptr<StructDecl> sd(new StructDecl);
+        sd->name = "rect";
+
+        sd->fieldList.emplace_back(new FieldDecl("x", make_shared<TypeInfo>(TypeInfo::Category::Int)));
+        sd->fieldList.emplace_back(new FieldDecl("y", make_shared<TypeInfo>(TypeInfo::Category::Int)));
+        sd->fieldList.emplace_back(new FieldDecl("width", make_shared<TypeInfo>(TypeInfo::Category::Int)));
+        sd->fieldList.emplace_back(new FieldDecl("height", make_shared<TypeInfo>(TypeInfo::Category::Int)));
+        sd->fieldList.emplace_back(new FieldDecl("fill_color", make_shared<TypeInfo>(TypeInfo::Category::String)));
+        sd->fieldList.emplace_back(new FieldDecl("stroke_width", make_shared<TypeInfo>(TypeInfo::Category::Int)));
+        sd->fieldList.emplace_back(new FieldDecl("stroke_color", make_shared<TypeInfo>(TypeInfo::Category::String)));
+        sd->fieldList.emplace_back(new FieldDecl("stroke_dasharray", make_shared<TypeInfo>(TypeInfo::Category::String)));
+
+        m_builtInStructs.push_back(move(sd));
+    }
+
+    {
+        unique_ptr<StructDecl> sd(new StructDecl);
+        sd->name = "pt";
+
+        sd->fieldList.emplace_back(new FieldDecl("x", make_shared<TypeInfo>(TypeInfo::Category::Int)));
+        sd->fieldList.emplace_back(new FieldDecl("y", make_shared<TypeInfo>(TypeInfo::Category::Int)));
+        sd->fieldList.emplace_back(new FieldDecl("radius", make_shared<TypeInfo>(TypeInfo::Category::Int)));
+        sd->fieldList.emplace_back(new FieldDecl("fill_color", make_shared<TypeInfo>(TypeInfo::Category::String)));
+
+        m_builtInStructs.push_back(move(sd));
+    }
 }
 
 void SymbolVisitor::visit()
 {
+    initGlobalScope();
+    for (auto &sd : m_builtInStructs)
+    {
+        visit(sd.get());
+    }
     for (auto doc : m_documents)
     {
         if (doc && doc->type == DocumentDecl::Type::Defination)
@@ -137,12 +159,32 @@ void SymbolVisitor::visit(DocumentDecl *dd)
     }
 }
 
+void SymbolVisitor::visit(StructDecl *sd)
+{
+    assert(sd != nullptr);
+
+    string name = sd->name;
+    shared_ptr<Symbol> sym(new ScopeSymbol(Symbol::Category::Struct, name,
+                                           Scope::Category::Struct, curScope()));
+    sym->setAstNode(sd);
+    curScope()->define(sym);
+
+    pushScope(dynamic_pointer_cast<Scope>(sym));
+    for (size_t i = 0; i < sd->fieldList.size(); i++)
+    {
+        visit(sd->fieldList[i].get());
+        sd->fieldList[i]->fieldIndex = static_cast<int>(i);
+    }
+    popScope();
+}
+
 void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
 {
     {
         string name = cdd->name;
         shared_ptr<Symbol> sym(new ScopeSymbol(Symbol::Category::Component, name,
                                                Scope::Category::Component, curScope()));
+        sym->setAstNode(cdd);
         curScope()->define(sym);
 
         pushScope(dynamic_pointer_cast<Scope>(sym));
@@ -154,7 +196,7 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
 
         for (size_t i = 0; i < cdd->propertyList.size(); i++)
         {
-            cdd->propertyList[i]->index = static_cast<int>(i);
+            cdd->propertyList[i]->fieldIndex = static_cast<int>(i);
             visitPropertyDefination(cdd->propertyList[i].get());
         }
         for (auto &p : cdd->propertyList)
@@ -229,16 +271,19 @@ void SymbolVisitor::visit(Expr *e)
     case Expr::Category::Integer:
     {
         e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
+        util::collectAsm("    iconst %d\n", dynamic_cast<IntegerLiteral *>(e)->value);
         break;
     }
     case Expr::Category::Float:
     {
         e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Float));
+        util::collectAsm("    fconst %f\n", static_cast<double>(dynamic_cast<FloatLiteral *>(e)->value));
         break;
     }
     case Expr::Category::String:
     {
         e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::String));
+        util::collectAsm("    sconst \"%s\"\n", dynamic_cast<StringLiteral *>(e)->value.c_str());
         break;
     }
     case Expr::Category::Invalid:
@@ -251,11 +296,8 @@ void SymbolVisitor::visit(Expr *e)
 void SymbolVisitor::visit(InitListExpr *ile)
 {
     assert(ile != nullptr);
-    for (auto &i : ile->exprList)
-    {
-        visit(i.get());
-    }
 
+    util::collectAsm("    vector\n");
     shared_ptr<TypeInfo> eType;
     if (ile->exprList.size() == 0)
     {
@@ -263,6 +305,12 @@ void SymbolVisitor::visit(InitListExpr *ile)
     }
     else
     {
+        for (size_t i = 0; i < ile->exprList.size(); i++)
+        {
+            visit(ile->exprList[i].get());
+            util::collectAsm("    vappend\n", static_cast<int>(i));
+        }
+
         eType = ile->exprList[0]->typeInfo;
         for (size_t i = 1; i < ile->exprList.size(); i++)
         {
@@ -273,13 +321,27 @@ void SymbolVisitor::visit(InitListExpr *ile)
             }
         }
     }
+
     ile->typeInfo = shared_ptr<ListTypeInfo>(new ListTypeInfo(eType));
 }
 
 void SymbolVisitor::visit(BinaryOperatorExpr *b)
 {
     assert(b != nullptr);
+
+    bool visitingLvalueBackup = m_visitingLvalue;
+
+    if (b->op == BinaryOperatorExpr::Op::Assign)
+    {
+        m_visitingLvalue = true;
+        m_lvalueCategory = LvalueCategory::Invalid;
+    }
     visit(b->left.get());
+    if (b->op == BinaryOperatorExpr::Op::Assign)
+    {
+        m_visitingLvalue = visitingLvalueBackup;
+    }
+
     visit(b->right.get());
 
     shared_ptr<TypeInfo> leftType = b->left->typeInfo;
@@ -429,6 +491,181 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         break;
     }
     }
+
+    switch (b->op)
+    {
+    case BinaryOperatorExpr::Op::LogicalAnd:
+    {
+        util::collectAsm("    iand\n");
+        break;
+    }
+    case BinaryOperatorExpr::Op::LogicalOr:
+    {
+        util::collectAsm("    ior\n");
+        break;
+    }
+    case BinaryOperatorExpr::Op::LessThan:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    ilt\n");
+        }
+        else
+        {
+            util::collectAsm("    flt\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::GreaterThan:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    igt\n");
+        }
+        else
+        {
+            util::collectAsm("    fgt\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::LessEqual:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    ile\n");
+        }
+        else
+        {
+            util::collectAsm("    fle\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::GreaterEqual:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    ige\n");
+        }
+        else
+        {
+            util::collectAsm("    fge\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::Equal:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    ieq\n");
+        }
+        else if (leftType->category() == TypeInfo::Category::Float)
+        {
+            util::collectAsm("    feq\n");
+        }
+        else
+        {
+            util::collectAsm("    seq\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::NotEqual:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    ine\n");
+        }
+        else if (leftType->category() == TypeInfo::Category::Float)
+        {
+            util::collectAsm("    fne\n");
+        }
+        else
+        {
+            util::collectAsm("    sne\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::Plus:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    iadd\n");
+        }
+        else if (leftType->category() == TypeInfo::Category::Float)
+        {
+            util::collectAsm("    fadd\n");
+        }
+        else
+        {
+            util::collectAsm("    sadd\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::Minus:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    isub\n");
+        }
+        else
+        {
+            util::collectAsm("    fsub\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::Multiply:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    imul\n");
+        }
+        else
+        {
+            util::collectAsm("    fmul\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::Divide:
+    {
+        if (leftType->category() == TypeInfo::Category::Int)
+        {
+            util::collectAsm("    idiv\n");
+        }
+        else
+        {
+            util::collectAsm("    fdiv\n");
+        }
+        break;
+    }
+    case BinaryOperatorExpr::Op::Remainder:
+    {
+        util::collectAsm("    irem\n");
+        break;
+    }
+    case BinaryOperatorExpr::Op::Assign:
+    {
+        if (m_lvalueCategory == LvalueCategory::List)
+        {
+            util::collectAsm("    vstore\n");
+        }
+        else if (m_lvalueCategory == LvalueCategory::Local)
+        {
+            util::collectAsm("    lstore %d\n", m_lvalueIndex);
+        }
+        else if (m_lvalueCategory == LvalueCategory::Global)
+        {
+            util::collectAsm("    gstore %d\n", m_lvalueIndex);
+        }
+        else if (m_lvalueCategory == LvalueCategory::Field)
+        {
+            util::collectAsm("    fstore %d\n", m_lvalueIndex);
+        }
+        else // (m_lvalueCategory == LvalueCategory::Invalid)
+        {
+            throw SymbolException("BinaryOperatorExpr", "Invalid lvalue category");
+        }
+        break;
+    }
+    }
 }
 
 void SymbolVisitor::visit(UnaryOperatorExpr *u)
@@ -473,6 +710,13 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
 void SymbolVisitor::visit(CallExpr *e)
 {
     assert(e != nullptr);
+
+    if (m_visitingLvalue)
+    {
+        throw SymbolException("CallExpr",
+                              "CallExpr produce rvalue");
+    }
+
     if (e->funcExpr->category == Expr::Category::Ref
             || e->funcExpr->category == Expr::Category::Member)
     {
@@ -524,20 +768,18 @@ void SymbolVisitor::visit(CallExpr *e)
                                   + Symbol::symbolCategoryString(func->category()));
         }
 
-        util::condPrint(option::showSymbolRef, "ref %s\n", func->symbolString().c_str());
+        util::condPrint(option::showSymbolRef, "ref: %s\n", func->symbolString().c_str());
         e->funcExpr->typeInfo = func->typeInfo();
     }
     else // Expr::Category::Member
     {
         MemberExpr *m = dynamic_cast<MemberExpr *>(e->funcExpr.get());
         assert(m != nullptr);
+
         visit(m->instanceExpr.get());
         shared_ptr<TypeInfo> instanceType = m->instanceExpr->typeInfo;
-        if (instanceType->category() == TypeInfo::Category::List)
-        {
-            throw SymbolException("CallExpr", "List type doesn't contain named method");
-        }
         string typeName = instanceType->toString();
+
         std::shared_ptr<Symbol> instanceTypeSymbol = curScope()->resolve(typeName);
         if (!instanceTypeSymbol)
         {
@@ -571,7 +813,7 @@ void SymbolVisitor::visit(CallExpr *e)
                                   + Symbol::symbolCategoryString(method->category()));
         }
 
-        util::condPrint(option::showSymbolRef, "ref %s\n", method->symbolString().c_str());
+        util::condPrint(option::showSymbolRef, "ref: %s\n", method->symbolString().c_str());
         e->funcExpr->typeInfo = method->typeInfo();
     }
 
@@ -590,17 +832,39 @@ void SymbolVisitor::visit(CallExpr *e)
         throw SymbolException("CallExpr", string(buf));
     }
 
-    for (size_t i = 0; i < paramTypes.size(); i++)
+    if (functionName == "len")
     {
-        if (*paramTypes[i] != *(e->paramList[i]->typeInfo))
+        if (e->paramList[0]->typeInfo->category() == TypeInfo::Category::String)
+        {
+            util::collectAsm("    slen\n");
+        }
+        else if (e->paramList[0]->typeInfo->category() == TypeInfo::Category::List)
+        {
+            util::collectAsm("    vlen\n");
+        }
+        else
         {
             char buf[BUF_LEN];
-            snprintf(buf, sizeof(buf), "%s requires %s in %dth parameters but is passed %s",
+            snprintf(buf, sizeof(buf), "%s requires string/list in 0th parameters but is passed %s",
                      functionName.c_str(),
-                     paramTypes[i]->toString().c_str(),
-                     static_cast<int>(i),
-                     e->paramList[i]->typeInfo->toString().c_str());
+                     e->paramList[0]->typeInfo->toString().c_str());
             throw SymbolException("CallExpr", string(buf));
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < paramTypes.size(); i++)
+        {
+            if (*paramTypes[i] != *(e->paramList[i]->typeInfo))
+            {
+                char buf[BUF_LEN];
+                snprintf(buf, sizeof(buf), "%s requires %s in %dth parameters but is passed %s",
+                         functionName.c_str(),
+                         paramTypes[i]->toString().c_str(),
+                         static_cast<int>(i),
+                         e->paramList[i]->typeInfo->toString().c_str());
+                throw SymbolException("CallExpr", string(buf));
+            }
         }
     }
 
@@ -610,21 +874,51 @@ void SymbolVisitor::visit(CallExpr *e)
 void SymbolVisitor::visit(ListSubscriptExpr *e)
 {
     assert(e != nullptr);
+
+    bool visitingLvalueBackup = m_visitingLvalue;
+    m_visitingLvalue = false;
+
     visit(e->listExpr.get());
+    if (e->listExpr->typeInfo->category() != TypeInfo::Category::List)
+    {
+        throw SymbolException("ListSubscriptExpr", "Type of listExpr is " + e->listExpr->typeInfo->toString());
+    }
+
     visit(e->indexExpr.get());
+    if (e->indexExpr->typeInfo->category() != TypeInfo::Category::Int)
+    {
+        throw SymbolException("ListSubscriptExpr", "Type of indexExpr is " + e->indexExpr->typeInfo->toString());
+    }
+
+    m_visitingLvalue = visitingLvalueBackup;
+
+    if (m_visitingLvalue)
+    {
+        m_lvalueCategory = LvalueCategory::List;
+    }
+    else
+    {
+        util::collectAsm("    vload\n");
+    }
+
+    shared_ptr<TypeInfo> ti = e->listExpr->typeInfo;
+    shared_ptr<ListTypeInfo> lti = dynamic_pointer_cast<ListTypeInfo>(ti);
+    assert(lti != nullptr);
+
+    e->typeInfo = lti->elementType();
 }
 
 void SymbolVisitor::visit(MemberExpr *e)
 {
     assert(e != nullptr);
 
-    visit(e->instanceExpr.get());
-    shared_ptr<TypeInfo> typeInfo = e->instanceExpr->typeInfo;
-    if (typeInfo->category() == TypeInfo::Category::List)
-    {
-        throw SymbolException("MemberExpr", "List type doesn't contain named member");
-    }
+    bool visitingLvalueBackup = m_visitingLvalue;
 
+    m_visitingLvalue = false;
+    visit(e->instanceExpr.get());
+    m_visitingLvalue = visitingLvalueBackup;
+
+    shared_ptr<TypeInfo> typeInfo = e->instanceExpr->typeInfo;
     string typeString = typeInfo->toString();
 
     shared_ptr<Symbol> instanceTypeSymbol;
@@ -658,13 +952,17 @@ void SymbolVisitor::visit(MemberExpr *e)
 
         instanceTypeSymbol = groupSym;
     }
-    else
+    else if (typeInfo->category() == TypeInfo::Category::Custom)
     {
         instanceTypeSymbol = curScope()->resolve(typeString);
         if (!instanceTypeSymbol)
         {
-            throw SymbolException("MemberExpr", "No symbol for typeName: " + typeString);
+            throw SymbolException("MemberExpr", "No symbol for type " + typeString);
         }
+    }
+    else
+    {
+        throw SymbolException("MemberExpr", typeInfo->toString() + " doesn't contains member");
     }
 
     std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
@@ -681,8 +979,54 @@ void SymbolVisitor::visit(MemberExpr *e)
         throw SymbolException("MemberExpr", typeString + " doesn't contains member named " + e->name);
     }
 
-    util::condPrint(option::showSymbolRef, "ref %s\n", member->symbolString().c_str());
+    util::condPrint(option::showSymbolRef, "ref: %s\n", member->symbolString().c_str());
     e->typeInfo = member->typeInfo();
+
+    ASTNode *ast = member->astNode();
+    if (m_visitingLvalue)
+    {
+        if (member->category() == Symbol::Category::Field)
+        {
+            FieldDecl *fd = dynamic_cast<FieldDecl *>(ast);
+
+            m_lvalueCategory = LvalueCategory::Field;
+            m_lvalueIndex = fd->fieldIndex;
+        }
+        else if (member->category() == Symbol::Category::Property)
+        {
+            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
+
+            m_lvalueCategory = LvalueCategory::Field;
+            m_lvalueIndex = pd->fieldIndex;
+        }
+        else
+        {
+            // do nothing
+        }
+    }
+    else
+    {
+        if (member->category() == Symbol::Category::Field)
+        {
+            FieldDecl *fd = dynamic_cast<FieldDecl *>(ast);
+            assert(fd != nullptr);
+
+            int fieldIndex = fd->fieldIndex;
+            util::collectAsm("    fload %d\n", fieldIndex);
+        }
+        else if (member->category() == Symbol::Category::Property)
+        {
+            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
+            assert(pd != nullptr);
+
+            int fieldIndex = pd->fieldIndex;
+            util::collectAsm("    fload %d\n", fieldIndex);
+        }
+        else
+        {
+            // do nothing
+        }
+    }
 
     if (member->category() == Symbol::Category::Property && m_analyzingPropertyDep)
     {
@@ -692,9 +1036,9 @@ void SymbolVisitor::visit(MemberExpr *e)
         assert(pd != nullptr);
 
         assert(m_curAnalyzingProperty != nullptr);
-        m_curAnalyzingProperty->out.push_back(pd->index);
-        pd->in.push_back(m_curAnalyzingProperty->index);
-        util::condPrint(option::showPropertyDep, "property [%d] -> [%d]\n", m_curAnalyzingProperty->index, pd->index);
+        m_curAnalyzingProperty->out.push_back(pd->fieldIndex);
+        pd->in.push_back(m_curAnalyzingProperty->fieldIndex);
+        util::condPrint(option::showPropertyDep, "property [%d] -> [%d]\n", m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
     }
 }
 
@@ -708,8 +1052,97 @@ void SymbolVisitor::visit(RefExpr *e)
         throw SymbolException("RefExpr", "No symbol named " + e->name);
     }
 
-    util::condPrint(option::showSymbolRef, "ref %s\n", sym->symbolString().c_str());
+    util::condPrint(option::showSymbolRef, "ref: %s\n", sym->symbolString().c_str());
     e->typeInfo = sym->typeInfo();
+
+    ASTNode *ast = sym->astNode();
+    if (m_visitingLvalue)
+    {
+        switch (sym->category())
+        {
+        case Symbol::Category::Variable:
+        {
+            m_lvalueCategory = LvalueCategory::Local;
+
+            VarDecl *vd = dynamic_cast<VarDecl *>(ast);
+            assert(vd != nullptr);
+
+            m_lvalueIndex = vd->localIndex;
+
+            break;
+        }
+        case Symbol::Category::Parameter:
+        {
+            m_lvalueCategory = LvalueCategory::Local;
+
+            ParamDecl *pd = dynamic_cast<ParamDecl *>(ast);
+            assert(pd != nullptr);
+
+            m_lvalueIndex = pd->localIndex;
+
+            break;
+        }
+        case Symbol::Category::Property:
+        {
+            m_lvalueCategory = LvalueCategory::Field;
+
+            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
+            assert(pd != nullptr);
+
+            m_lvalueIndex = pd->fieldIndex;
+
+            util::collectAsm("    lload 0\n");
+
+            break;
+        }
+        case Symbol::Category::PropertyGroup:
+        {
+            break;
+        }
+        default:
+        {
+            throw SymbolException("RefExpr",
+                                  e->name + " should't in lvalue expr");
+        }
+        }
+    }
+    else
+    {
+        switch (sym->category())
+        {
+        case Symbol::Category::Variable:
+        {
+            VarDecl *vd = dynamic_cast<VarDecl *>(ast);
+            assert(vd != nullptr);
+
+            util::collectAsm("    lload %d\n", vd->localIndex);
+
+            break;
+        }
+        case Symbol::Category::Parameter:
+        {
+            ParamDecl *pd = dynamic_cast<ParamDecl *>(ast);
+            assert(pd != nullptr);
+
+            util::collectAsm("    lload %d\n", pd->localIndex);
+
+            break;
+        }
+        case Symbol::Category::Property:
+        {
+            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
+            assert(pd != nullptr);
+
+            util::collectAsm("    lload 0\n");
+            util::collectAsm("    fload %d\n", pd->fieldIndex);
+
+            break;
+        }
+        default:
+        {
+        }
+        }
+    }
 
     if (sym->category() == Symbol::Category::Property && m_analyzingPropertyDep)
     {
@@ -719,9 +1152,9 @@ void SymbolVisitor::visit(RefExpr *e)
         assert(pd != nullptr);
 
         assert(m_curAnalyzingProperty != nullptr);
-        m_curAnalyzingProperty->out.push_back(pd->index);
-        pd->in.push_back(m_curAnalyzingProperty->index);
-        util::condPrint(option::showPropertyDep, "property [%d] -> [%d]\n", m_curAnalyzingProperty->index, pd->index);
+        m_curAnalyzingProperty->out.push_back(pd->fieldIndex);
+        pd->in.push_back(m_curAnalyzingProperty->fieldIndex);
+        util::condPrint(option::showPropertyDep, "property [%d] -> [%d]\n", m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
     }
 }
 
@@ -735,11 +1168,66 @@ void SymbolVisitor::visit(VarDecl *vd)
     vd->localIndex = m_functionLocals;
     m_functionLocals++;
 
+    util::condPrint(option::showGenAsm, "genAsm: localIndex [%d] %s\n",
+                    vd->localIndex,
+                    vd->name.c_str());
+
     if (vd->expr)
     {
         visit(vd->expr.get());
-        printf("lstore %d\n", vd->localIndex);
+        if (!(*vd->type == *vd->expr->typeInfo) && !vd->type->assignCompatible(vd->expr->typeInfo))
+        {
+            throw SymbolException("VarDecl", "Type doesn't match("
+                                  + vd->type->toString()
+                                  + ", "
+                                  + vd->expr->typeInfo->toString()
+                                  + ")");
+        }
+        util::collectAsm("    lstore %d\n", vd->localIndex);
     }
+    else
+    {
+        if (vd->type->category() == TypeInfo::Category::Custom)
+        {
+            std::string className = vd->type->toString();
+            shared_ptr<Symbol> classSymbol = curScope()->resolve(className);
+            if (classSymbol == nullptr)
+            {
+                throw SymbolException("VarDecl", "No symbol for type " + className);
+            }
+            util::condPrint(option::showSymbolRef, "ref: %s\n", classSymbol->symbolString().c_str());
+
+            int memberCount = 0;
+            ASTNode *ast = classSymbol->astNode();
+            if (classSymbol->category() == Symbol::Category::Struct)
+            {
+                StructDecl *sd = dynamic_cast<StructDecl *>(ast);
+                assert(sd != nullptr);
+                memberCount = static_cast<int>(sd->fieldList.size());
+            }
+            else if (classSymbol->category() == Symbol::Category::Component)
+            {
+                ComponentDefinationDecl *cdd = dynamic_cast<ComponentDefinationDecl *>(ast);
+                assert(cdd != nullptr);
+                memberCount = static_cast<int>(cdd->propertyList.size());
+            }
+            util::condPrint(option::showGenAsm, "genAsm: %s member count %d\n",
+                            classSymbol->symbolString().c_str(),
+                            memberCount);
+
+            util::collectAsm("    struct %d\n", memberCount);
+            util::collectAsm("    lstore %d\n", vd->localIndex);
+        }
+    }
+}
+
+void SymbolVisitor::visit(FieldDecl *md)
+{
+    assert(md != nullptr);
+
+    string name = md->name;
+    shared_ptr<Symbol> sym(new Symbol(Symbol::Category::Field, name, md->type, md));
+    curScope()->define(sym);
 }
 
 void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
@@ -756,7 +1244,7 @@ void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
         shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, pd->type, pd));
         curScope()->define(propertySym);
 
-        util::condPrint(option::showPropertyDep, "property [%d] %s\n", pd->index, propertySym->symbolString().c_str());
+        util::condPrint(option::showPropertyDep, "property [%d] %s\n", pd->fieldIndex, propertySym->symbolString().c_str());
     }
 }
 
@@ -776,12 +1264,12 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
             // the group is defined as a PropertyGroup, that's good
             std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(group);
             assert(scopeSym != nullptr);
-            util::condPrint(option::showSymbolRef, "ref %s\n", scopeSym->symbolString().c_str());
+            util::condPrint(option::showSymbolRef, "ref: %s\n", scopeSym->symbolString().c_str());
 
             shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd));
             scopeSym->define(propertySym);
 
-            util::condPrint(option::showPropertyDep, "property [%d] %s\n", gpd->index, propertySym->symbolString().c_str());
+            util::condPrint(option::showPropertyDep, "property [%d] %s\n", gpd->fieldIndex, propertySym->symbolString().c_str());
         }
         else
         {
@@ -807,7 +1295,7 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
         shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd));
         dynamic_cast<ScopeSymbol *>(groupSym.get())->define(propertySym);
 
-        util::condPrint(option::showPropertyDep, "property [%d] %s\n", gpd->index, propertySym->symbolString().c_str());
+        util::condPrint(option::showPropertyDep, "property [%d] %s\n", gpd->fieldIndex, propertySym->symbolString().c_str());
     }
 }
 
@@ -933,13 +1421,17 @@ void SymbolVisitor::visit(IfStmt *is)
 {
     assert(is != nullptr);
 
+    const int falseLabel = m_labelCounter++;
+
     visit(is->condition.get());
     if (is->condition->typeInfo->category() != TypeInfo::Category::Int)
     {
         throw SymbolException("IfStmt", "if statement requires type of condition expression is int, but actually "
                               + is->condition->typeInfo->toString());
     }
+    util::collectAsm("    brf .L%d\n", falseLabel);
     visit(is->thenStmt.get());
+    util::collectAsm(".L%d\n", falseLabel);
     if (is->elseStmt)
     {
         visit(is->elseStmt.get());
@@ -950,8 +1442,37 @@ void SymbolVisitor::visit(WhileStmt *ws)
 {
     assert(ws != nullptr);
 
+    const int conditionLabel = m_labelCounter++;
+    const int endLabel = m_labelCounter++;
+
+    m_breakLabels.push_back(endLabel);
+    m_continueLabels.push_back(conditionLabel);
+
+    util::collectAsm(".L%d\n", conditionLabel);
     visit(ws->condition.get());
+    util::collectAsm("    brf .L%d\n", endLabel);
     visit(ws->bodyStmt.get());
+    util::collectAsm("    br .L%d\n", conditionLabel);
+    util::collectAsm(".L%d\n", endLabel);
+
+    m_breakLabels.pop_back();
+    m_continueLabels.pop_back();
+}
+
+void SymbolVisitor::visit(BreakStmt *bs)
+{
+    assert(bs != nullptr);
+    assert(m_breakLabels.size() != 0);
+
+    util::collectAsm("    br .L%d\n", m_breakLabels.back());
+}
+
+void SymbolVisitor::visit(ContinueStmt *cs)
+{
+    assert(cs != nullptr);
+    assert(m_continueLabels.size() != 0);
+
+    util::collectAsm("    br .L%d\n", m_continueLabels.back());
 }
 
 void SymbolVisitor::visit(ReturnStmt *rs)
@@ -962,6 +1483,8 @@ void SymbolVisitor::visit(ReturnStmt *rs)
     {
         visit(rs->returnExpr.get());
     }
+
+    util::collectAsm("    ret\n");
 }
 
 void SymbolVisitor::visit(ExprStmt *es)
@@ -997,13 +1520,11 @@ void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
     methodScope->setScopeName(fd->name);
     pushScope(methodScope);
 
-    for (auto &p : fd->paramList)
+    for (size_t i = 0; i < fd->paramList.size(); i++)
     {
-        visit(p.get());
+        visit(fd->paramList[i].get());
+        fd->paramList[i]->localIndex = static_cast<int>(i);
     }
-
-    m_functionLocals = 0;
-    visit(fd->body.get());
 
     string name = fd->name;
     int args = static_cast<int>(fd->paramList.size());
@@ -1011,10 +1532,31 @@ void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
     {
         name = fd->component->name + "::" + name;
         args += 1;
+        for (size_t i = 0; i < fd->paramList.size(); i++)
+        {
+            fd->paramList[i]->localIndex += 1;
+        }
     }
-    int locals = m_functionLocals;
+
+    for (size_t i = 0; i < fd->paramList.size(); i++)
+    {
+        util::condPrint(option::showGenAsm, "genAsm: localIndex [%d] %s\n",
+                        fd->paramList[i]->localIndex,
+                        fd->paramList[i]->name.c_str());
+    }
+
+    util::dumpAsm();
+    m_functionLocals = args;
+    visit(fd->body.get());
+
+    int locals = m_functionLocals - args;
 
     printf(".def %s args=%d locals=%d\n", name.c_str(), args, locals);
+    vector<string> asms = util::dumpAsm();
+    for (auto &s : asms)
+    {
+        printf("%s", s.c_str());
+    }
 
     popScope();
 }

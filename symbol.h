@@ -42,7 +42,7 @@ public:
         Variable,
         Parameter,
         Struct,
-        Member,
+        Field,
         Component,
         PropertyGroup,
         Property,
@@ -66,6 +66,7 @@ public:
     std::string name() const;
     std::shared_ptr<TypeInfo> typeInfo() const;
     ASTNode *astNode() const;
+    void setAstNode(ASTNode *astNode);
 
 private:
     Category m_category = Category::Invalid;
@@ -99,7 +100,7 @@ class FunctionSymbol : public Symbol
 public:
     FunctionSymbol(const std::string &name,
                    const std::shared_ptr<TypeInfo> &ti,
-                   const std::vector<std::shared_ptr<TypeInfo>> &paramTypes)
+                   const std::vector<std::shared_ptr<TypeInfo>> &paramTypes = std::vector<std::shared_ptr<TypeInfo>>())
         : Symbol(Symbol::Category::Function, name, ti)
         , m_paramTypes(paramTypes)
     {}

@@ -135,15 +135,6 @@ bool TypeInfo::assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const
     {
         return true;
     }
-    if (m_category == Category::Point && rhs->m_category == Category::List)
-    {
-        ListTypeInfo *lti = dynamic_cast<ListTypeInfo *>(rhs.get());
-        assert(lti != nullptr);
-        if (lti->elementType()->category() == Category::Int)
-        {
-            return true;
-        }
-    }
     return false;
 }
 

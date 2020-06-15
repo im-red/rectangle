@@ -10,5 +10,7 @@ bool showSymbolRef = false;
 bool showPropertyDep = false;
 bool showScopeStack = false;
 bool showLLTry = false;
+bool showLocalIndex = false;
+bool showGenAsm = false;
 
 }

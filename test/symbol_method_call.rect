@@ -13,9 +13,20 @@ def Rectangle {
         rect re;
         drawRect(re);
 
+        list<int> l = {};
+        list<int> m = {1, 2, 3};
+        list<int> n = {r.x};
+
         string s = "123";
         string s2 = s;
-        printString(s);
+        while (s == "123") {
+            printString(s);
+            while (s == "123") {
+                printString(s);
+                break;
+            }
+            break;
+        }
 
         test();
         return;

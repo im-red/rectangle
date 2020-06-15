@@ -1,0 +1,72 @@
+def Rectangle {
+    int x: 0
+    int border.width: 1
+    enum LineType {
+        Solid,
+        Dot,
+        Dash
+    }
+    int border.type: Solid
+    void propertyLvalue() {
+        x = 0;
+        border.width = 1;
+    }
+    void propertyRvalue() {
+        int a = x;
+        int b = border.width;
+    }
+    void listInit() {
+        list<list<int>> points = {{1, 2}, {1, 2}, {1, 2}};
+        list<int> l = {};
+    }
+    void stmt() {
+        string s = "123";
+        while (s == "123") {
+            printString(s);
+            while (s == "123") {
+                printString(s);
+                break;
+            }
+            break;
+        }
+    }
+    void listSubscript() {
+        list<list<int>> points = {{1, 2}, {1, 2}, {1, 2}};
+        int pointLen = len(points);
+        int i = 0;
+        while (i < pointLen) {
+            pt p;
+            p.x = points[i][0];
+            p.y = points[i][1];
+            p.radius = 5;
+            p.fill_color = "#000000";
+            drawPt(p);
+            i = i + 1;
+        }
+    }
+    void draw() {
+        Rectangle r;
+        r.draw();
+        getDasharray(r.border.type);
+
+        rect re;
+        drawRect(re);
+
+        return;
+    }
+    string getDasharray(int type) {
+        return "";
+    }
+    void fieldLvalue() {
+        Rectangle r;
+        r.x = 0;
+        r.border.width = 0;
+    }
+    void fieldRvalue() {
+        Rectangle r;
+        int a = r.x;
+        a = r.x;
+        int b = r.border.width;
+        b = r.border.width;
+    }
+}

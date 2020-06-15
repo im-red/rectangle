@@ -11,6 +11,8 @@ extern bool showSymbolRef;
 extern bool showPropertyDep;
 extern bool showScopeStack;
 extern bool showLLTry;
+extern bool showLocalIndex;
+extern bool showGenAsm;
 
 }
 
