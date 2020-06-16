@@ -55,7 +55,24 @@ def Rectangle {
         return;
     }
     string getDasharray(int type) {
-        return "";
+        if (type == Solid) {
+            return "Solid";
+        }
+        else if (type == Dot) {
+            return "Dot";
+        }
+        else {
+            return "Dash";
+        }
+        if (x == Solid) {
+            return "Solid";
+        }
+        else if (border.type == Dot) {
+            return "Dot";
+        }
+        else {
+            return "Dash";
+        }
     }
     void fieldLvalue() {
         Rectangle r;

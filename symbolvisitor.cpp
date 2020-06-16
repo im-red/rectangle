@@ -713,8 +713,7 @@ void SymbolVisitor::visit(CallExpr *e)
 
     if (m_visitingLvalue)
     {
-        throw SymbolException("CallExpr",
-                              "CallExpr produce rvalue");
+        throw SymbolException("CallExpr", "CallExpr only produce rvalue");
     }
 
     if (e->funcExpr->category == Expr::Category::Ref
@@ -1138,6 +1137,15 @@ void SymbolVisitor::visit(RefExpr *e)
 
             break;
         }
+        case Symbol::Category::EnumConstants:
+        {
+            EnumConstantDecl *ecd = dynamic_cast<EnumConstantDecl *>(ast);
+            assert(ecd != nullptr);
+
+            util::collectAsm("    iconst %d\n", ecd->value);
+
+            break;
+        }
         default:
         {
         }
@@ -1330,7 +1338,7 @@ void SymbolVisitor::visit(ParamDecl *pd)
 {
     assert(pd != nullptr);
 
-    shared_ptr<Symbol> paramSym(new Symbol(Symbol::Category::Parameter, pd->name, pd->type));
+    shared_ptr<Symbol> paramSym(new Symbol(Symbol::Category::Parameter, pd->name, pd->type, pd));
     curScope()->define(paramSym);
 }
 
@@ -1565,7 +1573,7 @@ void SymbolVisitor::visit(EnumConstantDecl *ecd)
 {
     assert(ecd != nullptr);
 
-    shared_ptr<Symbol> enumSym(new Symbol(Symbol::Category::EnumConstants, ecd->name, make_shared<TypeInfo>(TypeInfo::Category::Int)));
+    shared_ptr<Symbol> enumSym(new Symbol(Symbol::Category::EnumConstants, ecd->name, make_shared<TypeInfo>(TypeInfo::Category::Int), ecd));
     curScope()->define(enumSym);
 }
 
