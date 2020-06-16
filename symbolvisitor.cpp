@@ -917,13 +917,13 @@ void SymbolVisitor::visit(MemberExpr *e)
     visit(e->instanceExpr.get());
     m_visitingLvalue = visitingLvalueBackup;
 
-    shared_ptr<TypeInfo> typeInfo = e->instanceExpr->typeInfo;
-    string typeString = typeInfo->toString();
+    shared_ptr<TypeInfo> instanceTypeInfo = e->instanceExpr->typeInfo;
+    string typeString = instanceTypeInfo->toString();
 
     shared_ptr<Symbol> instanceTypeSymbol;
-    if (typeInfo->category() == TypeInfo::Category::Group)
+    if (instanceTypeInfo->category() == TypeInfo::Category::Group)
     {
-        shared_ptr<GroupTypeInfo> groupTypeInfo = dynamic_pointer_cast<GroupTypeInfo>(typeInfo);
+        shared_ptr<GroupTypeInfo> groupTypeInfo = dynamic_pointer_cast<GroupTypeInfo>(instanceTypeInfo);
         assert(groupTypeInfo != nullptr);
 
         string componentName = groupTypeInfo->componentType()->toString();
@@ -951,7 +951,7 @@ void SymbolVisitor::visit(MemberExpr *e)
 
         instanceTypeSymbol = groupSym;
     }
-    else if (typeInfo->category() == TypeInfo::Category::Custom)
+    else if (instanceTypeInfo->category() == TypeInfo::Category::Custom)
     {
         instanceTypeSymbol = curScope()->resolve(typeString);
         if (!instanceTypeSymbol)
@@ -961,7 +961,7 @@ void SymbolVisitor::visit(MemberExpr *e)
     }
     else
     {
-        throw SymbolException("MemberExpr", typeInfo->toString() + " doesn't contains member");
+        throw SymbolException("MemberExpr", instanceTypeInfo->toString() + " doesn't contains member");
     }
 
     std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
@@ -997,6 +997,11 @@ void SymbolVisitor::visit(MemberExpr *e)
 
             m_lvalueCategory = LvalueCategory::Field;
             m_lvalueIndex = pd->fieldIndex;
+
+            if (instanceTypeInfo->category() == TypeInfo::Category::Group)
+            {
+                util::collectAsm("    lload 0\n");
+            }
         }
         else
         {

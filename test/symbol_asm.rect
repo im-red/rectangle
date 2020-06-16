@@ -7,14 +7,7 @@ def Rectangle {
         Dash
     }
     int border.type: Solid
-    void propertyLvalue() {
-        x = 0;
-        border.width = 1;
-    }
-    void propertyRvalue() {
-        int a = x;
-        int b = border.width;
-    }
+
     void listInit() {
         list<list<int>> points = {{1, 2}, {1, 2}, {1, 2}};
         list<int> l = {};
@@ -74,16 +67,32 @@ def Rectangle {
             return "Dash";
         }
     }
-    void fieldLvalue() {
+    void thisPropertyLvalue() {
+        x = 0;
+    }
+    void thisGroupedPropertyLvalue() {
+        border.width = 1;
+    }
+    void thisPropertyRvalue() {
+        int a = x;
+    }
+    void thisGroupedPropertyRvalue() {
+        int b = border.width;
+    }
+    void propertyLvalue() {
         Rectangle r;
         r.x = 0;
+    }
+    void groupedPropertyLvalue() {
+        Rectangle r;
         r.border.width = 0;
     }
-    void fieldRvalue() {
+    void propertyRvalue() {
         Rectangle r;
         int a = r.x;
-        a = r.x;
+    }
+    void groupedPropertyRvalue() {
+        Rectangle r;
         int b = r.border.width;
-        b = r.border.width;
     }
 }
