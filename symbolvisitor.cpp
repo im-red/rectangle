@@ -1019,6 +1019,7 @@ void SymbolVisitor::visit(MemberExpr *e)
             assert(pd != nullptr);
 
             int fieldIndex = pd->fieldIndex;
+            util::collectAsm("    lload 0\n");
             util::collectAsm("    fload %d\n", fieldIndex);
         }
         else
