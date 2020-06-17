@@ -997,11 +997,6 @@ void SymbolVisitor::visit(MemberExpr *e)
 
             m_lvalueCategory = LvalueCategory::Field;
             m_lvalueIndex = pd->fieldIndex;
-
-            if (instanceTypeInfo->category() == TypeInfo::Category::Group)
-            {
-                util::collectAsm("    lload 0\n");
-            }
         }
         else
         {
@@ -1024,7 +1019,6 @@ void SymbolVisitor::visit(MemberExpr *e)
             assert(pd != nullptr);
 
             int fieldIndex = pd->fieldIndex;
-            util::collectAsm("    lload 0\n");
             util::collectAsm("    fload %d\n", fieldIndex);
         }
         else
@@ -1102,6 +1096,7 @@ void SymbolVisitor::visit(RefExpr *e)
         }
         case Symbol::Category::PropertyGroup:
         {
+            util::collectAsm("    lload 0\n");
             break;
         }
         default:
@@ -1140,6 +1135,12 @@ void SymbolVisitor::visit(RefExpr *e)
 
             util::collectAsm("    lload 0\n");
             util::collectAsm("    fload %d\n", pd->fieldIndex);
+
+            break;
+        }
+        case Symbol::Category::PropertyGroup:
+        {
+            util::collectAsm("    lload 0\n");
 
             break;
         }

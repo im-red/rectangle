@@ -83,7 +83,9 @@ using namespace std;
 
 TEST(symbol, ASM)
 {
-    option::verbose = true;
+    option::showAst = true;
+    option::showGenAsm = true;
+
     ifstream t("../symbol_asm.rect");
     stringstream buffer;
     buffer << t.rdbuf();
