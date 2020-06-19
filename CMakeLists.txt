@@ -21,4 +21,5 @@ add_executable(rectangle
     symboltypestring.cpp
     util.cpp
     symbolvisitor.cpp
+    object.cpp
 )

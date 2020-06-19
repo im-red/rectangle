@@ -26,6 +26,7 @@ set(RECT_SRCS
     ../symbolvisitor.cpp
     ../symboltypestring.cpp
     ../util.cpp
+    ../object.cpp
 )
 
 add_library(common
@@ -37,11 +38,17 @@ add_executable(test_all
     test_driver.cpp
     test_parser.cpp
     test_symbol.cpp
+    test_object.cpp
 )
 
 add_executable(test_symbol
     test_symbol.cpp
 )
 
+add_executable(test_object
+    test_object.cpp
+)
+
 target_link_libraries(test_all common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_symbol common ${GTEST_LIBRARIES} pthread)
+target_link_libraries(test_object common ${GTEST_LIBRARIES} pthread)
