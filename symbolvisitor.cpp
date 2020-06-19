@@ -204,6 +204,10 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
         {
             visitPropertyInitialization(p.get());
         }
+
+        printf(".def %s::%s args=1 locals=0\n", name.c_str(), name.c_str());
+        printf("    ret\n");
+
         for (auto &f : cdd->methodList)
         {
             visitMethodHeader(f.get());
