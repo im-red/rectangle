@@ -98,5 +98,7 @@ private:
     };
     LvalueCategory m_lvalueCategory = LvalueCategory::Invalid;
     int m_lvalueIndex;
+
+    std::string m_curComponentName;
 };
 

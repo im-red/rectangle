@@ -188,6 +188,7 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
         curScope()->define(sym);
 
         pushScope(dynamic_pointer_cast<Scope>(sym));
+        m_curComponentName = name;
 
         for (auto &e : cdd->enumList)
         {
@@ -212,6 +213,7 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
             visitMethodBody(f.get());
         }
 
+        m_curComponentName = "";
         popScope();
     }
 }
@@ -716,16 +718,6 @@ void SymbolVisitor::visit(CallExpr *e)
         throw SymbolException("CallExpr", "CallExpr only produce rvalue");
     }
 
-    if (e->funcExpr->category == Expr::Category::Ref
-            || e->funcExpr->category == Expr::Category::Member)
-    {
-        // good
-    }
-    else
-    {
-        throw SymbolException("CallExpr", "Only f(...) and obj.f(...) is valid");
-    }
-
     if (curScope()->category() != Scope::Category::Local)
     {
         throw SymbolException("CallExpr",
@@ -739,6 +731,8 @@ void SymbolVisitor::visit(CallExpr *e)
     {
         RefExpr *r = dynamic_cast<RefExpr *>(e->funcExpr.get());
         assert(r != nullptr);
+        visit(r);
+
         std::shared_ptr<Symbol> func = curScope()->resolve(r->name);
         if (!func)
         {
@@ -770,7 +764,7 @@ void SymbolVisitor::visit(CallExpr *e)
         util::condPrint(option::showSymbolRef, "ref: %s\n", func->symbolString().c_str());
         e->funcExpr->typeInfo = func->typeInfo();
     }
-    else // Expr::Category::Member
+    else if (e->funcExpr->category == Expr::Category::Member)
     {
         MemberExpr *m = dynamic_cast<MemberExpr *>(e->funcExpr.get());
         assert(m != nullptr);
@@ -814,6 +808,10 @@ void SymbolVisitor::visit(CallExpr *e)
 
         util::condPrint(option::showSymbolRef, "ref: %s\n", method->symbolString().c_str());
         e->funcExpr->typeInfo = method->typeInfo();
+    }
+    else
+    {
+        throw SymbolException("CallExpr", "Only f(...) and obj.f(...) is valid");
     }
 
     for (auto &p : e->paramList)
@@ -864,6 +862,37 @@ void SymbolVisitor::visit(CallExpr *e)
                          e->paramList[i]->typeInfo->toString().c_str());
                 throw SymbolException("CallExpr", string(buf));
             }
+        }
+        if (e->funcExpr->category == Expr::Category::Ref)
+        {
+            RefExpr *r = dynamic_cast<RefExpr *>(e->funcExpr.get());
+            assert(r != nullptr);
+            std::shared_ptr<Symbol> func = curScope()->resolve(r->name);
+            assert(func != nullptr);
+
+            if (func->category() == Symbol::Category::Function)
+            {
+                util::collectAsm("    call %s\n", func->name().c_str());
+            }
+            else if (func->category() == Symbol::Category::Method)
+            {
+                assert(m_curComponentName != "");
+                util::collectAsm("    call %s::%s\n", m_curComponentName.c_str(), func->name().c_str());
+            }
+            else
+            {
+                assert(false);
+            }
+        }
+        else if (e->funcExpr->category == Expr::Category::Member)
+        {
+            MemberExpr *m = dynamic_cast<MemberExpr *>(e->funcExpr.get());
+            assert(m != nullptr);
+
+            shared_ptr<TypeInfo> instanceType = m->instanceExpr->typeInfo;
+            string typeName = instanceType->toString();
+
+            util::collectAsm("    call %s::%s\n", typeName.c_str(), m->name.c_str());
         }
     }
 
@@ -1115,6 +1144,9 @@ void SymbolVisitor::visit(RefExpr *e)
             VarDecl *vd = dynamic_cast<VarDecl *>(ast);
             assert(vd != nullptr);
 
+            util::condPrint(option::showGenAsm,
+                            "genAsm: ref %s(Variable) in RefExpr(rvalue)\n", sym->name().c_str());
+
             util::collectAsm("    lload %d\n", vd->localIndex);
 
             break;
@@ -1123,6 +1155,9 @@ void SymbolVisitor::visit(RefExpr *e)
         {
             ParamDecl *pd = dynamic_cast<ParamDecl *>(ast);
             assert(pd != nullptr);
+
+            util::condPrint(option::showGenAsm,
+                            "genAsm: ref %s(Parameter) in RefExpr(rvalue)\n", sym->name().c_str());
 
             util::collectAsm("    lload %d\n", pd->localIndex);
 
@@ -1133,6 +1168,9 @@ void SymbolVisitor::visit(RefExpr *e)
             PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
             assert(pd != nullptr);
 
+            util::condPrint(option::showGenAsm,
+                            "genAsm: ref %s(Property) in RefExpr(rvalue)\n", sym->name().c_str());
+
             util::collectAsm("    lload 0\n");
             util::collectAsm("    fload %d\n", pd->fieldIndex);
 
@@ -1140,6 +1178,9 @@ void SymbolVisitor::visit(RefExpr *e)
         }
         case Symbol::Category::PropertyGroup:
         {
+            util::condPrint(option::showGenAsm,
+                            "genAsm: ref %s(PropertyGroup) in RefExpr(rvalue)\n", sym->name().c_str());
+
             util::collectAsm("    lload 0\n");
 
             break;
@@ -1149,8 +1190,19 @@ void SymbolVisitor::visit(RefExpr *e)
             EnumConstantDecl *ecd = dynamic_cast<EnumConstantDecl *>(ast);
             assert(ecd != nullptr);
 
+            util::condPrint(option::showGenAsm,
+                            "genAsm: ref %s(EnumConstants) in RefExpr(rvalue)\n", sym->name().c_str());
+
             util::collectAsm("    iconst %d\n", ecd->value);
 
+            break;
+        }
+        case Symbol::Category::Method:
+        {
+            util::condPrint(option::showGenAsm,
+                            "genAsm: ref %s(Method) in RefExpr(rvalue)\n", sym->name().c_str());
+
+            util::collectAsm("    lload 0\n");
             break;
         }
         default:

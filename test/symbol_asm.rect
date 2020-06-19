@@ -124,4 +124,11 @@ def Rectangle {
         Rectangle r;
         r.list0[1] = r.test.list1[0];
     }
+    void thisMethod(int foo) {
+        thisMethod(x);
+    }
+    void instanceMethod(int foo) {
+        Rectangle r;
+        r.instanceMethod(r.x);
+    }
 }
