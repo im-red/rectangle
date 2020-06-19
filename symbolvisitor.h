@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "asmtext.h"
 #include "symbol.h"
 
 class SymbolVisitor
@@ -100,5 +101,7 @@ private:
     int m_lvalueIndex;
 
     std::string m_curComponentName;
+
+    AsmText m_asm;
 };
 

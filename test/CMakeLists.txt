@@ -27,6 +27,7 @@ set(RECT_SRCS
     ../symboltypestring.cpp
     ../util.cpp
     ../object.cpp
+    ../asmtext.cpp
 )
 
 add_library(common

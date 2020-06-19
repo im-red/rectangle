@@ -22,4 +22,5 @@ add_executable(rectangle
     util.cpp
     symbolvisitor.cpp
     object.cpp
+    asmtext.cpp
 )
