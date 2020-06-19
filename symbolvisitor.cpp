@@ -1283,6 +1283,12 @@ void SymbolVisitor::visit(VarDecl *vd)
                             memberCount);
 
             util::collectAsm("    struct %d\n", memberCount);
+            if (classSymbol->category() == Symbol::Category::Component)
+            {
+                util::collectAsm("    call %s::%s\n",
+                                 classSymbol->name().c_str(),
+                                 classSymbol->name().c_str());
+            }
             util::collectAsm("    lstore %d\n", vd->localIndex);
         }
     }
