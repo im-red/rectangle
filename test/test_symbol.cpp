@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "option.h"
 #include "symbolvisitor.h"
+#include "asmbin.h"
 
 #include <gtest/gtest.h>
 
@@ -104,5 +105,7 @@ TEST(symbol, ASM)
 
     SymbolVisitor sv;
     sv.setDocuments(documents);
-    sv.visit();
+    AsmText txt = sv.visit();
+    AsmBin bin(txt);
+    bin.dump();
 }

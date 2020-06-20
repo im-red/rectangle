@@ -143,7 +143,7 @@ void SymbolVisitor::initBuiltInStructs()
     }
 }
 
-void SymbolVisitor::visit()
+AsmText SymbolVisitor::visit()
 {
     m_asm.clear();
 
@@ -167,9 +167,7 @@ void SymbolVisitor::visit()
         }
     }
 
-    m_asm.dump();
-    AsmBin asmBin(m_asm);
-    asmBin.dump();
+    return m_asm;
 }
 
 void SymbolVisitor::visit(DocumentDecl *dd)

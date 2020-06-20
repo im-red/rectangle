@@ -26,7 +26,7 @@ public:
     SymbolVisitor();
 
     void setDocuments(std::vector<DocumentDecl *> documents);
-    void visit();
+    AsmText visit();
 
 private:
     std::shared_ptr<Scope> curScope();
