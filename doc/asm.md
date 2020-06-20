@@ -201,12 +201,6 @@ call f
 
 ret
 
-## Draw
-
-drawRect
-
-drawText
-
 ## Utility
 
 print
@@ -222,3 +216,9 @@ opd.push(v.size())
 ```
 
 halt
+
+## Draw
+
+drawRect
+
+drawText

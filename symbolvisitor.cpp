@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  ********************************************************************************/
 
+#include "asmbin.h"
 #include "symbolvisitor.h"
 
 #include <assert.h>
@@ -149,6 +150,8 @@ void SymbolVisitor::visit()
     }
 
     m_asm.dump();
+    AsmBin asmBin(m_asm);
+    asmBin.dump();
 }
 
 void SymbolVisitor::visit(DocumentDecl *dd)

@@ -12,5 +12,6 @@ bool showScopeStack = false;
 bool showLLTry = false;
 bool showLocalIndex = false;
 bool showGenAsm = false;
+bool showAssemble = false;
 
 }

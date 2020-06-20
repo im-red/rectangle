@@ -85,6 +85,7 @@ TEST(symbol, ASM)
 {
     option::showAst = true;
     option::showGenAsm = true;
+    option::showAssemble = true;
 
     ifstream t("../symbol_asm.rect");
     stringstream buffer;
