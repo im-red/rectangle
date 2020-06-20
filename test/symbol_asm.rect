@@ -17,9 +17,9 @@ def Rectangle {
     void stmt() {
         string s = "123";
         while (s == "123") {
-            printString(s);
+            print(s);
             while (s == "123") {
-                printString(s);
+                print(s);
                 break;
             }
             break;

@@ -65,24 +65,26 @@ void SymbolVisitor::initGlobalScope()
     shared_ptr<Scope> globalScope(new Scope(Scope::Category::Global, nullptr));
     pushScope(globalScope);
 
-    {
-        shared_ptr<TypeInfo> stringType(new TypeInfo(TypeInfo::Category::String));
-        vector<shared_ptr<TypeInfo>> paramTypes(1, stringType);
-        shared_ptr<Symbol> printString(new FunctionSymbol("printString", make_shared<TypeInfo>(TypeInfo::Category::Void), paramTypes));
-        curScope()->define(printString);
-    }
+    shared_ptr<TypeInfo> voidType = make_shared<TypeInfo>(TypeInfo::Category::Void);
 
     {
         shared_ptr<TypeInfo> rectType(new CustomTypeInfo("rect"));
         vector<shared_ptr<TypeInfo>> paramTypes(1, rectType);
-        shared_ptr<Symbol> drawRect(new FunctionSymbol("drawRect", make_shared<TypeInfo>(TypeInfo::Category::Void), paramTypes));
+        shared_ptr<Symbol> drawRect(new FunctionSymbol("drawRect", voidType, paramTypes));
         curScope()->define(drawRect);
     }
 
     {
         shared_ptr<TypeInfo> ptType(new CustomTypeInfo("pt"));
         vector<shared_ptr<TypeInfo>> paramTypes(1, ptType);
-        shared_ptr<Symbol> drawPt(new FunctionSymbol("drawPt", make_shared<TypeInfo>(TypeInfo::Category::Void), paramTypes));
+        shared_ptr<Symbol> drawPt(new FunctionSymbol("drawPt", voidType, paramTypes));
+        curScope()->define(drawPt);
+    }
+
+    {
+        shared_ptr<TypeInfo> textType(new CustomTypeInfo("text"));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, textType);
+        shared_ptr<Symbol> drawPt(new FunctionSymbol("drawText", voidType, paramTypes));
         curScope()->define(drawPt);
     }
 
@@ -91,23 +93,27 @@ void SymbolVisitor::initGlobalScope()
         vector<shared_ptr<TypeInfo>> paramTypes(1, voidType);
         shared_ptr<Symbol> len(new FunctionSymbol("len", make_shared<TypeInfo>(TypeInfo::Category::Int), paramTypes));
         curScope()->define(len);
+        shared_ptr<Symbol> print(new FunctionSymbol("print", voidType, paramTypes));
+        curScope()->define(print);
     }
 }
 
 void SymbolVisitor::initBuiltInStructs()
 {
+    shared_ptr<TypeInfo> intType = make_shared<TypeInfo>(TypeInfo::Category::Int);
+    shared_ptr<TypeInfo> StringType = make_shared<TypeInfo>(TypeInfo::Category::String);
     {
         unique_ptr<StructDecl> sd(new StructDecl);
         sd->name = "rect";
 
-        sd->fieldList.emplace_back(new FieldDecl("x", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        sd->fieldList.emplace_back(new FieldDecl("y", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        sd->fieldList.emplace_back(new FieldDecl("width", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        sd->fieldList.emplace_back(new FieldDecl("height", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        sd->fieldList.emplace_back(new FieldDecl("fill_color", make_shared<TypeInfo>(TypeInfo::Category::String)));
-        sd->fieldList.emplace_back(new FieldDecl("stroke_width", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        sd->fieldList.emplace_back(new FieldDecl("stroke_color", make_shared<TypeInfo>(TypeInfo::Category::String)));
-        sd->fieldList.emplace_back(new FieldDecl("stroke_dasharray", make_shared<TypeInfo>(TypeInfo::Category::String)));
+        sd->fieldList.emplace_back(new FieldDecl("x", intType));
+        sd->fieldList.emplace_back(new FieldDecl("y", intType));
+        sd->fieldList.emplace_back(new FieldDecl("width", intType));
+        sd->fieldList.emplace_back(new FieldDecl("height", intType));
+        sd->fieldList.emplace_back(new FieldDecl("fill_color", StringType));
+        sd->fieldList.emplace_back(new FieldDecl("stroke_width", intType));
+        sd->fieldList.emplace_back(new FieldDecl("stroke_color", StringType));
+        sd->fieldList.emplace_back(new FieldDecl("stroke_dasharray", StringType));
 
         m_builtInStructs.push_back(move(sd));
     }
@@ -116,10 +122,22 @@ void SymbolVisitor::initBuiltInStructs()
         unique_ptr<StructDecl> sd(new StructDecl);
         sd->name = "pt";
 
-        sd->fieldList.emplace_back(new FieldDecl("x", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        sd->fieldList.emplace_back(new FieldDecl("y", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        sd->fieldList.emplace_back(new FieldDecl("radius", make_shared<TypeInfo>(TypeInfo::Category::Int)));
-        sd->fieldList.emplace_back(new FieldDecl("fill_color", make_shared<TypeInfo>(TypeInfo::Category::String)));
+        sd->fieldList.emplace_back(new FieldDecl("x", intType));
+        sd->fieldList.emplace_back(new FieldDecl("y", intType));
+        sd->fieldList.emplace_back(new FieldDecl("radius", intType));
+        sd->fieldList.emplace_back(new FieldDecl("fill_color", StringType));
+
+        m_builtInStructs.push_back(move(sd));
+    }
+
+    {
+        unique_ptr<StructDecl> sd(new StructDecl);
+        sd->name = "text";
+
+        sd->fieldList.emplace_back(new FieldDecl("x", intType));
+        sd->fieldList.emplace_back(new FieldDecl("y", intType));
+        sd->fieldList.emplace_back(new FieldDecl("size", intType));
+        sd->fieldList.emplace_back(new FieldDecl("text", StringType));
 
         m_builtInStructs.push_back(move(sd));
     }
@@ -858,6 +876,13 @@ void SymbolVisitor::visit(CallExpr *e)
                      e->paramList[0]->typeInfo->toString().c_str());
             throw SymbolException("CallExpr", string(buf));
         }
+    }
+    else if (functionName == "print"
+             || functionName == "drawRect"
+             || functionName == "drawText"
+             || functionName == "drawPt")
+    {
+        m_asm.appendLine({functionName});
     }
     else
     {
