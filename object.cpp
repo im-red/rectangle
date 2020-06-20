@@ -17,6 +17,8 @@
 
 #include "object.h"
 
+using namespace std;
+
 Object::~Object()
 {
     for (auto &o : m_vData)
@@ -69,4 +71,74 @@ Object::Category Object::category() const
 void Object::setCategory(const Category &category)
 {
     m_category = category;
+}
+
+std::string Object::toString() const
+{
+    std::string result;
+    switch (m_category)
+    {
+    case Category::Int:
+    {
+        result = "Int(" + to_string(m_intData) + ")";
+        break;
+    }
+    case Category::Float:
+    {
+        result = "Float(" + to_string(m_floatData) + ")";
+        break;
+    }
+    case Category::String:
+    {
+        result = "String(\"" + m_stringData + "\")";
+        break;
+    }
+    case Category::List:
+    {
+        result = "List(";
+        if (m_vData.size() == 0)
+        {
+            result += ")";
+        }
+        else if (m_vData.size() == 1)
+        {
+            result += m_vData[0]->toString() + ")";
+        }
+        else
+        {
+            result += m_vData[0]->toString();
+            for (size_t i = 1; i < m_vData.size(); i++)
+            {
+                result += ", " + m_vData[i]->toString();
+            }
+        }
+        break;
+    }
+    case Category::Struct:
+    {
+        result = "Struct(";
+        if (m_vData.size() == 0)
+        {
+            result += ")";
+        }
+        else if (m_vData.size() == 1)
+        {
+            result += m_vData[0]->toString() + ")";
+        }
+        else
+        {
+            result += m_vData[0]->toString();
+            for (size_t i = 1; i < m_vData.size(); i++)
+            {
+                result += ", " + m_vData[i]->toString();
+            }
+        }
+        break;
+    }
+    default:
+    {
+        assert(false);
+    }
+    }
+    return result;
 }

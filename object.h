@@ -152,6 +152,8 @@ public:
     Category category() const;
     void setCategory(const Category &category);
 
+    std::string toString() const;
+
 private:
     Category m_category = Category::Invalid;
 
