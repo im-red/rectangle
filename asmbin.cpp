@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  ********************************************************************************/
 
+#include "asminstruction.h"
 #include "asmbin.h"
 #include "util.h"
 #include "option.h"
@@ -37,186 +38,6 @@ AsmBin::~AsmBin()
     }
 }
 
-static const map<string, unsigned char> s_instrName2value =
-{
-    { "iadd", AsmBin::IADD },
-    { "isub", AsmBin::ISUB },
-    { "imul", AsmBin::IMUL },
-    { "idiv", AsmBin::IDIV },
-    { "irem", AsmBin::IREM },
-    { "ieq", AsmBin::IEQ },
-    { "ine", AsmBin::INE },
-    { "ilt", AsmBin::ILT },
-    { "igt", AsmBin::IGT },
-    { "ile", AsmBin::ILE },
-    { "ige", AsmBin::IGE },
-    { "iand", AsmBin::IAND },
-    { "ior", AsmBin::IOR },
-    { "fadd", AsmBin::FADD },
-    { "fsub", AsmBin::FSUB },
-    { "fmul", AsmBin::FMUL },
-    { "fdiv", AsmBin::FDIV },
-    { "feq", AsmBin::FEQ },
-    { "fne", AsmBin::FNE },
-    { "flt", AsmBin::FLT },
-    { "fgt", AsmBin::FGT },
-    { "fle", AsmBin::FLE },
-    { "fge", AsmBin::FGE },
-    { "sadd", AsmBin::SADD },
-    { "seq", AsmBin::SEQ },
-    { "sne", AsmBin::SNE },
-    { "pop", AsmBin::POP },
-    { "vector", AsmBin::VECTOR },
-    { "vappend", AsmBin::VAPPEND },
-    { "vload", AsmBin::VLOAD },
-    { "vstore", AsmBin::VSTORE },
-    { "ret", AsmBin::RET },
-    { "print", AsmBin::PRINT },
-    { "vlen", AsmBin::VLEN },
-    { "slen", AsmBin::SLEN },
-    { "halt", AsmBin::HALT },
-    { "drawRect", AsmBin::DRAWRECT },
-    { "drawText", AsmBin::DRAWTEXT },
-    { "gload", AsmBin::GLOAD },
-    { "gstore", AsmBin::GSTORE },
-    { "lload", AsmBin::LLOAD },
-    { "lstore", AsmBin::LSTORE },
-    { "fload", AsmBin::FLOAD },
-    { "fstore", AsmBin::FSTORE },
-    { "iconst", AsmBin::ICONST },
-    { "fconst", AsmBin::FCONST },
-    { "sconst", AsmBin::SCONST },
-    { "struct", AsmBin::STRUCT },
-    { "br", AsmBin::BR },
-    { "brt", AsmBin::BRT },
-    { "brf", AsmBin::BRF },
-    { "call", AsmBin::CALL },
-};
-
-static const map<unsigned char, string> s_instrValue2name =
-{
-    { AsmBin::IADD, "iadd" },
-    { AsmBin::ISUB, "isub" },
-    { AsmBin::IMUL, "imul" },
-    { AsmBin::IDIV, "idiv" },
-    { AsmBin::IREM, "irem" },
-    { AsmBin::IEQ, "ieq" },
-    { AsmBin::INE, "ine" },
-    { AsmBin::ILT, "ilt" },
-    { AsmBin::IGT, "igt" },
-    { AsmBin::ILE, "ile" },
-    { AsmBin::IGE, "ige" },
-    { AsmBin::IAND, "iand" },
-    { AsmBin::IOR, "ior" },
-    { AsmBin::FADD, "fadd" },
-    { AsmBin::FSUB, "fsub" },
-    { AsmBin::FMUL, "fmul" },
-    { AsmBin::FDIV, "fdiv" },
-    { AsmBin::FEQ, "feq" },
-    { AsmBin::FNE, "fne" },
-    { AsmBin::FLT, "flt" },
-    { AsmBin::FGT, "fgt" },
-    { AsmBin::FLE, "fle" },
-    { AsmBin::FGE, "fge" },
-    { AsmBin::SADD, "sadd" },
-    { AsmBin::SEQ, "seq" },
-    { AsmBin::SNE, "sne" },
-    { AsmBin::POP, "pop" },
-    { AsmBin::VECTOR, "vector" },
-    { AsmBin::VAPPEND, "vappend" },
-    { AsmBin::VLOAD, "vload" },
-    { AsmBin::VSTORE, "vstore" },
-    { AsmBin::RET, "ret" },
-    { AsmBin::PRINT, "print" },
-    { AsmBin::VLEN, "vlen" },
-    { AsmBin::SLEN, "slen" },
-    { AsmBin::HALT, "halt" },
-    { AsmBin::DRAWRECT, "drawRect" },
-    { AsmBin::DRAWTEXT, "drawText" },
-    { AsmBin::GLOAD, "gload" },
-    { AsmBin::GSTORE, "gstore" },
-    { AsmBin::LLOAD, "lload" },
-    { AsmBin::LSTORE, "lstore" },
-    { AsmBin::FLOAD, "fload" },
-    { AsmBin::FSTORE, "fstore" },
-    { AsmBin::ICONST, "iconst" },
-    { AsmBin::FCONST, "fconst" },
-    { AsmBin::SCONST, "sconst" },
-    { AsmBin::STRUCT, "struct" },
-    { AsmBin::BR, "br" },
-    { AsmBin::BRT, "brt" },
-    { AsmBin::BRF, "brf" },
-    { AsmBin::CALL, "call" },
-};
-
-static const set<unsigned char> s_instr0 =
-{
-    AsmBin::IADD,
-    AsmBin::ISUB,
-    AsmBin::IMUL,
-    AsmBin::IDIV,
-    AsmBin::IREM,
-    AsmBin::IEQ,
-    AsmBin::INE,
-    AsmBin::ILT,
-    AsmBin::IGT,
-    AsmBin::ILE,
-    AsmBin::IGE,
-    AsmBin::IAND,
-    AsmBin::IOR,
-    AsmBin::FADD,
-    AsmBin::FSUB,
-    AsmBin::FMUL,
-    AsmBin::FDIV,
-    AsmBin::FEQ,
-    AsmBin::FNE,
-    AsmBin::FLT,
-    AsmBin::FGT,
-    AsmBin::FLE,
-    AsmBin::FGE,
-    AsmBin::SADD,
-    AsmBin::SEQ,
-    AsmBin::SNE,
-    AsmBin::POP,
-    AsmBin::VECTOR,
-    AsmBin::VAPPEND,
-    AsmBin::VLOAD,
-    AsmBin::VSTORE,
-    AsmBin::RET,
-    AsmBin::PRINT,
-    AsmBin::VLEN,
-    AsmBin::SLEN,
-    AsmBin::HALT,
-    AsmBin::DRAWRECT,
-    AsmBin::DRAWTEXT,
-};
-
-static const set<unsigned char> s_instr1 =
-{
-    AsmBin::GLOAD,
-    AsmBin::GSTORE,
-    AsmBin::LLOAD,
-    AsmBin::LSTORE,
-    AsmBin::FLOAD,
-    AsmBin::FSTORE,
-    AsmBin::ICONST,
-    AsmBin::FCONST,
-    AsmBin::SCONST,
-    AsmBin::STRUCT,
-};
-
-static const set<unsigned char> s_instrBranch =
-{
-    AsmBin::BR,
-    AsmBin::BRT,
-    AsmBin::BRF,
-};
-
-static const set<unsigned char> s_instrCall =
-{
-    AsmBin::CALL,
-};
-
 void AsmBin::assemble(const AsmText &t)
 {
     vector<vector<string>> text = t.text();
@@ -228,58 +49,7 @@ void AsmBin::assemble(const AsmText &t)
         }
         const std::string &firstWord = line[0];
 
-        Instruction instr = INVALID;
-        if (s_instrName2value.find(firstWord) != s_instrName2value.end())
-        {
-            instr = static_cast<Instruction>(s_instrName2value.at(firstWord));
-        }
-
-        auto iter0 = s_instr0.find(instr);
-        auto iter1 = s_instr1.find(instr);
-        auto iterBranch = s_instrBranch.find(instr);
-
-        if (iter0 != s_instr0.end())
-        {
-            assert(line.size() == 1);
-            appendByte(instr);
-        }
-        else if (iter1 != s_instr1.end())
-        {
-            assert(line.size() == 2);
-            int op;
-            if (firstWord == "fconst")
-            {
-                op = defineFloat(static_cast<float>(atof(line[1].c_str())));
-            }
-            else if (firstWord == "sconst")
-            {
-                op = defineString(line[1]);
-            }
-            else
-            {
-                op = atoi(line[1].c_str());
-            }
-            appendByte(instr);
-            appendInt(op);
-        }
-        else if (iterBranch != s_instrBranch.end())
-        {
-            assert(line.size() == 2);
-            string label = line[1];
-            int index = defineLabel(label);
-            appendByte(instr);
-            m_labelIndexAddr.push_back(m_offset);
-            appendInt(index);
-        }
-        else if (firstWord == "call")
-        {
-            assert(line.size() == 2);
-            string funcName = line[1];
-            int index = defineFunction(funcName);
-            appendByte(CALL);
-            appendInt(index);
-        }
-        else if (firstWord == ".def")
+        if (firstWord == ".def")
         {
             assert(line.size() == 4);
             string funcName = line[1];
@@ -294,7 +64,56 @@ void AsmBin::assemble(const AsmText &t)
         }
         else
         {
-            assert(false);
+            Instruction instr = static_cast<Instruction>(instr::getAsmValue(firstWord));
+
+            if (instr::isBranchInstr(instr))
+            {
+                assert(line.size() == 2);
+
+                string label = line[1];
+                int index = defineLabel(label);
+                appendByte(instr);
+                m_labelIndexAddr.push_back(m_offset);
+                appendInt(index);
+            }
+            else if (instr::isCallInstr(instr))
+            {
+                assert(line.size() == 2);
+
+                string funcName = line[1];
+                int index = defineFunction(funcName);
+                appendByte(CALL);
+                appendInt(index);
+            }
+            else if (instr::is0OpInstr(instr))
+            {
+                assert(line.size() == 1);
+
+                appendByte(instr);
+            }
+            else if (instr::is1OpInstr(instr))
+            {
+                assert(line.size() == 2);
+                int op;
+                if (firstWord == "fconst")
+                {
+                    op = defineFloat(static_cast<float>(atof(line[1].c_str())));
+                }
+                else if (firstWord == "sconst")
+                {
+                    op = defineString(line[1]);
+                }
+                else
+                {
+                    op = atoi(line[1].c_str());
+                }
+                appendByte(instr);
+                appendInt(op);
+            }
+            else
+            {
+                assert(false);
+            }
         }
     }
 
@@ -321,24 +140,21 @@ void AsmBin::dump()
     while (offset < static_cast<int>(m_code.size()))
     {
         unsigned char instr = m_code[static_cast<size_t>(offset)];
-        auto iter0 = s_instr0.find(instr);
-        auto iter1 = s_instr1.find(instr);
-        auto iterBranch = s_instrBranch.find(instr);
-        auto iterCall = s_instrCall.find(instr);
-        if (iter0 != s_instr0.end())
+
+        if (instr::is0OpInstr(instr))
         {
             unsigned addr = static_cast<unsigned>(offset);
-            printf("    %04x: %02x             ; %-9s\n", addr, instr, s_instrValue2name.at(instr).c_str());
+            printf("    %04x: %02x             ; %-9s\n", addr, instr, instr::getAsmName(instr).c_str());
             offset += 1;
         }
-        else if (iter1 != s_instr1.end() || iterBranch != s_instrBranch.end() || iterCall != s_instrCall.end())
+        else if (instr::is1OpInstr(instr))
         {
             unsigned addr = static_cast<unsigned>(offset);
             int op = getInt(offset + 1);
             printf("    %04x: %02x %02x %02x %02x %02x ; %-9s %x\n",
                    offset, instr,
                    m_code[addr + 1], m_code[addr + 2], m_code[addr + 3], m_code[addr + 4],
-                   s_instrValue2name.at(instr).c_str(), op);
+                    instr::getAsmName(instr).c_str(), op);
             offset += 5;
         }
         else
@@ -347,6 +163,11 @@ void AsmBin::dump()
             assert(false);
         }
     }
+}
+
+int AsmBin::codeSize() const
+{
+    return static_cast<int>(m_code.size());
 }
 
 int AsmBin::defineFloat(float f)
@@ -520,15 +341,15 @@ void AsmBin::appendInt(int n)
     m_offset += 4;
 }
 
-unsigned char AsmBin::getByte(int addr)
+unsigned char AsmBin::getByte(int addr) const
 {
-    assert(addr > 0 && addr < static_cast<int>(m_code.size()));
+    assert(addr >= 0 && addr < static_cast<int>(m_code.size()));
     return m_code[static_cast<size_t>(addr)];
 }
 
 void AsmBin::setInt(int addr, int n)
 {
-    assert(addr > 0 && addr < static_cast<int>(m_code.size()));
+    assert(addr >= 0 && addr < static_cast<int>(m_code.size()));
     for (int i = 0; i < 4; i++)
     {
         m_code[static_cast<size_t>(addr + i)] = n & 0xff;
@@ -546,9 +367,9 @@ void AsmBin::fillLabelAddr()
     }
 }
 
-int AsmBin::getInt(int addr)
+int AsmBin::getInt(int addr) const
 {
-    assert(addr > 0 && addr < static_cast<int>(m_code.size()));
+    assert(addr >= 0 && addr < static_cast<int>(m_code.size()));
     int result = 0;
     for (int i = 0; i < 4; i++)
     {
@@ -556,4 +377,28 @@ int AsmBin::getInt(int addr)
         result |= (cur << (i * 8));
     }
     return result;
+}
+
+Object *AsmBin::getConstant(int index) const
+{
+    assert(index >= 0 && index < static_cast<int>(m_constants.size()));
+    return m_constants[static_cast<size_t>(index)];
+}
+
+AsmBin::FunctionItem AsmBin::getFunction(int index) const
+{
+    assert(index >= 0 && index < static_cast<int>(m_functions.size()));
+    return m_functions[static_cast<size_t>(index)];
+}
+
+AsmBin::FunctionItem AsmBin::getFunction(const string &funcName) const
+{
+    for (size_t i = 0; i < m_functions.size(); i++)
+    {
+        if (m_functions[i].name == funcName)
+        {
+            return m_functions[i];
+        }
+    }
+    return FunctionItem("(invalid)");
 }

@@ -29,6 +29,7 @@ set(RECT_SRCS
     ../object.cpp
     ../asmtext.cpp
     ../asmbin.cpp
+    ../asminstruction.cpp
 )
 
 add_library(common

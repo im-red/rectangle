@@ -101,8 +101,13 @@ public:
 
     void dump();
 
-    unsigned char getByte(int addr);
-    int getInt(int addr);
+    int codeSize() const;
+
+    unsigned char getByte(int addr) const;
+    int getInt(int addr) const;
+    Object *getConstant(int index) const;
+    FunctionItem getFunction(int index) const;
+    FunctionItem getFunction(const std::string &funcName) const;
 
 private:
     int defineFloat(float f);
