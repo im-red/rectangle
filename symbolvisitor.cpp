@@ -17,6 +17,7 @@
 
 #include "asmbin.h"
 #include "symbolvisitor.h"
+#include "structinfo.h"
 
 #include <assert.h>
 
@@ -100,45 +101,16 @@ void SymbolVisitor::initGlobalScope()
 
 void SymbolVisitor::initBuiltInStructs()
 {
-    shared_ptr<TypeInfo> intType = make_shared<TypeInfo>(TypeInfo::Category::Int);
-    shared_ptr<TypeInfo> StringType = make_shared<TypeInfo>(TypeInfo::Category::String);
+    for (auto pInfo : builtin::infoList)
     {
         unique_ptr<StructDecl> sd(new StructDecl);
-        sd->name = "rect";
-
-        sd->fieldList.emplace_back(new FieldDecl("x", intType));
-        sd->fieldList.emplace_back(new FieldDecl("y", intType));
-        sd->fieldList.emplace_back(new FieldDecl("width", intType));
-        sd->fieldList.emplace_back(new FieldDecl("height", intType));
-        sd->fieldList.emplace_back(new FieldDecl("fill_color", StringType));
-        sd->fieldList.emplace_back(new FieldDecl("stroke_width", intType));
-        sd->fieldList.emplace_back(new FieldDecl("stroke_color", StringType));
-        sd->fieldList.emplace_back(new FieldDecl("stroke_dasharray", StringType));
-
-        m_builtInStructs.push_back(move(sd));
-    }
-
-    {
-        unique_ptr<StructDecl> sd(new StructDecl);
-        sd->name = "pt";
-
-        sd->fieldList.emplace_back(new FieldDecl("x", intType));
-        sd->fieldList.emplace_back(new FieldDecl("y", intType));
-        sd->fieldList.emplace_back(new FieldDecl("radius", intType));
-        sd->fieldList.emplace_back(new FieldDecl("fill_color", StringType));
-
-        m_builtInStructs.push_back(move(sd));
-    }
-
-    {
-        unique_ptr<StructDecl> sd(new StructDecl);
-        sd->name = "text";
-
-        sd->fieldList.emplace_back(new FieldDecl("x", intType));
-        sd->fieldList.emplace_back(new FieldDecl("y", intType));
-        sd->fieldList.emplace_back(new FieldDecl("size", intType));
-        sd->fieldList.emplace_back(new FieldDecl("text", StringType));
-
+        sd->name = pInfo->name();
+        int fieldCount = pInfo->fieldCount();
+        for (int i = 0; i < fieldCount; i++)
+        {
+            builtin::FieldInfo field = pInfo->fieldAt(i);
+            sd->fieldList.emplace_back(new FieldDecl(field.name, make_shared<TypeInfo>(field.type)));
+        }
         m_builtInStructs.push_back(move(sd));
     }
 }
