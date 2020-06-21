@@ -30,6 +30,9 @@ set(RECT_SRCS
     ../asmtext.cpp
     ../asmbin.cpp
     ../asminstruction.cpp
+    ../asmmachine.cpp
+    ../structinfo.cpp
+    ../svgpainter.cpp
 )
 
 add_library(common
@@ -42,6 +45,7 @@ add_executable(test_all
     test_parser.cpp
     test_symbol.cpp
     test_object.cpp
+    test_machine.cpp
 )
 
 add_executable(test_symbol
@@ -52,6 +56,11 @@ add_executable(test_object
     test_object.cpp
 )
 
+add_executable(test_machine
+    test_machine.cpp
+)
+
 target_link_libraries(test_all common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_symbol common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_object common ${GTEST_LIBRARIES} pthread)
+target_link_libraries(test_machine common ${GTEST_LIBRARIES} pthread)

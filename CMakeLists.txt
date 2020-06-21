@@ -24,6 +24,7 @@ add_executable(rectangle
     object.cpp
     asmtext.cpp
     asmbin.cpp
+    asmmachine.cpp
     asminstruction.cpp
     structinfo.cpp
     svgpainter.cpp

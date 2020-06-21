@@ -1,0 +1,47 @@
+def Rectangle {
+    int x: 0
+    int border.width: 1
+    enum LineType {
+        Solid,
+        Dot,
+        Dash
+    }
+    int border.type: Solid
+    list<int> list0: {}
+    list<int> test.list1: {}
+
+    void main() {
+        print("Hello, world!");
+
+        int gridWidth = 100;
+
+        rect r;
+        r.width = gridWidth;
+        r.height = gridWidth;
+        r.fill_color = "#FFFFFF";
+        r.stroke_width = 2;
+        r.stroke_color = "#000000";
+        r.stroke_dasharray = "5";
+
+        text t;
+        t.size = 100;
+
+        list<string> sv = {"H", "e", "l", "l", "o", ",", " ", "w", "o", "r", "l", "d", "!"};
+
+        int tx = 0;
+        while (tx < len(sv)) {
+            r.x = tx * gridWidth;
+            t.x = tx * gridWidth;
+            int ty = 0;
+            while (ty < 10) {
+                r.y = ty * gridWidth;
+                t.y = ty * gridWidth + t.size;
+                t.text = sv[tx];
+                drawRect(r);
+                drawText(t);
+                ty = ty + 1;
+            }
+            tx = tx + 1;
+        }
+    }
+}
