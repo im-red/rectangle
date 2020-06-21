@@ -22,8 +22,6 @@ using namespace std;
 namespace draw
 {
 
-constexpr int BUF_LEN = 512;
-
 SvgPainter::SvgPainter()
 {
 
@@ -72,7 +70,7 @@ RectangleShape::RectangleShape(const RectangleData &rect)
 
 std::string RectangleShape::generate()
 {
-    char buf[BUF_LEN];
+    char buf[512];
     snprintf(buf, sizeof(buf), "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" style=\"fill:%s; stroke-width:%d; stroke:%s; stroke-dasharray:%s\"/>",
              m_data.x, m_data.y, m_data.width, m_data.height, m_data.fill_color.c_str(), m_data.stroke_width, m_data.stroke_color.c_str(), m_data.stroke_dasharray.c_str());
     return string(buf);
@@ -86,7 +84,7 @@ TextShape::TextShape(const TextData &text)
 
 string TextShape::generate()
 {
-    char buf[BUF_LEN];
+    char buf[512];
     snprintf(buf, sizeof(buf), "<text x=\"%d\" y=\"%d\" font-size=\"%d\">%s</text>",
              m_data.x, m_data.y, m_data.size, m_data.text.c_str());
     return string(buf);

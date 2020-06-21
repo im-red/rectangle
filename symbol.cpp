@@ -25,8 +25,6 @@
 
 using namespace std;
 
-constexpr int BUF_LEN = 512;
-
 Symbol::Symbol(Category cat, const string &n, std::shared_ptr<TypeInfo> ti, ASTNode *ast)
     : m_category(cat)
     , m_name(n)
@@ -43,8 +41,7 @@ Symbol::~Symbol()
 
 string Symbol::symbolString() const
 {
-    constexpr int BUF_LEN = 200;
-    char buf[BUF_LEN];
+    char buf[512];
     if (m_category == Category::Property)
     {
         assert(m_astNode != nullptr);

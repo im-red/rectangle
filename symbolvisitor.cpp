@@ -23,14 +23,12 @@
 
 using namespace std;
 
-constexpr int BUF_LEN = 512;
-
 SymbolVisitor::SymbolVisitor()
 {
     initBuiltInStructs();
 }
 
-void SymbolVisitor::setDocuments(std::vector<DocumentDecl *> documents)
+void SymbolVisitor::setDocuments(const std::vector<DocumentDecl *> &documents)
 {
     m_documents = documents;
 
@@ -90,7 +88,6 @@ void SymbolVisitor::initGlobalScope()
     }
 
     {
-        shared_ptr<TypeInfo> voidType(new TypeInfo(TypeInfo::Category::Void));
         vector<shared_ptr<TypeInfo>> paramTypes(1, voidType);
         shared_ptr<Symbol> len(new FunctionSymbol("len", make_shared<TypeInfo>(TypeInfo::Category::Int), paramTypes));
         curScope()->define(len);
@@ -491,6 +488,11 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         b->typeInfo = leftType;
         break;
     }
+    case BinaryOperatorExpr::Op::Invalid:
+    {
+        assert(false);
+        break;
+    }
     }
 
     switch (b->op)
@@ -666,6 +668,11 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         break;
     }
+    case BinaryOperatorExpr::Op::Invalid:
+    {
+        assert(false);
+        break;
+    }
     }
 }
 
@@ -703,6 +710,11 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
             throw SymbolException("UnaryOperatorExpr",
                                   "Unary operator '!' can only used for int expr");
         }
+        break;
+    }
+    case UnaryOperatorExpr::Op::Invalid:
+    {
+        assert(false);
         break;
     }
     }
@@ -820,7 +832,7 @@ void SymbolVisitor::visit(CallExpr *e)
 
     if (paramTypes.size() != e->paramList.size())
     {
-        char buf[BUF_LEN];
+        char buf[512];
         snprintf(buf, sizeof(buf), "%s requires %d parameters but is passed %d parameters",
                  functionName.c_str(),
                  static_cast<int>(paramTypes.size()),
@@ -840,7 +852,7 @@ void SymbolVisitor::visit(CallExpr *e)
         }
         else
         {
-            char buf[BUF_LEN];
+            char buf[512];
             snprintf(buf, sizeof(buf), "%s requires string/list in 0th parameters but is passed %s",
                      functionName.c_str(),
                      e->paramList[0]->typeInfo->toString().c_str());
@@ -860,7 +872,7 @@ void SymbolVisitor::visit(CallExpr *e)
         {
             if (*paramTypes[i] != *(e->paramList[i]->typeInfo))
             {
-                char buf[BUF_LEN];
+                char buf[512];
                 snprintf(buf, sizeof(buf), "%s requires %s in %dth parameters but is passed %s",
                          functionName.c_str(),
                          paramTypes[i]->toString().c_str(),
@@ -1017,6 +1029,7 @@ void SymbolVisitor::visit(MemberExpr *e)
     e->typeInfo = member->typeInfo();
 
     ASTNode *ast = member->astNode();
+    assert(ast != nullptr);
     if (m_visitingLvalue)
     {
         if (member->category() == Symbol::Category::Field)
@@ -1064,8 +1077,6 @@ void SymbolVisitor::visit(MemberExpr *e)
 
     if (member->category() == Symbol::Category::Property && m_analyzingPropertyDep)
     {
-        ASTNode *ast = member->astNode();
-        assert(ast != nullptr);
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 
@@ -1219,8 +1230,6 @@ void SymbolVisitor::visit(RefExpr *e)
 
     if (sym->category() == Symbol::Category::Property && m_analyzingPropertyDep)
     {
-        ASTNode *ast = sym->astNode();
-        assert(ast != nullptr);
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 

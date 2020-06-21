@@ -39,8 +39,7 @@ struct Token
 
     std::string dump()
     {
-        constexpr int BUF_LEN = 100;
-        char buf[BUF_LEN];
+        char buf[512];
         snprintf(buf, sizeof(buf), "line %d column %d(%s)", line, column, str.c_str());
         return std::string(buf);
     }

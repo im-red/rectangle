@@ -25,7 +25,7 @@ class SymbolVisitor
 public:
     SymbolVisitor();
 
-    void setDocuments(std::vector<DocumentDecl *> documents);
+    void setDocuments(const std::vector<DocumentDecl *> &documents);
     AsmText visit();
 
 private:
@@ -98,7 +98,7 @@ private:
         List
     };
     LvalueCategory m_lvalueCategory = LvalueCategory::Invalid;
-    int m_lvalueIndex;
+    int m_lvalueIndex = -1;
 
     std::string m_curComponentName;
 

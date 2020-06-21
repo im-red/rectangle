@@ -23,8 +23,6 @@
 
 using namespace std;
 
-constexpr int BUF_LEN = 512;
-
 Parser::Parser()
 {
 
@@ -137,7 +135,7 @@ void Parser::match(int tokenType)
     }
     else
     {
-        char buf[BUF_LEN];
+        char buf[512];
         snprintf(buf, sizeof(buf), "expect %s but actual %s at line %d column %d(%s)",
                  Lexer::tokenTypeString(tokenType).c_str(),
                  Lexer::tokenTypeString(curTokenType()).c_str(),
@@ -206,7 +204,7 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
     }
     default:
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect 'def'/Identifier at line %d column %d",
                  tok.line, tok.column);
@@ -330,7 +328,7 @@ void Parser::parseMemberItem(unique_ptr<ComponentDefinationDecl> &defination)
     }
     else
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "(MemberItem)expect enumDefination/propertyDefination/functionDefination at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());
@@ -428,7 +426,7 @@ std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
     }
     else
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect ':'/'.' at line %d column %d",
                  tok.line, tok.column);
@@ -495,7 +493,7 @@ std::shared_ptr<TypeInfo> Parser::parsePropertyType()
     }
     default:
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect a type token at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());
@@ -560,7 +558,7 @@ std::shared_ptr<TypeInfo> Parser::parseType()
     }
     default:
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect a type token at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());
@@ -625,7 +623,7 @@ std::unique_ptr<Expr> Parser::parseLiteral()
     }
     default:
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect a literal token at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());
@@ -792,7 +790,7 @@ void Parser::parseBlockItem(std::vector<std::unique_ptr<Stmt>> &stmts)
     }
     else
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf),
                  "expect a delcaration/statement for blockItem at line %d column %d(%s)",
@@ -919,7 +917,7 @@ std::unique_ptr<Expr> Parser::parseInitializer()
     }
     else
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect a initializer at line %d column %d",
                  tok.line, tok.column);
@@ -1268,7 +1266,7 @@ std::unique_ptr<Expr> Parser::parseUnaryExpression()
     }
     else
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect a unaryExpression at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());
@@ -1291,7 +1289,7 @@ void Parser::parseUnaryOperator()
     }
     default:
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect '+'/'-'/'!' at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());
@@ -1430,7 +1428,7 @@ std::unique_ptr<Expr> Parser::parsePrimaryExpression()
     }
     default:
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect Identifier/literal/'(' at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());
@@ -1505,7 +1503,7 @@ std::unique_ptr<Stmt> Parser::parseStatement()
         }
         else
         {
-            char buf[BUF_LEN];
+            char buf[512];
             Token tok = curToken();
             snprintf(buf, sizeof(buf), "expect a statement at line %d column %d(%s)",
                      tok.line, tok.column, tok.str.c_str());
@@ -1547,7 +1545,7 @@ std::unique_ptr<Stmt> Parser::parseSelectionStatement()
         }
         else
         {
-            char buf[BUF_LEN];
+            char buf[512];
             Token tok = curToken();
             snprintf(buf, sizeof(buf), "expect a 'if'/compoundStatement at line %d column %d(%s)",
                      tok.line, tok.column, tok.str.c_str());
@@ -1621,7 +1619,7 @@ std::unique_ptr<Stmt> Parser::parseJumpStatement()
     }
     default:
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect a 'continue'/'break'/'return' at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());
@@ -1793,7 +1791,7 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
     }
     default:
     {
-        char buf[BUF_LEN];
+        char buf[512];
         Token tok = curToken();
         snprintf(buf, sizeof(buf), "expect a ':'/'.'/'{' after Identifier at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());

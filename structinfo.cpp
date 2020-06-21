@@ -17,7 +17,11 @@
 
 #include "structinfo.h"
 
+#include <algorithm>
+
 #include <assert.h>
+
+using namespace std;
 
 namespace builtin
 {
@@ -48,15 +52,13 @@ int StructInfo::fieldCount() const
 FieldInfo StructInfo::fieldAt(int index) const
 {
     assert(index >= 0 && index < static_cast<int>(m_name2field.size()));
-    for (auto &&pair : m_name2field)
+    auto iter = find_if(m_name2field.begin(), m_name2field.end(),
+                        [index](const pair<string, FieldInfo> &p)
     {
-        if (pair.second.index == index)
-        {
-            return pair.second;
-        }
-    }
-    assert(false);
-    return m_name2field.begin()->second;
+        return p.second.index == index;
+    });
+    assert(iter != m_name2field.end());
+    return iter->second;
 }
 
 std::string StructInfo::name() const

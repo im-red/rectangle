@@ -54,7 +54,7 @@ public:
 class RectangleShape : public Shape
 {
 public:
-    RectangleShape(const RectangleData &rect);
+    explicit RectangleShape(const RectangleData &rect);
     std::string generate() override;
 
 private:
@@ -64,7 +64,7 @@ private:
 class TextShape : public Shape
 {
 public:
-    TextShape(const TextData &text);
+    explicit TextShape(const TextData &text);
     std::string generate() override;
 
 private:

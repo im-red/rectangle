@@ -99,7 +99,7 @@ public:
     };
 
 public:
-    AsmBin(const AsmText &t);
+    explicit AsmBin(const AsmText &t);
     ~AsmBin();
 
     void assemble(const AsmText &t);
@@ -130,7 +130,7 @@ private:
 private:
     struct LabelItem
     {
-        LabelItem(const std::string &name_, int addr_ = -1)
+        explicit LabelItem(const std::string &name_, int addr_ = -1)
             : name(name_), addr(addr_)
         {}
         std::string name;

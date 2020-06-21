@@ -208,6 +208,7 @@ struct BinaryOperatorExpr : public Expr
 {
     enum class Op
     {
+        Invalid,
         LogicalAnd,
         LogicalOr,
         Equal,
@@ -236,7 +237,7 @@ struct BinaryOperatorExpr : public Expr
         right->print(indent + 1);
     }
 
-    Op op;
+    Op op = Op::Invalid;
     std::unique_ptr<Expr> left;
     std::unique_ptr<Expr> right;
 };
@@ -245,6 +246,7 @@ struct UnaryOperatorExpr : public Expr
 {
     enum Op
     {
+        Invalid,
         Positive,
         Negative,
         Not
@@ -258,7 +260,7 @@ struct UnaryOperatorExpr : public Expr
         expr->print(indent + 1);
     }
 
-    Op op;
+    Op op = Op::Invalid;
     std::unique_ptr<Expr> expr;
 };
 
@@ -396,7 +398,7 @@ public:
         Expr
     };
 
-    Stmt(Category cat) : category(cat) {}
+    explicit Stmt(Category cat) : category(cat) {}
     virtual ~Stmt();
 
     Category category;

@@ -135,8 +135,7 @@ public:
 
     virtual std::string scopeString() const
     {
-        constexpr int BUF_LEN = 200;
-        char buf[BUF_LEN];
+        char buf[512];
         snprintf(buf, sizeof(buf), "[%d] %s (%s)",
                  m_scopeId,
                  scopeCategoryString(m_category).c_str(),

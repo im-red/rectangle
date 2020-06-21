@@ -54,9 +54,9 @@ public:
 
 public:
     Object() {}
-    Object(int i) : m_category(Category::Int), m_intData(i) {}
-    Object(float f) : m_category(Category::Float), m_floatData(f) {}
-    Object(const std::string &s) : m_category(Category::String), m_stringData(s) {}
+    explicit Object(int i) : m_category(Category::Int), m_intData(i) {}
+    explicit Object(float f) : m_category(Category::Float), m_floatData(f) {}
+    explicit Object(const std::string &s) : m_category(Category::String), m_stringData(s) {}
     Object(Category cat, int elementCount) : m_category(cat)
     {
         assert(cat == Category::Struct || cat == Category::List);
@@ -143,8 +143,8 @@ public:
 private:
     Category m_category = Category::Invalid;
 
-    int m_intData;
-    float m_floatData;
+    int m_intData = 0;
+    float m_floatData = 0.0f;
     std::string m_stringData;
     std::vector<Object> m_vData;
 };

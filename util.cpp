@@ -42,8 +42,7 @@ void collectAsm(const char * const fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
-    constexpr int BUF_LEN = 512;
-    char buf[BUF_LEN];
+    char buf[512];
     vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
 
