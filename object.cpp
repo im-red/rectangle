@@ -381,3 +381,47 @@ bool operator||(const Object &lhs, const Object &rhs)
     }
     return false;
 }
+
+ObjectPointer::ObjectPointer(Object *o, bool tmp)
+    : m_object(o), m_tmp(tmp)
+{
+
+}
+
+ObjectPointer::~ObjectPointer()
+{
+    if (m_tmp && m_object)
+    {
+        delete m_object;
+    }
+}
+
+ObjectPointer::ObjectPointer(ObjectPointer &&rhs)
+{
+    m_object = rhs.m_object;
+    rhs.m_object = nullptr;
+    m_tmp = rhs.m_tmp;
+}
+
+ObjectPointer &ObjectPointer::operator=(ObjectPointer &&rhs)
+{
+    m_object = rhs.m_object;
+    rhs.m_object = nullptr;
+    m_tmp = rhs.m_tmp;
+    return *this;
+}
+
+Object *ObjectPointer::get() const
+{
+    return m_object;
+}
+
+bool ObjectPointer::isTmp() const
+{
+    return m_tmp;
+}
+
+ObjectPointer::operator Object() const
+{
+    return *m_object;
+}

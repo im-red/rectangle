@@ -148,3 +148,26 @@ private:
     std::string m_stringData;
     std::vector<Object> m_vData;
 };
+
+class ObjectPointer
+{
+public:
+    ObjectPointer(Object *o, bool tmp);
+    ~ObjectPointer();
+
+    operator Object() const;
+
+    ObjectPointer(ObjectPointer &&rhs);
+    ObjectPointer &operator=(ObjectPointer &&rhs);
+
+    Object *get() const;
+    bool isTmp() const;
+
+private:
+    ObjectPointer(const ObjectPointer &) = delete;
+    ObjectPointer &operator=(const ObjectPointer &) = delete;
+
+private:
+    Object *m_object;
+    bool m_tmp;
+};
