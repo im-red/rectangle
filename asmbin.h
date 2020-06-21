@@ -85,7 +85,7 @@ public:
     struct FunctionItem
     {
         FunctionItem(const std::string &name_ = "", int addr_ = -1, int args_ = -1, int locals_ = -1)
-            : name(name_), addr(addr_), args(args_), locals(locals_)
+            : name(name_), addr(addr_), args(args_), locals(locals_), index(-1)
         {}
         bool isValid() const
         {
@@ -95,6 +95,7 @@ public:
         int addr;
         int args;
         int locals;
+        int index;
     };
 
 public:

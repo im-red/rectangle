@@ -234,6 +234,7 @@ int AsmBin::defineFunction(const std::string &name, int addr, int args, int loca
             index = m_functions.size() - 1;
         }
     }
+    m_functions[index].index = static_cast<int>(index);
 
     string printName = name;
     if (alreadyDefined)
