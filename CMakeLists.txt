@@ -25,4 +25,5 @@ add_executable(rectangle
     asmtext.cpp
     asmbin.cpp
     asminstruction.cpp
+    structinfo.cpp
 )
