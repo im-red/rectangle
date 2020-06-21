@@ -23,6 +23,22 @@
 
 #include <assert.h>
 
+class Object;
+
+Object operator+(const Object &lhs, const Object &rhs);
+Object operator-(const Object &lhs, const Object &rhs);
+Object operator*(const Object &lhs, const Object &rhs);
+Object operator/(const Object &lhs, const Object &rhs);
+Object operator%(const Object &lhs, const Object &rhs);
+bool operator==(const Object &lhs, const Object &rhs);
+bool operator!=(const Object &lhs, const Object &rhs);
+bool operator>(const Object &lhs, const Object &rhs);
+bool operator<(const Object &lhs, const Object &rhs);
+bool operator>=(const Object &lhs, const Object &rhs);
+bool operator<=(const Object &lhs, const Object &rhs);
+bool operator&&(const Object &lhs, const Object &rhs);
+bool operator||(const Object &lhs, const Object &rhs);
+
 class Object
 {
 public:
@@ -44,11 +60,7 @@ public:
     Object(Category cat, int elementCount) : m_category(cat)
     {
         assert(cat == Category::Struct || cat == Category::List);
-        m_vData.reserve(static_cast<size_t>(elementCount));
-        for (int i = 0; i < elementCount; i++)
-        {
-            m_vData.push_back(new Object());
-        }
+        m_vData.resize(static_cast<size_t>(elementCount));
     }
     ~Object();
 
@@ -67,54 +79,7 @@ public:
         m_intData = rhs.m_intData;
         m_floatData = rhs.m_floatData;
         m_stringData = rhs.m_stringData;
-        for (auto &o : m_vData)
-        {
-            delete o;
-        }
-        m_vData.clear();
-        for (auto &o : rhs.m_vData)
-        {
-            m_vData.push_back(new Object(*o));
-        }
-    }
-
-    bool operator==(const Object &rhs)
-    {
-        if (m_category != rhs.m_category)
-        {
-            return false;
-        }
-        switch (m_category)
-        {
-        case Category::Int:     return m_intData == rhs.m_intData;
-        case Category::Float:   return m_floatData == rhs.m_floatData;
-        case Category::String:  return m_stringData == rhs.m_stringData;
-        case Category::Struct:
-        case Category::List:
-        {
-            if (m_vData.size() != rhs.m_vData.size())
-            {
-                return false;
-            }
-            size_t len = m_vData.size();
-            for (size_t i = 0; i < len; i++)
-            {
-                if (*m_vData[i] != *rhs.m_vData[i])
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-        default:
-        {
-            return true;
-        }
-        }
-    }
-    bool operator!=(const Object &rhs)
-    {
-        return !operator==(rhs);
+        m_vData = rhs.m_vData;
     }
 
     int intData() const;
@@ -131,19 +96,40 @@ public:
         assert(m_category == Category::Struct || m_category == Category::List);
         return static_cast<int>(m_vData.size());
     }
+    Object &element(int index)
+    {
+        assert(m_category == Category::Struct || m_category == Category::List);
+        return m_vData[static_cast<size_t>(index)];
+    }
+    const Object &element(int index) const
+    {
+        assert(m_category == Category::Struct || m_category == Category::List);
+        return m_vData[static_cast<size_t>(index)];
+    }
 
-    Object *field(int index) const
+    Object &field(int index)
+    {
+        assert(m_category == Category::Struct);
+        return m_vData[static_cast<size_t>(index)];
+    }
+    const Object &field(int index) const
     {
         assert(m_category == Category::Struct);
         return m_vData[static_cast<size_t>(index)];
     }
 
-    Object *at(int index) const
+    Object &at(int index)
     {
         assert(m_category == Category::List);
         return m_vData[static_cast<size_t>(index)];
     }
-    void append(Object *o)
+    const Object &at(int index) const
+    {
+        assert(m_category == Category::List);
+        return m_vData[static_cast<size_t>(index)];
+    }
+
+    void append(const Object &o)
     {
         assert(m_category == Category::List);
         m_vData.push_back(o);
@@ -160,5 +146,5 @@ private:
     int m_intData;
     float m_floatData;
     std::string m_stringData;
-    std::vector<Object *> m_vData;
+    std::vector<Object> m_vData;
 };

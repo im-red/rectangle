@@ -32,10 +32,6 @@ AsmBin::AsmBin(const AsmText &t)
 
 AsmBin::~AsmBin()
 {
-    for (auto &o : m_constants)
-    {
-        delete o;
-    }
 }
 
 void AsmBin::assemble(const AsmText &t)
@@ -125,7 +121,7 @@ void AsmBin::dump()
     printf("Constants:\n");
     for (size_t i = 0; i < m_constants.size(); i++)
     {
-        printf("    %04x: %s\n", static_cast<unsigned>(i), m_constants[i]->toString().c_str());
+        printf("    %04x: %s\n", static_cast<unsigned>(i), m_constants[i].toString().c_str());
     }
 
     printf("Functions:\n");
@@ -174,8 +170,7 @@ int AsmBin::defineFloat(float f)
 {
     util::condPrint(option::showAssemble, "assemble: def float %lf\n", static_cast<double>(f));
 
-    Object *o = new Object(f);
-    m_constants.push_back(o);
+    m_constants.emplace_back(f);
     return static_cast<int>(m_constants.size() - 1);
 }
 
@@ -185,14 +180,14 @@ int AsmBin::defineString(const std::string &s)
 
     for (size_t i = 0; i < m_constants.size(); i++)
     {
-        Object *o = m_constants[i];
-        if (o->category() == Object::Category::String && o->stringData() == s)
+        Object &o = m_constants[i];
+        if (o.category() == Object::Category::String && o.stringData() == s)
         {
             return static_cast<int>(i);
         }
     }
-    Object *o = new Object(s);
-    m_constants.push_back(o);
+
+    m_constants.emplace_back(s);
     return static_cast<int>(m_constants.size() - 1);
 }
 
@@ -379,7 +374,7 @@ int AsmBin::getInt(int addr) const
     return result;
 }
 
-Object *AsmBin::getConstant(int index) const
+Object AsmBin::getConstant(int index) const
 {
     assert(index >= 0 && index < static_cast<int>(m_constants.size()));
     return m_constants[static_cast<size_t>(index)];

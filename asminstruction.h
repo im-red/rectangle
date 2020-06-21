@@ -25,56 +25,75 @@ namespace instr
 enum AsmInstruction : unsigned char
 {
     INVALID,
+
     IADD,
+    FADD,
+    SADD,
+
     ISUB,
+    FSUB,
+
     IMUL,
+    FMUL,
+
     IDIV,
+    FDIV,
+
     IREM,
+
     IEQ,
+    FEQ,
+    SEQ,
+
     INE,
+    FNE,
+    SNE,
+
     ILT,
+    FLT,
+
     IGT,
+    FGT,
+
     ILE,
+    FLE,
+
     IGE,
+    FGE,
+
     IAND,
     IOR,
-    FADD,
-    FSUB,
-    FMUL,
-    FDIV,
-    FEQ,
-    FNE,
-    FLT,
-    FGT,
-    FLE,
-    FGE,
-    SADD,
-    SEQ,
-    SNE,
+
     ICONST,
     FCONST,
     SCONST,
     STRUCT,
     POP,
+
     GLOAD,
     GSTORE,
     LLOAD,
     LSTORE,
     FLOAD,
     FSTORE,
+
     VECTOR,
     VAPPEND,
     VLOAD,
     VSTORE,
+
     BR,
     BRT,
     BRF,
+
     CALL,
     RET,
+
     PRINT,
     VLEN,
     SLEN,
     HALT,
+
     DRAWRECT,
     DRAWTEXT
 };

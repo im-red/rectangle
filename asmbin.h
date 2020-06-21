@@ -84,9 +84,13 @@ public:
 
     struct FunctionItem
     {
-        FunctionItem(const std::string &name_, int addr_ = -1, int args_ = -1, int locals_ = -1)
+        FunctionItem(const std::string &name_ = "", int addr_ = -1, int args_ = -1, int locals_ = -1)
             : name(name_), addr(addr_), args(args_), locals(locals_)
         {}
+        bool isValid() const
+        {
+            return name != "" && addr != -1 && args != -1 && locals != -1;
+        }
         std::string name;
         int addr;
         int args;
@@ -105,7 +109,7 @@ public:
 
     unsigned char getByte(int addr) const;
     int getInt(int addr) const;
-    Object *getConstant(int index) const;
+    Object getConstant(int index) const;
     FunctionItem getFunction(int index) const;
     FunctionItem getFunction(const std::string &funcName) const;
 
@@ -134,7 +138,7 @@ private:
 
     int m_offset = 0;
     std::vector<unsigned char> m_code;
-    std::vector<Object *> m_constants;
+    std::vector<Object> m_constants;
     std::vector<FunctionItem> m_functions;
     std::vector<LabelItem> m_labels;
 

@@ -21,10 +21,6 @@ using namespace std;
 
 Object::~Object()
 {
-    for (auto &o : m_vData)
-    {
-        delete o;
-    }
 }
 
 int Object::intData() const
@@ -102,14 +98,14 @@ std::string Object::toString() const
         }
         else if (m_vData.size() == 1)
         {
-            result += m_vData[0]->toString() + ")";
+            result += m_vData[0].toString() + ")";
         }
         else
         {
-            result += m_vData[0]->toString();
+            result += m_vData[0].toString();
             for (size_t i = 1; i < m_vData.size(); i++)
             {
-                result += ", " + m_vData[i]->toString();
+                result += ", " + m_vData[i].toString();
             }
         }
         break;
@@ -123,14 +119,14 @@ std::string Object::toString() const
         }
         else if (m_vData.size() == 1)
         {
-            result += m_vData[0]->toString() + ")";
+            result += m_vData[0].toString() + ")";
         }
         else
         {
-            result += m_vData[0]->toString();
+            result += m_vData[0].toString();
             for (size_t i = 1; i < m_vData.size(); i++)
             {
-                result += ", " + m_vData[i]->toString();
+                result += ", " + m_vData[i].toString();
             }
         }
         break;
@@ -141,4 +137,247 @@ std::string Object::toString() const
     }
     }
     return result;
+}
+
+Object operator+(const Object &lhs, const Object &rhs)
+{
+    assert(lhs.category() == rhs.category());
+
+    Object result;
+    result.setCategory(lhs.category());
+    switch (lhs.category())
+    {
+    case Object::Category::Int:
+    {
+        result.setIntData(lhs.intData() + rhs.intData());
+        break;
+    }
+    case Object::Category::Float:
+    {
+        result.setFloatData(lhs.floatData() + rhs.floatData());
+        break;
+    }
+    case Object::Category::String:
+    {
+        result.setStringData(lhs.stringData() + rhs.stringData());
+        break;
+    }
+    default:
+    {
+        assert(false);
+    }
+    }
+    return result;
+}
+
+Object operator-(const Object &lhs, const Object &rhs)
+{
+    assert(lhs.category() == rhs.category());
+
+    Object result;
+    result.setCategory(lhs.category());
+    switch (lhs.category())
+    {
+    case Object::Category::Int:
+    {
+        result.setIntData(lhs.intData() - rhs.intData());
+        break;
+    }
+    case Object::Category::Float:
+    {
+        result.setFloatData(lhs.floatData() - rhs.floatData());
+        break;
+    }
+    default:
+    {
+        assert(false);
+    }
+    }
+    return result;
+}
+
+Object operator*(const Object &lhs, const Object &rhs)
+{
+    assert(lhs.category() == rhs.category());
+
+    Object result;
+    result.setCategory(lhs.category());
+    switch (lhs.category())
+    {
+    case Object::Category::Int:
+    {
+        result.setIntData(lhs.intData() * rhs.intData());
+        break;
+    }
+    case Object::Category::Float:
+    {
+        result.setFloatData(lhs.floatData() * rhs.floatData());
+        break;
+    }
+    default:
+    {
+        assert(false);
+    }
+    }
+    return result;
+}
+
+Object operator/(const Object &lhs, const Object &rhs)
+{
+    assert(lhs.category() == rhs.category());
+
+    Object result;
+    result.setCategory(lhs.category());
+    switch (lhs.category())
+    {
+    case Object::Category::Int:
+    {
+        result.setIntData(lhs.intData() / rhs.intData());
+        break;
+    }
+    case Object::Category::Float:
+    {
+        result.setFloatData(lhs.floatData() / rhs.floatData());
+        break;
+    }
+    default:
+    {
+        assert(false);
+    }
+    }
+    return result;
+}
+
+Object operator%(const Object &lhs, const Object &rhs)
+{
+    assert(lhs.category() == rhs.category());
+
+    Object result;
+    result.setCategory(lhs.category());
+    switch (lhs.category())
+    {
+    case Object::Category::Int:
+    {
+        result.setIntData(lhs.intData() % rhs.intData());
+        break;
+    }
+    default:
+    {
+        assert(false);
+    }
+    }
+    return result;
+}
+
+bool operator==(const Object &lhs, const Object &rhs)
+{
+    if (lhs.category() != rhs.category())
+    {
+        return false;
+    }
+    switch (lhs.category())
+    {
+    case Object::Category::Int:     return lhs.intData() == rhs.intData();
+    case Object::Category::Float:   return lhs.floatData() == rhs.floatData();
+    case Object::Category::String:  return lhs.stringData() == rhs.stringData();
+    case Object::Category::Struct:
+    case Object::Category::List:
+    {
+        if (lhs.elementCount() != rhs.elementCount())
+        {
+            return false;
+        }
+        int len = lhs.elementCount();
+        for (int i = 0; i < len; i++)
+        {
+            if (lhs.element(i) != rhs.element(i))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    default:
+    {
+        return true;
+    }
+    }
+}
+
+bool operator!=(const Object &lhs, const Object &rhs)
+{
+    return !(lhs == rhs);
+}
+
+bool operator>(const Object &lhs, const Object &rhs)
+{
+    assert(lhs.category() == rhs.category());
+
+    switch (lhs.category())
+    {
+    case Object::Category::Int:
+    {
+        return lhs.intData() > rhs.intData();
+    }
+    case Object::Category::Float:
+    {
+        return lhs.floatData() > rhs.floatData();
+    }
+    default:
+    {
+        assert(false);
+    }
+    }
+    return false;
+}
+
+bool operator<(const Object &lhs, const Object &rhs)
+{
+    return !(lhs == rhs || lhs > rhs);
+}
+
+bool operator>=(const Object &lhs, const Object &rhs)
+{
+    return lhs > rhs || lhs == rhs;
+}
+
+bool operator<=(const Object &lhs, const Object &rhs)
+{
+    return !(lhs > rhs);
+}
+
+bool operator&&(const Object &lhs, const Object &rhs)
+{
+    assert(lhs.category() == rhs.category());
+
+    switch (lhs.category())
+    {
+    case Object::Category::Int:
+    {
+        return lhs.intData() && rhs.intData();
+    }
+    default:
+    {
+        assert(false);
+    }
+    }
+    return false;
+}
+
+bool operator||(const Object &lhs, const Object &rhs)
+{
+    assert(lhs.category() == rhs.category());
+
+    switch (lhs.category())
+    {
+    case Object::Category::Int:
+    {
+        return lhs.intData() || rhs.intData();
+    }
+    default:
+    {
+        assert(false);
+    }
+    }
+    return false;
 }
