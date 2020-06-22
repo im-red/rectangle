@@ -217,78 +217,25 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
 void SymbolVisitor::visit(ComponentInstanceDecl *cid)
 {
     (void) cid;
-    throw SymbolException("ComponentInstanceDecl", "Not implement");
+    throw VisitException("ComponentInstanceDecl", "Not implement");
 }
 
-void SymbolVisitor::visit(Expr *e)
+void SymbolVisitor::visit(IntegerLiteral *e)
 {
-    switch (e->category)
-    {
-    case Expr::Category::InitList:
-    {
-        InitListExpr *l = dynamic_cast<InitListExpr *>(e);
-        visit(l);
-        break;
-    }
-    case Expr::Category::BinaryOperator:
-    {
-        BinaryOperatorExpr *b = dynamic_cast<BinaryOperatorExpr *>(e);
-        visit(b);
-        break;
-    }
-    case Expr::Category::UnaryOperator:
-    {
-        UnaryOperatorExpr *u = dynamic_cast<UnaryOperatorExpr *>(e);
-        visit(u);
-        break;
-    }
-    case Expr::Category::Call:
-    {
-        CallExpr *c = dynamic_cast<CallExpr *>(e);
-        visit(c);
-        break;
-    }
-    case Expr::Category::ListSubscript:
-    {
-        ListSubscriptExpr *l = dynamic_cast<ListSubscriptExpr *>(e);
-        visit(l);
-        break;
-    }
-    case Expr::Category::Member:
-    {
-        MemberExpr *m = dynamic_cast<MemberExpr *>(e);
-        visit(m);
-        break;
-    }
-    case Expr::Category::Ref:
-    {
-        RefExpr *r = dynamic_cast<RefExpr *>(e);
-        visit(r);
-        break;
-    }
-    case Expr::Category::Integer:
-    {
-        e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
-        m_asm.appendLine({"iconst", to_string(dynamic_cast<IntegerLiteral *>(e)->value)});
-        break;
-    }
-    case Expr::Category::Float:
-    {
-        e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Float));
-        m_asm.appendLine({"fconst", to_string(dynamic_cast<FloatLiteral *>(e)->value)});
-        break;
-    }
-    case Expr::Category::String:
-    {
-        e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::String));
-        m_asm.appendLine({"sconst", dynamic_cast<StringLiteral *>(e)->value});
-        break;
-    }
-    case Expr::Category::Invalid:
-    {
-        throw SymbolException("Expr", "Invalid expr");
-    }
-    }
+    e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
+    m_asm.appendLine({"iconst", to_string(dynamic_cast<IntegerLiteral *>(e)->value)});
+}
+
+void SymbolVisitor::visit(FloatLiteral *e)
+{
+    e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Float));
+    m_asm.appendLine({"fconst", to_string(dynamic_cast<FloatLiteral *>(e)->value)});
+}
+
+void SymbolVisitor::visit(StringLiteral *e)
+{
+    e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::String));
+    m_asm.appendLine({"sconst", dynamic_cast<StringLiteral *>(e)->value});
 }
 
 void SymbolVisitor::visit(InitListExpr *ile)
@@ -314,7 +261,7 @@ void SymbolVisitor::visit(InitListExpr *ile)
         {
             if (*eType != *(ile->exprList[i]->typeInfo))
             {
-                throw SymbolException("InitListExpr",
+                throw VisitException("InitListExpr",
                                       "Elements of InitListExpr must have same type");
             }
         }
@@ -352,7 +299,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (!(leftType->category() == TypeInfo::Category::Int && rightType->category() == TypeInfo::Category::Int))
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'&&'/'||' operator require int operand");
         }
         b->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
@@ -365,7 +312,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'<'/'>'/'<='/'>=' operator requires type of operands is same");
         }
         TypeInfo::Category cat = leftType->category();
@@ -375,7 +322,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'<'/'>'/'<='/'>=' operator requires type of operands is int/float");
         }
         b->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
@@ -386,7 +333,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'=='/'!=' operator requires type of operands is same("
                                   + leftType->toString() + ", "
                                   + rightType->toString() + ")");
@@ -398,7 +345,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'=='/'!=' operator requires type of operands is int/float/string");
         }
         b->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
@@ -408,7 +355,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'+' operator requires type of operands is same");
         }
         TypeInfo::Category cat = leftType->category();
@@ -418,7 +365,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'+' operator requires type of operands is int/float/string");
         }
         b->typeInfo = leftType;
@@ -430,7 +377,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'-'/'*'/'/' operator requires type of operands is same");
         }
         TypeInfo::Category cat = leftType->category();
@@ -440,7 +387,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'-'/'*'/'/' operator requires type of operands is int/float");
         }
         b->typeInfo = leftType;
@@ -450,7 +397,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'%' operator requires type of operands is same");
         }
         TypeInfo::Category cat = leftType->category();
@@ -460,7 +407,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'%' operator requires type of operands is int");
         }
         b->typeInfo = leftType;
@@ -470,7 +417,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'=' operator requires type of operands is same("
                                   + leftType->toString() + ", "
                                   + rightType->toString() + ")");
@@ -482,7 +429,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw SymbolException("BinaryOperatorExpr",
+            throw VisitException("BinaryOperatorExpr",
                                   "'=' operator requires type of operands is int/float/string");
         }
         b->typeInfo = leftType;
@@ -664,7 +611,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else // (m_lvalueCategory == LvalueCategory::Invalid)
         {
-            throw SymbolException("BinaryOperatorExpr", "Invalid lvalue category");
+            throw VisitException("BinaryOperatorExpr", "Invalid lvalue category");
         }
         break;
     }
@@ -694,7 +641,7 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
         }
         else
         {
-            throw SymbolException("UnaryOperatorExpr",
+            throw VisitException("UnaryOperatorExpr",
                                   "Unary operator '-'/'+' can only used for int/float expr");
         }
         break;
@@ -707,7 +654,7 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
         }
         else
         {
-            throw SymbolException("UnaryOperatorExpr",
+            throw VisitException("UnaryOperatorExpr",
                                   "Unary operator '!' can only used for int expr");
         }
         break;
@@ -726,12 +673,12 @@ void SymbolVisitor::visit(CallExpr *e)
 
     if (m_visitingLvalue)
     {
-        throw SymbolException("CallExpr", "CallExpr only produce rvalue");
+        throw VisitException("CallExpr", "CallExpr only produce rvalue");
     }
 
     if (curScope()->category() != Scope::Category::Local)
     {
-        throw SymbolException("CallExpr",
+        throw VisitException("CallExpr",
                               "CallExpr can only be used in LocalScope");
     }
 
@@ -747,7 +694,7 @@ void SymbolVisitor::visit(CallExpr *e)
         std::shared_ptr<Symbol> func = curScope()->resolve(r->name);
         if (!func)
         {
-            throw SymbolException("CallExpr", "No symbol: " + r->name);
+            throw VisitException("CallExpr", "No symbol: " + r->name);
         }
 
         if (func->category() == Symbol::Category::Function)
@@ -766,7 +713,7 @@ void SymbolVisitor::visit(CallExpr *e)
         }
         else
         {
-            throw SymbolException("CallExpr",
+            throw VisitException("CallExpr",
                                   r->name
                                   + " is a "
                                   + Symbol::symbolCategoryString(func->category()));
@@ -787,19 +734,19 @@ void SymbolVisitor::visit(CallExpr *e)
         std::shared_ptr<Symbol> instanceTypeSymbol = curScope()->resolve(typeName);
         if (!instanceTypeSymbol)
         {
-            throw SymbolException("CallExpr", "No symbol for typeName: " + typeName);
+            throw VisitException("CallExpr", "No symbol for typeName: " + typeName);
         }
         std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
         if (!scopeSym)
         {
-            throw SymbolException("CallExpr", typeName + " is a "
+            throw VisitException("CallExpr", typeName + " is a "
                                   + Symbol::symbolCategoryString(instanceTypeSymbol->category())
                                   + ", doesn't contains method");
         }
         std::shared_ptr<Symbol> method = scopeSym->resolve(m->name);
         if (!method)
         {
-            throw SymbolException("CallExpr", typeName + " doesn't contains method named " + m->name);
+            throw VisitException("CallExpr", typeName + " doesn't contains method named " + m->name);
         }
 
         if (method->category() == Symbol::Category::Method)
@@ -811,7 +758,7 @@ void SymbolVisitor::visit(CallExpr *e)
         }
         else
         {
-            throw SymbolException("CallExpr",
+            throw VisitException("CallExpr",
                                   m->name
                                   + " is a "
                                   + Symbol::symbolCategoryString(method->category()));
@@ -822,7 +769,7 @@ void SymbolVisitor::visit(CallExpr *e)
     }
     else
     {
-        throw SymbolException("CallExpr", "Only f(...) and obj.f(...) is valid");
+        throw VisitException("CallExpr", "Only f(...) and obj.f(...) is valid");
     }
 
     for (auto &p : e->paramList)
@@ -837,7 +784,7 @@ void SymbolVisitor::visit(CallExpr *e)
                  functionName.c_str(),
                  static_cast<int>(paramTypes.size()),
                  static_cast<int>(e->paramList.size()));
-        throw SymbolException("CallExpr", string(buf));
+        throw VisitException("CallExpr", string(buf));
     }
 
     if (functionName == "len")
@@ -856,7 +803,7 @@ void SymbolVisitor::visit(CallExpr *e)
             snprintf(buf, sizeof(buf), "%s requires string/list in 0th parameters but is passed %s",
                      functionName.c_str(),
                      e->paramList[0]->typeInfo->toString().c_str());
-            throw SymbolException("CallExpr", string(buf));
+            throw VisitException("CallExpr", string(buf));
         }
     }
     else if (functionName == "print"
@@ -878,7 +825,7 @@ void SymbolVisitor::visit(CallExpr *e)
                          paramTypes[i]->toString().c_str(),
                          static_cast<int>(i),
                          e->paramList[i]->typeInfo->toString().c_str());
-                throw SymbolException("CallExpr", string(buf));
+                throw VisitException("CallExpr", string(buf));
             }
         }
         if (e->funcExpr->category == Expr::Category::Ref)
@@ -927,13 +874,13 @@ void SymbolVisitor::visit(ListSubscriptExpr *e)
     visit(e->listExpr.get());
     if (e->listExpr->typeInfo->category() != TypeInfo::Category::List)
     {
-        throw SymbolException("ListSubscriptExpr", "Type of listExpr is " + e->listExpr->typeInfo->toString());
+        throw VisitException("ListSubscriptExpr", "Type of listExpr is " + e->listExpr->typeInfo->toString());
     }
 
     visit(e->indexExpr.get());
     if (e->indexExpr->typeInfo->category() != TypeInfo::Category::Int)
     {
-        throw SymbolException("ListSubscriptExpr", "Type of indexExpr is " + e->indexExpr->typeInfo->toString());
+        throw VisitException("ListSubscriptExpr", "Type of indexExpr is " + e->indexExpr->typeInfo->toString());
     }
 
     m_visitingLvalue = visitingLvalueBackup;
@@ -979,12 +926,12 @@ void SymbolVisitor::visit(MemberExpr *e)
         shared_ptr<Symbol> componentSym = curScope()->resolve(componentName);
         if (!componentSym)
         {
-            throw SymbolException("MemberExpr",
+            throw VisitException("MemberExpr",
                                   "No symbol for componentName " + componentName);
         }
         if (componentSym->category() != Symbol::Category::Component)
         {
-            throw SymbolException("MemberExpr",
+            throw VisitException("MemberExpr",
                                   componentName + " is not a component symbol");
         }
         shared_ptr<ScopeSymbol> componentScope = dynamic_pointer_cast<ScopeSymbol>(componentSym);
@@ -993,7 +940,7 @@ void SymbolVisitor::visit(MemberExpr *e)
         shared_ptr<Symbol> groupSym = componentScope->resolve(groupName);
         if (!groupSym)
         {
-            throw SymbolException("MemberExpr", componentName + " doesn't contains group named " + groupName);
+            throw VisitException("MemberExpr", componentName + " doesn't contains group named " + groupName);
         }
 
         instanceTypeSymbol = groupSym;
@@ -1003,18 +950,18 @@ void SymbolVisitor::visit(MemberExpr *e)
         instanceTypeSymbol = curScope()->resolve(typeString);
         if (!instanceTypeSymbol)
         {
-            throw SymbolException("MemberExpr", "No symbol for type " + typeString);
+            throw VisitException("MemberExpr", "No symbol for type " + typeString);
         }
     }
     else
     {
-        throw SymbolException("MemberExpr", instanceTypeInfo->toString() + " doesn't contains member");
+        throw VisitException("MemberExpr", instanceTypeInfo->toString() + " doesn't contains member");
     }
 
     std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
     if (!scopeSym)
     {
-        throw SymbolException("MemberExpr", typeString + " is a "
+        throw VisitException("MemberExpr", typeString + " is a "
                               + Symbol::symbolCategoryString(instanceTypeSymbol->category())
                               + ", doesn't contains member");
     }
@@ -1022,7 +969,7 @@ void SymbolVisitor::visit(MemberExpr *e)
     std::shared_ptr<Symbol> member = scopeSym->resolve(e->name);
     if (!member)
     {
-        throw SymbolException("MemberExpr", typeString + " doesn't contains member named " + e->name);
+        throw VisitException("MemberExpr", typeString + " doesn't contains member named " + e->name);
     }
 
     util::condPrint(option::showSymbolRef, "ref: %s\n", member->symbolString().c_str());
@@ -1094,7 +1041,7 @@ void SymbolVisitor::visit(RefExpr *e)
     std::shared_ptr<Symbol> sym = curScope()->resolve(e->name);
     if (!sym)
     {
-        throw SymbolException("RefExpr", "No symbol named " + e->name);
+        throw VisitException("RefExpr", "No symbol named " + e->name);
     }
 
     util::condPrint(option::showSymbolRef, "ref: %s\n", sym->symbolString().c_str());
@@ -1147,7 +1094,7 @@ void SymbolVisitor::visit(RefExpr *e)
         }
         default:
         {
-            throw SymbolException("RefExpr",
+            throw VisitException("RefExpr",
                                   e->name + " should't in lvalue expr");
         }
         }
@@ -1259,7 +1206,7 @@ void SymbolVisitor::visit(VarDecl *vd)
         visit(vd->expr.get());
         if (!(*vd->type == *vd->expr->typeInfo) && !vd->type->assignCompatible(vd->expr->typeInfo))
         {
-            throw SymbolException("VarDecl", "Type doesn't match("
+            throw VisitException("VarDecl", "Type doesn't match("
                                   + vd->type->toString()
                                   + ", "
                                   + vd->expr->typeInfo->toString()
@@ -1275,7 +1222,7 @@ void SymbolVisitor::visit(VarDecl *vd)
             shared_ptr<Symbol> classSymbol = curScope()->resolve(className);
             if (classSymbol == nullptr)
             {
-                throw SymbolException("VarDecl", "No symbol for type " + className);
+                throw VisitException("VarDecl", "No symbol for type " + className);
             }
             util::condPrint(option::showSymbolRef, "ref: %s\n", classSymbol->symbolString().c_str());
 
@@ -1360,7 +1307,7 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
         else
         {
             // the group is defined as a non-PropertyGroup, that's bad
-            throw SymbolException("GroupedPropertyDecl",
+            throw VisitException("GroupedPropertyDecl",
                                   group->name() + " is already defined as "
                                   + group->symbolString());
         }
@@ -1420,67 +1367,6 @@ void SymbolVisitor::visit(ParamDecl *pd)
     curScope()->define(paramSym);
 }
 
-void SymbolVisitor::visit(Stmt *s)
-{
-    assert(s != nullptr);
-
-    switch (s->category)
-    {
-    case Stmt::Category::If:
-    {
-        auto *st = dynamic_cast<IfStmt *>(s);
-        visit(st);
-        break;
-    }
-    case Stmt::Category::Decl:
-    {
-        auto *st = dynamic_cast<DeclStmt *>(s);
-        visit(st);
-        break;
-    }
-    case Stmt::Category::Expr:
-    {
-        auto *st = dynamic_cast<ExprStmt *>(s);
-        visit(st);
-        break;
-    }
-    case Stmt::Category::Break:
-    {
-        auto *st = dynamic_cast<BreakStmt *>(s);
-        visit(st);
-        break;
-    }
-    case Stmt::Category::While:
-    {
-        auto *st = dynamic_cast<WhileStmt *>(s);
-        visit(st);
-        break;
-    }
-    case Stmt::Category::Return:
-    {
-        auto *st = dynamic_cast<ReturnStmt *>(s);
-        visit(st);
-        break;
-    }
-    case Stmt::Category::Compound:
-    {
-        auto *st = dynamic_cast<CompoundStmt *>(s);
-        visit(st);
-        break;
-    }
-    case Stmt::Category::Continue:
-    {
-        auto *st = dynamic_cast<ContinueStmt *>(s);
-        visit(st);
-        break;
-    }
-    default:
-    {
-        throw SymbolException("Stmt", "Invalid statement category");
-    }
-    }
-}
-
 void SymbolVisitor::visit(CompoundStmt *cs)
 {
     assert(cs != nullptr);
@@ -1512,7 +1398,7 @@ void SymbolVisitor::visit(IfStmt *is)
     visit(is->condition.get());
     if (is->condition->typeInfo->category() != TypeInfo::Category::Int)
     {
-        throw SymbolException("IfStmt", "if statement requires type of condition expression is int, but actually "
+        throw VisitException("IfStmt", "if statement requires type of condition expression is int, but actually "
                               + is->condition->typeInfo->toString());
     }
     m_asm.appendLine({"brf", string(".L") + to_string(falseLabel)});
@@ -1659,4 +1545,14 @@ void SymbolVisitor::visit(EnumDecl *ed)
         ed->constantList[i]->value = static_cast<int>(i);
         visit(ed->constantList[i].get());
     }
+}
+
+void SymbolVisitor::visit(BindingDecl *)
+{
+
+}
+
+void SymbolVisitor::visit(GroupedBindingDecl *)
+{
+
 }

@@ -33,6 +33,7 @@ set(RECT_SRCS
     ../asmmachine.cpp
     ../structinfo.cpp
     ../svgpainter.cpp
+    ../visitor.cpp
 )
 
 add_library(common

@@ -17,10 +17,11 @@
 
 #pragma once
 
+#include "visitor.h"
 #include "asmtext.h"
 #include "symbol.h"
 
-class SymbolVisitor
+class SymbolVisitor : public Visitor
 {
 public:
     SymbolVisitor();
@@ -36,41 +37,44 @@ private:
     void initGlobalScope();
     void initBuiltInStructs();
 
-private:
-    void visit(DocumentDecl *dd);
-    void visit(StructDecl *sd);
-    void visit(ComponentDefinationDecl *cdd);
-    void visit(ComponentInstanceDecl *cid);
-    void visit(Expr *e);
-    void visit(InitListExpr *ile);
-    void visit(BinaryOperatorExpr *b);
-    void visit(UnaryOperatorExpr *u);
-    void visit(CallExpr *c);
-    void visit(ListSubscriptExpr *lse);
-    void visit(MemberExpr *me);
-    void visit(RefExpr *re);
-    void visit(VarDecl *vd);
-    void visit(FieldDecl *md);
+protected:
+    void visit(Expr *e) override { Visitor::visit(e); }
+    void visit(Stmt *s) override { Visitor::visit(s); }
+    void visit(DocumentDecl *dd) override;
+    void visit(StructDecl *sd) override;
+    void visit(ComponentDefinationDecl *cdd) override;
+    void visit(ComponentInstanceDecl *cid) override;
+    void visit(IntegerLiteral *e) override;
+    void visit(FloatLiteral *e) override;
+    void visit(StringLiteral *e) override;
+    void visit(InitListExpr *ile) override;
+    void visit(BinaryOperatorExpr *b) override;
+    void visit(UnaryOperatorExpr *u) override;
+    void visit(CallExpr *c) override;
+    void visit(ListSubscriptExpr *lse) override;
+    void visit(MemberExpr *me) override;
+    void visit(RefExpr *re) override;
+    void visit(VarDecl *vd) override;
+    void visit(FieldDecl *md) override;
     void visitPropertyDefination(PropertyDecl *pd);
     void visitPropertyDefination(GroupedPropertyDecl *gpd);
     void visitPropertyInitialization(PropertyDecl *pd);
     void visitPropertyInitialization(GroupedPropertyDecl *gpd);
-    void visit(ParamDecl *pd);
-    void visit(Stmt *s);
-    void visit(CompoundStmt *cs);
-    void visit(DeclStmt *ds);
-    void visit(IfStmt *is);
-    void visit(WhileStmt *ws);
-    void visit(BreakStmt *bs);
-    void visit(ContinueStmt *cs);
-    void visit(ReturnStmt *rs);
-    void visit(ExprStmt *es);
+    void visit(ParamDecl *pd) override;
+    void visit(CompoundStmt *cs) override;
+    void visit(DeclStmt *ds) override;
+    void visit(IfStmt *is) override;
+    void visit(WhileStmt *ws) override;
+    void visit(BreakStmt *bs) override;
+    void visit(ContinueStmt *cs) override;
+    void visit(ReturnStmt *rs) override;
+    void visit(ExprStmt *es) override;
     void visitMethodHeader(FunctionDecl *fd);
     void visitMethodBody(FunctionDecl *fd);
-    void visit(EnumConstantDecl *ecd);
-    void visit(EnumDecl *ed);
-    void visit(BindingDecl *bd);
-    void visit(GroupedBindingDecl *gbd);
+    void visit(EnumConstantDecl *ecd) override;
+    void visit(EnumDecl *ed) override;
+    void visit(BindingDecl *) override;
+    void visit(GroupedBindingDecl *) override;
 
 private:
     std::vector<DocumentDecl *> m_documents;
