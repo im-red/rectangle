@@ -180,15 +180,8 @@ void Parser::decTrying()
 
 std::unique_ptr<DocumentDecl> Parser::parseDocument()
 {
-    unique_ptr<DocumentDecl> doc;
-
     unique_ptr<ComponentDefinationDecl> def;
     unique_ptr<ComponentInstanceDecl> instance;
-
-    if (!trying())
-    {
-        doc.reset(new DocumentDecl);
-    }
 
     switch(curTokenType())
     {
@@ -213,17 +206,16 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
     }
     match(Lexer::T_EOF);
 
+    unique_ptr<DocumentDecl> doc;
     if (!trying())
     {
         if (def)
         {
-            doc->type = DocumentDecl::Type::Defination;
-            doc->defination = move(def);
+            doc.reset(def.release());
         }
         else if (instance)
         {
-            doc->type = DocumentDecl::Type::Instance;
-            doc->instance = move(instance);
+            doc.reset(instance.release());
         }
         else
         {

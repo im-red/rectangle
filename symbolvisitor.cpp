@@ -141,13 +141,22 @@ AsmText SymbolVisitor::visit()
 
 void SymbolVisitor::visit(DocumentDecl *dd)
 {
+    assert(dd != nullptr);
+
     if (dd->type == DocumentDecl::Type::Defination)
     {
-        visit(dd->defination.get());
+        ComponentDefinationDecl *cdd = dynamic_cast<ComponentDefinationDecl *>(dd);
+        visit(cdd);
+    }
+    else if (dd->type == DocumentDecl::Type::Instance)
+    {
+        ComponentInstanceDecl *cid = dynamic_cast<ComponentInstanceDecl *>(dd);
+        visit(cid);
     }
     else
     {
-        visit(dd->instance.get());
+        StructDecl *sd = dynamic_cast<StructDecl *>(dd);
+        visit(sd);
     }
 }
 

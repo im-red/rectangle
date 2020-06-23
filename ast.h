@@ -560,8 +560,24 @@ struct EnumDecl : public ASTNode
     std::vector<std::unique_ptr<EnumConstantDecl>> constantList;
 };
 
-struct ComponentDefinationDecl : public ASTNode
+struct DocumentDecl : public ASTNode
 {
+    enum class Type
+    {
+        Defination,
+        Instance,
+        Struct
+    };
+
+    DocumentDecl(Type type_) : type(type_) {}
+
+    Type type;
+};
+
+struct ComponentDefinationDecl : public DocumentDecl
+{
+    ComponentDefinationDecl() : DocumentDecl(DocumentDecl::Type::Defination) {}
+
     void doPrint(int indent) const override
     {
         util::condPrint(option::showAst, "ComponentDefinationDecl(%s)\n", name.c_str());
@@ -601,8 +617,9 @@ struct FieldDecl : public ASTNode
     int fieldIndex = -1;
 };
 
-struct StructDecl : public ASTNode
+struct StructDecl : public DocumentDecl
 {
+    StructDecl() : DocumentDecl(DocumentDecl::Type::Struct) {}
     void doPrint(int indent) const override
     {
         util::condPrint(option::showAst, "StructDecl(%s)\n", name.c_str());
@@ -646,8 +663,9 @@ struct GroupedBindingDecl : public BindingDecl
     std::string groupName;
 };
 
-struct ComponentInstanceDecl : public ASTNode
+struct ComponentInstanceDecl : public DocumentDecl
 {
+    ComponentInstanceDecl() : DocumentDecl(DocumentDecl::Type::Defination) {}
     void doPrint(int indent) const override
     {
         util::condPrint(option::showAst, "ComponentInstanceDecl(%s)\n",componentName.c_str());
@@ -664,36 +682,4 @@ struct ComponentInstanceDecl : public ASTNode
     std::string componentName;
     std::vector<std::unique_ptr<BindingDecl>> bindingList;
     std::vector<std::unique_ptr<ComponentInstanceDecl>> instanceList;
-};
-
-struct DocumentDecl : public ASTNode
-{
-    void doPrint(int indent) const override
-    {
-        util::condPrint(option::showAst, "DocumentDecl\n");
-        if (type == Type::Defination)
-        {
-            defination->print(indent + 1);
-        }
-        else if (type == Type::Instance)
-        {
-            instance->print(indent + 1);
-        }
-        else
-        {
-            structDecl->print(indent + 1);
-        }
-    }
-
-    enum class Type
-    {
-        Defination,
-        Instance,
-        Struct
-    };
-
-    Type type;
-    std::unique_ptr<ComponentDefinationDecl> defination;
-    std::unique_ptr<ComponentInstanceDecl> instance;
-    std::unique_ptr<StructDecl> structDecl;
 };
