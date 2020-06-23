@@ -40,7 +40,7 @@ private:
 protected:
     void visit(Expr *e) override { Visitor::visit(e); }
     void visit(Stmt *s) override { Visitor::visit(s); }
-    void visit(DocumentDecl *dd) override;
+    void visit(DocumentDecl *dd) override { Visitor::visit(dd); }
     void visit(StructDecl *sd) override;
     void visit(ComponentDefinationDecl *cdd) override;
     void visit(ComponentInstanceDecl *cid) override;

@@ -69,6 +69,6 @@ protected:
     virtual void visit(BindingDecl *) {}
     virtual void visit(GroupedBindingDecl *) {}
     virtual void visit(ComponentInstanceDecl *) {}
-    virtual void visit(DocumentDecl *) {}
+    virtual void visit(DocumentDecl *);
 };
 
