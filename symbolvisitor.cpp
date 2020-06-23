@@ -32,8 +32,6 @@ void SymbolVisitor::setDocuments(const std::vector<DocumentDecl *> &documents)
 {
     m_documents = documents;
 
-    m_scopes.clear();
-    m_symbols.clear();
     m_curScope.reset();
     Scope::resetNextScopeId();
 }

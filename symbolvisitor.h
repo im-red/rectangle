@@ -79,8 +79,6 @@ protected:
 private:
     std::vector<DocumentDecl *> m_documents;
     std::vector<std::unique_ptr<StructDecl>> m_builtInStructs;
-    std::vector<std::shared_ptr<Scope>> m_scopes;
-    std::vector<std::shared_ptr<Symbol>> m_symbols;
     std::shared_ptr<Scope> m_curScope = nullptr;
 
     bool m_analyzingPropertyDep = false;
