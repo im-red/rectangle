@@ -83,8 +83,8 @@ void SymbolVisitor::initGlobalScope()
     {
         shared_ptr<TypeInfo> textType(new CustomTypeInfo("text"));
         vector<shared_ptr<TypeInfo>> paramTypes(1, textType);
-        shared_ptr<Symbol> drawPt(new FunctionSymbol("drawText", voidType, paramTypes));
-        curScope()->define(drawPt);
+        shared_ptr<Symbol> drawText(new FunctionSymbol("drawText", voidType, paramTypes));
+        curScope()->define(drawText);
     }
 
     {
