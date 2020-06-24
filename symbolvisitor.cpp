@@ -18,6 +18,7 @@
 #include "asmbin.h"
 #include "symbolvisitor.h"
 #include "structinfo.h"
+#include "symboltable.h"
 
 #include <assert.h>
 
@@ -28,69 +29,48 @@ SymbolVisitor::SymbolVisitor()
     initBuiltInStructs();
 }
 
-void SymbolVisitor::setDocuments(const std::vector<DocumentDecl *> &documents)
+void SymbolVisitor::setDocuments(const std::vector<DocumentDecl *> &documents, SymbolTable *symbolTable)
 {
     m_documents = documents;
+    m_symbolTable = symbolTable;
 
-    m_curScope.reset();
     Scope::resetNextScopeId();
-}
-
-std::shared_ptr<Scope> SymbolVisitor::curScope()
-{
-    return m_curScope;
-}
-
-void SymbolVisitor::pushScope(const std::shared_ptr<Scope> &scope)
-{
-    m_curScope = scope;
-    util::condPrint(option::showScopeStack, "pushScope: %p(%s)\n",
-                     static_cast<void *>(m_curScope.get()),
-                     m_curScope->scopeString().c_str());
-}
-
-void SymbolVisitor::popScope()
-{
-    util::condPrint(option::showScopeStack, "popScope: %p(%s)\n",
-                     static_cast<void *>(m_curScope.get()),
-                     m_curScope->scopeString().c_str());
-    m_curScope = m_curScope->parent();
 }
 
 void SymbolVisitor::initGlobalScope()
 {
-    shared_ptr<Scope> globalScope(new Scope(Scope::Category::Global, nullptr));
-    pushScope(globalScope);
+    Scope *globalScope = new Scope(Scope::Category::Global, nullptr);
+    m_symbolTable->pushScope(globalScope);
 
     shared_ptr<TypeInfo> voidType = make_shared<TypeInfo>(TypeInfo::Category::Void);
 
     {
         shared_ptr<TypeInfo> rectType(new CustomTypeInfo("rect"));
         vector<shared_ptr<TypeInfo>> paramTypes(1, rectType);
-        shared_ptr<Symbol> drawRect(new FunctionSymbol("drawRect", voidType, paramTypes));
-        curScope()->define(drawRect);
+        Symbol *drawRect = new FunctionSymbol("drawRect", voidType, paramTypes);
+        m_symbolTable->define(drawRect);
     }
 
     {
         shared_ptr<TypeInfo> ptType(new CustomTypeInfo("pt"));
         vector<shared_ptr<TypeInfo>> paramTypes(1, ptType);
-        shared_ptr<Symbol> drawPt(new FunctionSymbol("drawPt", voidType, paramTypes));
-        curScope()->define(drawPt);
+        Symbol *drawPt = new FunctionSymbol("drawPt", voidType, paramTypes);
+        m_symbolTable->define(drawPt);
     }
 
     {
         shared_ptr<TypeInfo> textType(new CustomTypeInfo("text"));
         vector<shared_ptr<TypeInfo>> paramTypes(1, textType);
-        shared_ptr<Symbol> drawText(new FunctionSymbol("drawText", voidType, paramTypes));
-        curScope()->define(drawText);
+        Symbol *drawText = new FunctionSymbol("drawText", voidType, paramTypes);
+        m_symbolTable->define(drawText);
     }
 
     {
         vector<shared_ptr<TypeInfo>> paramTypes(1, voidType);
-        shared_ptr<Symbol> len(new FunctionSymbol("len", make_shared<TypeInfo>(TypeInfo::Category::Int), paramTypes));
-        curScope()->define(len);
-        shared_ptr<Symbol> print(new FunctionSymbol("print", voidType, paramTypes));
-        curScope()->define(print);
+        Symbol *len = new FunctionSymbol("len", make_shared<TypeInfo>(TypeInfo::Category::Int), paramTypes);
+        m_symbolTable->define(len);
+        Symbol *print = new FunctionSymbol("print", voidType, paramTypes);
+        m_symbolTable->define(print);
     }
 }
 
@@ -142,30 +122,30 @@ void SymbolVisitor::visit(StructDecl *sd)
     assert(sd != nullptr);
 
     string name = sd->name;
-    shared_ptr<Symbol> sym(new ScopeSymbol(Symbol::Category::Struct, name,
-                                           Scope::Category::Struct, curScope()));
+    Symbol *sym(new ScopeSymbol(Symbol::Category::Struct, name,
+                                           Scope::Category::Struct, m_symbolTable->curScope()));
     sym->setAstNode(sd);
-    curScope()->define(sym);
+    m_symbolTable->define(sym);
 
-    pushScope(dynamic_pointer_cast<Scope>(sym));
+    m_symbolTable->pushScope(dynamic_cast<Scope *>(sym));
     for (size_t i = 0; i < sd->fieldList.size(); i++)
     {
         visit(sd->fieldList[i].get());
         sd->fieldList[i]->fieldIndex = static_cast<int>(i);
     }
-    popScope();
+    m_symbolTable->popScope();
 }
 
 void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
 {
     {
         string name = cdd->name;
-        shared_ptr<Symbol> sym(new ScopeSymbol(Symbol::Category::Component, name,
-                                               Scope::Category::Component, curScope()));
+        Symbol *sym(new ScopeSymbol(Symbol::Category::Component, name,
+                                               Scope::Category::Component, m_symbolTable->curScope()));
         sym->setAstNode(cdd);
-        curScope()->define(sym);
+        m_symbolTable->define(sym);
 
-        pushScope(dynamic_pointer_cast<Scope>(sym));
+        m_symbolTable->pushScope(dynamic_cast<Scope *>(sym));
         m_curComponentName = name;
 
         for (auto &e : cdd->enumList)
@@ -196,7 +176,7 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
         }
 
         m_curComponentName = "";
-        popScope();
+        m_symbolTable->popScope();
     }
 }
 
@@ -662,7 +642,7 @@ void SymbolVisitor::visit(CallExpr *e)
         throw VisitException("CallExpr", "CallExpr only produce rvalue");
     }
 
-    if (curScope()->category() != Scope::Category::Local)
+    if (m_symbolTable->curScope()->category() != Scope::Category::Local)
     {
         throw VisitException("CallExpr",
                               "CallExpr can only be used in LocalScope");
@@ -677,7 +657,7 @@ void SymbolVisitor::visit(CallExpr *e)
         assert(r != nullptr);
         visit(r);
 
-        std::shared_ptr<Symbol> func = curScope()->resolve(r->name);
+        Symbol *func = m_symbolTable->curScope()->resolve(r->name);
         if (!func)
         {
             throw VisitException("CallExpr", "No symbol: " + r->name);
@@ -685,14 +665,14 @@ void SymbolVisitor::visit(CallExpr *e)
 
         if (func->category() == Symbol::Category::Function)
         {
-            shared_ptr<FunctionSymbol> funcSymbol = dynamic_pointer_cast<FunctionSymbol>(func);
+            FunctionSymbol *funcSymbol = dynamic_cast<FunctionSymbol *>(func);
             assert(funcSymbol);
             functionName = funcSymbol->name();
             paramTypes = funcSymbol->paramTypes();
         }
         else if (func->category() == Symbol::Category::Method)
         {
-            shared_ptr<MethodSymbol> methodSymbol = dynamic_pointer_cast<MethodSymbol>(func);
+            MethodSymbol *methodSymbol = dynamic_cast<MethodSymbol *>(func);
             assert(methodSymbol);
             functionName = methodSymbol->name();
             paramTypes = methodSymbol->paramTypes();
@@ -717,19 +697,19 @@ void SymbolVisitor::visit(CallExpr *e)
         shared_ptr<TypeInfo> instanceType = m->instanceExpr->typeInfo;
         string typeName = instanceType->toString();
 
-        std::shared_ptr<Symbol> instanceTypeSymbol = curScope()->resolve(typeName);
+        Symbol *instanceTypeSymbol = m_symbolTable->curScope()->resolve(typeName);
         if (!instanceTypeSymbol)
         {
             throw VisitException("CallExpr", "No symbol for typeName: " + typeName);
         }
-        std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
+        ScopeSymbol *scopeSym = dynamic_cast<ScopeSymbol *>(instanceTypeSymbol);
         if (!scopeSym)
         {
             throw VisitException("CallExpr", typeName + " is a "
                                   + Symbol::symbolCategoryString(instanceTypeSymbol->category())
                                   + ", doesn't contains method");
         }
-        std::shared_ptr<Symbol> method = scopeSym->resolve(m->name);
+        Symbol *method = scopeSym->resolve(m->name);
         if (!method)
         {
             throw VisitException("CallExpr", typeName + " doesn't contains method named " + m->name);
@@ -737,7 +717,7 @@ void SymbolVisitor::visit(CallExpr *e)
 
         if (method->category() == Symbol::Category::Method)
         {
-            shared_ptr<MethodSymbol> methodSymbol = dynamic_pointer_cast<MethodSymbol>(method);
+            MethodSymbol *methodSymbol = dynamic_cast<MethodSymbol *>(method);
             assert(methodSymbol);
             functionName = methodSymbol->name();
             paramTypes = methodSymbol->paramTypes();
@@ -818,7 +798,7 @@ void SymbolVisitor::visit(CallExpr *e)
         {
             RefExpr *r = dynamic_cast<RefExpr *>(e->funcExpr.get());
             assert(r != nullptr);
-            std::shared_ptr<Symbol> func = curScope()->resolve(r->name);
+            Symbol *func = m_symbolTable->curScope()->resolve(r->name);
             assert(func != nullptr);
 
             if (func->category() == Symbol::Category::Function)
@@ -900,7 +880,7 @@ void SymbolVisitor::visit(MemberExpr *e)
     shared_ptr<TypeInfo> instanceTypeInfo = e->instanceExpr->typeInfo;
     string typeString = instanceTypeInfo->toString();
 
-    shared_ptr<Symbol> instanceTypeSymbol;
+    Symbol *instanceTypeSymbol;
     if (instanceTypeInfo->category() == TypeInfo::Category::Group)
     {
         shared_ptr<GroupTypeInfo> groupTypeInfo = dynamic_pointer_cast<GroupTypeInfo>(instanceTypeInfo);
@@ -909,7 +889,7 @@ void SymbolVisitor::visit(MemberExpr *e)
         string componentName = groupTypeInfo->componentType()->toString();
         string groupName = groupTypeInfo->name();
 
-        shared_ptr<Symbol> componentSym = curScope()->resolve(componentName);
+        Symbol *componentSym = m_symbolTable->curScope()->resolve(componentName);
         if (!componentSym)
         {
             throw VisitException("MemberExpr",
@@ -920,10 +900,10 @@ void SymbolVisitor::visit(MemberExpr *e)
             throw VisitException("MemberExpr",
                                   componentName + " is not a component symbol");
         }
-        shared_ptr<ScopeSymbol> componentScope = dynamic_pointer_cast<ScopeSymbol>(componentSym);
+        ScopeSymbol *componentScope = dynamic_cast<ScopeSymbol *>(componentSym);
         assert(componentScope != nullptr);
 
-        shared_ptr<Symbol> groupSym = componentScope->resolve(groupName);
+        Symbol *groupSym = componentScope->resolve(groupName);
         if (!groupSym)
         {
             throw VisitException("MemberExpr", componentName + " doesn't contains group named " + groupName);
@@ -933,7 +913,7 @@ void SymbolVisitor::visit(MemberExpr *e)
     }
     else if (instanceTypeInfo->category() == TypeInfo::Category::Custom)
     {
-        instanceTypeSymbol = curScope()->resolve(typeString);
+        instanceTypeSymbol = m_symbolTable->curScope()->resolve(typeString);
         if (!instanceTypeSymbol)
         {
             throw VisitException("MemberExpr", "No symbol for type " + typeString);
@@ -944,7 +924,7 @@ void SymbolVisitor::visit(MemberExpr *e)
         throw VisitException("MemberExpr", instanceTypeInfo->toString() + " doesn't contains member");
     }
 
-    std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(instanceTypeSymbol);
+    ScopeSymbol *scopeSym = dynamic_cast<ScopeSymbol *>(instanceTypeSymbol);
     if (!scopeSym)
     {
         throw VisitException("MemberExpr", typeString + " is a "
@@ -952,7 +932,7 @@ void SymbolVisitor::visit(MemberExpr *e)
                               + ", doesn't contains member");
     }
 
-    std::shared_ptr<Symbol> member = scopeSym->resolve(e->name);
+    Symbol *member = scopeSym->resolve(e->name);
     if (!member)
     {
         throw VisitException("MemberExpr", typeString + " doesn't contains member named " + e->name);
@@ -962,7 +942,6 @@ void SymbolVisitor::visit(MemberExpr *e)
     e->typeInfo = member->typeInfo();
 
     ASTNode *ast = member->astNode();
-    assert(ast != nullptr);
     if (m_visitingLvalue)
     {
         if (member->category() == Symbol::Category::Field)
@@ -1024,7 +1003,7 @@ void SymbolVisitor::visit(RefExpr *e)
 {
     assert(e != nullptr);
 
-    std::shared_ptr<Symbol> sym = curScope()->resolve(e->name);
+    Symbol *sym = m_symbolTable->curScope()->resolve(e->name);
     if (!sym)
     {
         throw VisitException("RefExpr", "No symbol named " + e->name);
@@ -1177,8 +1156,8 @@ void SymbolVisitor::visit(VarDecl *vd)
 {
     assert(vd != nullptr);
 
-    shared_ptr<Symbol> paramSym(new Symbol(Symbol::Category::Variable, vd->name, vd->type, vd));
-    curScope()->define(paramSym);
+    Symbol *paramSym = new Symbol(Symbol::Category::Variable, vd->name, vd->type, vd);
+    m_symbolTable->define(paramSym);
 
     vd->localIndex = m_functionLocals;
     m_functionLocals++;
@@ -1205,7 +1184,7 @@ void SymbolVisitor::visit(VarDecl *vd)
         if (vd->type->category() == TypeInfo::Category::Custom)
         {
             std::string className = vd->type->toString();
-            shared_ptr<Symbol> classSymbol = curScope()->resolve(className);
+            Symbol *classSymbol = m_symbolTable->curScope()->resolve(className);
             if (classSymbol == nullptr)
             {
                 throw VisitException("VarDecl", "No symbol for type " + className);
@@ -1245,8 +1224,8 @@ void SymbolVisitor::visit(FieldDecl *md)
     assert(md != nullptr);
 
     string name = md->name;
-    shared_ptr<Symbol> sym(new Symbol(Symbol::Category::Field, name, md->type, md));
-    curScope()->define(sym);
+    Symbol *sym = new Symbol(Symbol::Category::Field, name, md->type, md);
+    m_symbolTable->define(sym);
 }
 
 void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
@@ -1260,8 +1239,8 @@ void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
     else
     {
         string propertyName = pd->name;
-        shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, pd->type, pd));
-        curScope()->define(propertySym);
+        Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, pd->type, pd);
+        m_symbolTable->define(propertySym);
 
         util::condPrint(option::showPropertyDep, "property [%d] %s\n", pd->fieldIndex, propertySym->symbolString().c_str());
     }
@@ -1274,18 +1253,18 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
     string groupName = gpd->groupName;
     string propertyName = gpd->name;
 
-    std::shared_ptr<Symbol> group = curScope()->resolve(groupName);
+    Symbol *group = m_symbolTable->curScope()->resolve(groupName);
     if (group)
     {
         // the group is already defined
         if (group->category() == Symbol::Category::PropertyGroup)
         {
             // the group is defined as a PropertyGroup, that's good
-            std::shared_ptr<ScopeSymbol> scopeSym = dynamic_pointer_cast<ScopeSymbol>(group);
+            ScopeSymbol *scopeSym = dynamic_cast<ScopeSymbol *>(group);
             assert(scopeSym != nullptr);
             util::condPrint(option::showSymbolRef, "ref: %s\n", scopeSym->symbolString().c_str());
 
-            shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd));
+            Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd);
             scopeSym->define(propertySym);
 
             util::condPrint(option::showPropertyDep, "property [%d] %s\n", gpd->fieldIndex, propertySym->symbolString().c_str());
@@ -1301,18 +1280,18 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
     else
     {
         // the group is not defined, define it
-        shared_ptr<ScopeSymbol> componentSym = dynamic_pointer_cast<ScopeSymbol>(curScope());
+        ScopeSymbol *componentSym = dynamic_cast<ScopeSymbol *>(m_symbolTable->curScope());
         shared_ptr<TypeInfo> customType(new CustomTypeInfo(componentSym->name()));
 
-        shared_ptr<Symbol> groupSym(new ScopeSymbol(Symbol::Category::PropertyGroup,
+        Symbol *groupSym(new ScopeSymbol(Symbol::Category::PropertyGroup,
                                                     groupName,
                                                     Scope::Category::Group,
-                                                    curScope(),
+                                                    m_symbolTable->curScope(),
                                                     shared_ptr<TypeInfo>(new GroupTypeInfo(groupName, customType))));
-        curScope()->define(groupSym);
+        m_symbolTable->define(groupSym);
 
-        shared_ptr<Symbol> propertySym(new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd));
-        dynamic_cast<ScopeSymbol *>(groupSym.get())->define(propertySym);
+        Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd);
+        dynamic_cast<ScopeSymbol *>(groupSym)->define(propertySym);
 
         util::condPrint(option::showPropertyDep, "property [%d] %s\n", gpd->fieldIndex, propertySym->symbolString().c_str());
     }
@@ -1349,23 +1328,23 @@ void SymbolVisitor::visit(ParamDecl *pd)
 {
     assert(pd != nullptr);
 
-    shared_ptr<Symbol> paramSym(new Symbol(Symbol::Category::Parameter, pd->name, pd->type, pd));
-    curScope()->define(paramSym);
+    Symbol *paramSym = new Symbol(Symbol::Category::Parameter, pd->name, pd->type, pd);
+    m_symbolTable->define(paramSym);
 }
 
 void SymbolVisitor::visit(CompoundStmt *cs)
 {
     assert(cs != nullptr);
 
-    shared_ptr<Scope> localScope(new Scope(Scope::Category::Local, curScope()));
-    pushScope(localScope);
+    Scope *localScope(new Scope(Scope::Category::Local, m_symbolTable->curScope()));
+    m_symbolTable->pushScope(localScope);
 
     for (auto &s : cs->stmtList)
     {
         visit(s.get());
     }
 
-    popScope();
+    m_symbolTable->popScope();
 }
 
 void SymbolVisitor::visit(DeclStmt *ds)
@@ -1456,8 +1435,8 @@ void SymbolVisitor::visitMethodHeader(FunctionDecl *fd)
 {
     assert(fd != nullptr);
 
-    shared_ptr<Scope> componentScope = curScope();
-    shared_ptr<Symbol> componentSymbol = dynamic_pointer_cast<Symbol>(componentScope);
+    Scope *componentScope = m_symbolTable->curScope();
+    Symbol *componentSymbol = dynamic_cast<Symbol *>(componentScope);
     assert(componentSymbol);
 
     vector<shared_ptr<TypeInfo>> paramTypes;
@@ -1466,17 +1445,17 @@ void SymbolVisitor::visitMethodHeader(FunctionDecl *fd)
         paramTypes.push_back(p->type);
     }
 
-    shared_ptr<Symbol> methodSym(new MethodSymbol(fd->name, fd->returnType, componentSymbol, paramTypes));
-    curScope()->define(methodSym);
+    Symbol *methodSym(new MethodSymbol(fd->name, fd->returnType, componentSymbol, paramTypes));
+    m_symbolTable->define(methodSym);
 }
 
 void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
 {
     assert(fd != nullptr);
 
-    shared_ptr<Scope> methodScope(new Scope(Scope::Category::Method, curScope()));
+    Scope *methodScope(new Scope(Scope::Category::Method, m_symbolTable->curScope()));
     methodScope->setScopeName(fd->name);
-    pushScope(methodScope);
+    m_symbolTable->pushScope(methodScope);
 
     for (size_t i = 0; i < fd->paramList.size(); i++)
     {
@@ -1511,15 +1490,15 @@ void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
 
     m_asm.setLine(headerLine, {".def", name, to_string(args), to_string(locals)});
 
-    popScope();
+    m_symbolTable->popScope();
 }
 
 void SymbolVisitor::visit(EnumConstantDecl *ecd)
 {
     assert(ecd != nullptr);
 
-    shared_ptr<Symbol> enumSym(new Symbol(Symbol::Category::EnumConstants, ecd->name, make_shared<TypeInfo>(TypeInfo::Category::Int), ecd));
-    curScope()->define(enumSym);
+    Symbol *enumSym = new Symbol(Symbol::Category::EnumConstants, ecd->name, make_shared<TypeInfo>(TypeInfo::Category::Int), ecd);
+    m_symbolTable->define(enumSym);
 }
 
 void SymbolVisitor::visit(EnumDecl *ed)

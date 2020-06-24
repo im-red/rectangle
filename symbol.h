@@ -22,6 +22,17 @@
 #include <string>
 #include <map>
 
+class SymbolException : public std::runtime_error
+{
+public:
+    explicit SymbolException(const std::string &s)
+        : std::runtime_error(s)
+    {}
+    SymbolException(const std::string &type, const std::string &s)
+        : SymbolException("symbol " + type + " exception: " + s)
+    {}
+};
+
 class Symbol
 {
 public:
@@ -69,18 +80,18 @@ class MethodSymbol : public Symbol
 public:
     MethodSymbol(const std::string &name,
                  const std::shared_ptr<TypeInfo> &ti,
-                 const std::shared_ptr<Symbol> &componentSymbol,
+                 Symbol *componentSymbol,
                  const std::vector<std::shared_ptr<TypeInfo>> &paramTypes)
         : Symbol(Symbol::Category::Method, name, ti)
         , m_componentSymbol(componentSymbol)
         , m_paramTypes(paramTypes)
     {}
 
-    std::shared_ptr<Symbol> componentSymbol() const { return m_componentSymbol; }
+    Symbol *componentSymbol() const { return m_componentSymbol; }
     std::vector<std::shared_ptr<TypeInfo>> paramTypes() const { return m_paramTypes; }
 
 private:
-    std::shared_ptr<Symbol> m_componentSymbol;
+    Symbol *m_componentSymbol;
     std::vector<std::shared_ptr<TypeInfo>> m_paramTypes;
 };
 
@@ -119,7 +130,7 @@ public:
 public:
     static std::string scopeCategoryString(Category category);
 
-    Scope(Category cat, std::shared_ptr<Scope> p);
+    Scope(Category cat, Scope *p);
     virtual ~Scope();
 
     virtual std::string scopeString() const
@@ -132,12 +143,11 @@ public:
         return std::string(buf);
     }
 
-    std::shared_ptr<Scope> parent() const { return m_parent; }
+    Scope *parent() const { return m_parent; }
     Category category() const { return m_category; }
 
-    std::shared_ptr<Symbol> resolve(const std::string &name);
-
-    void define(const std::shared_ptr<Symbol> &sym);
+    void define(Symbol *sym);
+    Symbol *resolve(const std::string &name);
 
     std::string scopeName() const;
     void setScopeName(const std::string &scopeName);
@@ -148,8 +158,8 @@ public:
     static void resetNextScopeId() { m_nextScopeId = 0; }
 
 private:
-    std::map<std::string, std::shared_ptr<Symbol>> m_symbols;
-    std::shared_ptr<Scope> m_parent = nullptr;
+    std::map<std::string, Symbol *> m_symbols;
+    Scope *m_parent = nullptr;
     Category m_category = Category::Invalid;
     std::string m_scopeName = "anonymous";
     int m_scopeId = -1;
@@ -160,6 +170,6 @@ class ScopeSymbol : public Symbol, public Scope
 {
 public:
     ScopeSymbol(Symbol::Category symCat, const std::string &name,
-                Scope::Category scopeCat, std::shared_ptr<Scope> parent,
+                Scope::Category scopeCat, Scope *parent,
                 const std::shared_ptr<TypeInfo> &ti = std::shared_ptr<TypeInfo>());
 };

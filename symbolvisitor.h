@@ -21,19 +21,17 @@
 #include "asmtext.h"
 #include "symbol.h"
 
+class SymbolTable;
+
 class SymbolVisitor : public Visitor
 {
 public:
     SymbolVisitor();
 
-    void setDocuments(const std::vector<DocumentDecl *> &documents);
+    void setDocuments(const std::vector<DocumentDecl *> &documents, SymbolTable *symbolTable);
     AsmText visit();
 
 private:
-    std::shared_ptr<Scope> curScope();
-    void pushScope(const std::shared_ptr<Scope> &scope);
-    void popScope();
-
     void initGlobalScope();
     void initBuiltInStructs();
 
@@ -79,7 +77,6 @@ protected:
 private:
     std::vector<DocumentDecl *> m_documents;
     std::vector<std::unique_ptr<StructDecl>> m_builtInStructs;
-    std::shared_ptr<Scope> m_curScope = nullptr;
 
     bool m_analyzingPropertyDep = false;
     PropertyDecl *m_curAnalyzingProperty = nullptr;
@@ -105,5 +102,7 @@ private:
     std::string m_curComponentName;
 
     AsmText m_asm;
+
+    SymbolTable *m_symbolTable = nullptr;
 };
 

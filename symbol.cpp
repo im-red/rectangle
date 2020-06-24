@@ -103,7 +103,7 @@ void Symbol::setAstNode(ASTNode *astNode)
 
 int Scope::m_nextScopeId = 0;
 
-Scope::Scope(Category cat, std::shared_ptr<Scope> p)
+Scope::Scope(Category cat, Scope *p)
     : m_parent(p)
     , m_category(cat)
     , m_scopeId(m_nextScopeId++)
@@ -113,10 +113,13 @@ Scope::Scope(Category cat, std::shared_ptr<Scope> p)
 
 Scope::~Scope()
 {
-
+    for (auto &pair : m_symbols)
+    {
+        delete pair.second;
+    }
 }
 
-std::shared_ptr<Symbol> Scope::resolve(const string &name)
+Symbol *Scope::resolve(const string &name)
 {
     auto iter = m_symbols.find(name);
     if (iter == m_symbols.end())
@@ -127,7 +130,7 @@ std::shared_ptr<Symbol> Scope::resolve(const string &name)
         }
         else
         {
-            return std::shared_ptr<Symbol>();
+            return nullptr;
         }
     }
     else
@@ -136,7 +139,7 @@ std::shared_ptr<Symbol> Scope::resolve(const string &name)
     }
 }
 
-void Scope::define(const std::shared_ptr<Symbol> &sym)
+void Scope::define(Symbol *sym)
 {
     m_symbols[sym->name()] = sym;
 }
@@ -161,7 +164,7 @@ void Scope::setScopeId(int scopeId)
     m_scopeId = scopeId;
 }
 
-ScopeSymbol::ScopeSymbol(Symbol::Category symCat, const string &name, Scope::Category scopeCat, std::shared_ptr<Scope> parent, const std::shared_ptr<TypeInfo> &ti)
+ScopeSymbol::ScopeSymbol(Symbol::Category symCat, const string &name, Scope::Category scopeCat, Scope *parent, const std::shared_ptr<TypeInfo> &ti)
     : Symbol(symCat, name, ti)
     , Scope(scopeCat, parent)
 {

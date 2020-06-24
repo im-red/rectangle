@@ -3,6 +3,7 @@
 #include "option.h"
 #include "symbolvisitor.h"
 #include "asmbin.h"
+#include "symboltable.h"
 
 #include <gtest/gtest.h>
 
@@ -103,8 +104,9 @@ TEST(symbol, ASM)
     vector<DocumentDecl *> documents;
     documents.push_back(p.document());
 
+    SymbolTable symbolTable;
     SymbolVisitor sv;
-    sv.setDocuments(documents);
+    sv.setDocuments(documents, &symbolTable);
     AsmText txt = sv.visit();
     txt.dump();
     AsmBin bin(txt);

@@ -34,6 +34,7 @@ set(RECT_SRCS
     ../structinfo.cpp
     ../svgpainter.cpp
     ../visitor.cpp
+    ../symboltable.cpp
 )
 
 add_library(common
