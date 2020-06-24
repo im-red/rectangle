@@ -28,84 +28,30 @@ Parser::Parser()
 
 }
 
-void Parser::setTokens(const std::vector<Token> &tokens)
+void Parser::clear()
 {
-    m_tokens = tokens;
+    m_tokens.clear();
+    m_document.reset();
     m_index = 0;
-    m_memory.clear();
+    m_trying = 0;
 }
 
-bool Parser::parse()
+std::unique_ptr<DocumentDecl> Parser::parse(const std::vector<Token> &tokens)
 {
-    m_document.reset();
+    clear();
+    m_tokens = tokens;
 
-    bool result = true;
     try
     {
         m_document = parseDocument();
     }
     catch (ParseException &e)
     {
-        result = false;
         m_document.reset();
         fprintf(stderr, "%s\n", e.what());
     }
-    return result;
-}
 
-bool Parser::parseRule(Parser::ParserRule rule, int index)
-{
-    bool result = true;
-    m_index = index;
-    try
-    {
-        switch(rule)
-        {
-        case Document:                  parseDocument();                    break;
-        case ComponentDefination:       parseComponentDefination();         break;
-        case PropertyDefination:        parsePropertyDefination();          break;
-        case Type:                      parseType();                        break;
-        case PropertyType:              parsePropertyType();                break;
-        case ListType:                  parseListType();                    break;
-        case Literal:                   parseLiteral();                     break;
-        case FunctionDefination:        parseFunctionDefination();          break;
-        case ParamItem:                 parseParamItem();                   break;
-        case CompoundStatement:         parseCompoundStatement();           break;
-        case Declaration:               parseDeclaration();                 break;
-        case Initializer:               parseInitializer();                 break;
-        case InitializerList:           parseInitializerList();             break;
-        case Expression:                parseExpression();                  break;
-        case LogicalOrExpression:       parseLogicalOrExpression();         break;
-        case LogicalAndExpression:      parseLogicalAndExpression();        break;
-        case EqualityExpression:        parseEqualityExpression();          break;
-        case RelationalExpression:      parseRelationalExpression();        break;
-        case AdditiveExpression:        parseAdditiveExpression();          break;
-        case MultiplicativeExpression:  parseMultiplicativeExpression();    break;
-        case UnaryExpression:           parseUnaryExpression();             break;
-        case UnaryOperator:             parseUnaryOperator();               break;
-        case PostfixExpression:         parsePostfixExpression();           break;
-        case PrimaryExpression:         parsePrimaryExpression();           break;
-        case Statement:                 parseStatement();                   break;
-        case SelectionStatement:        parseSelectionStatement();          break;
-        case IterationStatement:        parseIterationStatement();          break;
-        case JumpStatement:             parseJumpStatement();               break;
-        case ExprStatement:             parseExprStatement();               break;
-        case EnumDefination:            parseEnumDefination();              break;
-        case ComponentInstance:         parseComponentInstance();           break;
-        default :
-        {
-            fprintf(stderr, "Invalid ParserRule: %d\n", rule);
-            assert(false);
-        }
-        }
-    }
-    catch (ParseException &e)
-    {
-        result = false;
-        fprintf(stderr, "%s\n", e.what());
-    }
-
-    return result;
+    return move(m_document);
 }
 
 int Parser::tokenType(int i) const
@@ -142,30 +88,6 @@ void Parser::match(int tokenType)
                  curToken().line, curToken().column, curToken().str.c_str());
         throw ParseException(buf);
     }
-}
-
-int Parser::getMemory(int index, Parser::ParserRule rule)
-{
-    assert(index >= 0 && index < static_cast<int>(m_tokens.size()));
-    assert(rule >= 0 && rule < RuleCount);
-
-    auto iter = m_memory[index].find(rule);
-    if (iter == m_memory[index].end())
-    {
-        return MemoryUnknown;
-    }
-    else
-    {
-        return iter->second;
-    }
-}
-
-void Parser::updateMemory(int index, Parser::ParserRule rule, int result)
-{
-    assert(index >= 0 && index < static_cast<int>(m_tokens.size()));
-    assert(rule >= 0 && rule < RuleCount);
-
-    m_memory[index][rule] = result;
 }
 
 void Parser::incTrying()

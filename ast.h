@@ -27,7 +27,7 @@
 struct ASTNode
 {
     virtual ~ASTNode();
-    virtual void print(int indent) const
+    virtual void print(int indent = 0) const
     {
         std::string space(indent, ' ');
         util::condPrint(option::showAst, "%s", space.c_str());

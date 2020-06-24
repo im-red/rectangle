@@ -35,12 +35,6 @@ public:
 class Parser
 {
 public:
-    enum MemoryResult
-    {
-        MemoryFail = -2,
-        MemoryUnknown = -1
-    };
-
     enum ParserRule
     {
         Document,
@@ -87,32 +81,15 @@ public:
         RuleCount
     };
 
-    enum ParserError
-    {
-
-    };
-
 public:
-    Parser();
-
-    void setTokens(const std::vector<Token> &tokens);
-
-    bool parse();
-    bool parseRule(ParserRule rule, int index);
-
-    void print() const
-    {
-        if (m_document)
-        {
-            m_document->print(0);
-        }
-    }
-    DocumentDecl *document() const { return m_document.get(); }
-
     static std::string parserRuleString(ParserRule rule);
-    static std::string parserErrorString(ParserError err);
+
+    Parser();
+    std::unique_ptr<DocumentDecl> parse(const std::vector<Token> &tokens);
 
 private:
+    void clear();
+
     int tokenType(int i) const;
     int curTokenType() const { return tokenType(m_index); }
 
@@ -121,9 +98,6 @@ private:
 
     void consume();
     void match(int tokenType);
-
-    int getMemory(int index, ParserRule rule);
-    void updateMemory(int index, ParserRule rule, int result);
 
     void incTrying();
     void decTrying();
@@ -179,7 +153,6 @@ private:
 private:
     std::vector<Token> m_tokens;
     int m_index = 0;
-    std::map<int, std::map<int, int>> m_memory;
     int m_trying = 0;
     std::unique_ptr<DocumentDecl> m_document;
 };

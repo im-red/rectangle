@@ -29,12 +29,10 @@ TEST(machine, run)
     Parser p;
     Lexer l;
     l.setCode(code);
-    p.setTokens(l.tokens());
-    p.parse();
-    p.print();
-
+    unique_ptr<DocumentDecl> document = p.parse(l.tokens());
+    document->print();
     vector<DocumentDecl *> documents;
-    documents.push_back(p.document());
+    documents.push_back(document.get());
 
     SymbolTable symbolTable;
 

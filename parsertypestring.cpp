@@ -58,9 +58,3 @@ std::string Parser::parserRuleString(ParserRule rule)
 
     return STRING_MAP.at(rule);
 }
-
-string Parser::parserErrorString(Parser::ParserError err)
-{
-    (void) err;
-    return "";
-}
