@@ -733,26 +733,8 @@ void SymbolVisitor::visit(CallExpr *e)
         throw VisitException("CallExpr", string(buf));
     }
 
-    if (functionName == "len")
-    {
-        if (e->paramList[0]->typeInfo->category() == TypeInfo::Category::String)
-        {
-            m_asm.appendLine({"slen"});
-        }
-        else if (e->paramList[0]->typeInfo->category() == TypeInfo::Category::List)
-        {
-            m_asm.appendLine({"vlen"});
-        }
-        else
-        {
-            char buf[512];
-            snprintf(buf, sizeof(buf), "%s requires string/list in 0th parameters but is passed %s",
-                     functionName.c_str(),
-                     e->paramList[0]->typeInfo->toString().c_str());
-            throw VisitException("CallExpr", string(buf));
-        }
-    }
-    else if (functionName == "print"
+    if (functionName == "len"
+             || functionName == "print"
              || functionName == "drawRect"
              || functionName == "drawText"
              || functionName == "drawPt")

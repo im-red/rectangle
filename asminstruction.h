@@ -95,9 +95,8 @@ enum AsmInstruction : unsigned char
     CALL,
     RET,
 
+    LEN,
     PRINT,
-    VLEN,
-    SLEN,
     HALT,
 
     DRAWRECT,

@@ -358,22 +358,28 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         }
         break;
     }
+    case instr::LEN:
+    {
+        Object o = popOperand();
+        if (o.category() == Object::Category::List)
+        {
+            pushOperand(ObjectPointer(new Object(o.elementCount()), true));
+        }
+        else if (o.category() == Object::Category::String)
+        {
+            pushOperand(ObjectPointer(new Object(static_cast<int>(o.stringData().size())), true));
+        }
+        else
+        {
+            assert(false);
+        }
+
+        break;
+    }
     case instr::PRINT:
     {
         Object o = popOperand();
         printf("> %s\n", o.toString().c_str());
-        break;
-    }
-    case instr::VLEN:
-    {
-        Object o = popOperand();
-        pushOperand(ObjectPointer(new Object(o.elementCount()), true));
-        break;
-    }
-    case instr::SLEN:
-    {
-        Object o = popOperand();
-        pushOperand(ObjectPointer(new Object(static_cast<int>(o.stringData().size())), true));
         break;
     }
     case instr::HALT:

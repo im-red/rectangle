@@ -209,11 +209,9 @@ ret
 
 ## Utility
 
+len
+
 print
-
-vlen
-
-slen
 
 ```
 v = opd.back()
