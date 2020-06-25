@@ -31,13 +31,12 @@ TEST(machine, run)
     l.setCode(code);
     unique_ptr<DocumentDecl> document = p.parse(l.tokens());
     document->print();
-    vector<DocumentDecl *> documents;
-    documents.push_back(document.get());
 
-    SymbolTable symbolTable;
+    AST ast;
+    ast.addDocument(move(document));
 
     SymbolVisitor sv;
-    sv.setDocuments(documents, &symbolTable);
+    sv.setAst(&ast);
 
     AsmText txt = sv.visit();
     txt.dump();

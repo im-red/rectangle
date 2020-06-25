@@ -118,14 +118,14 @@ public:
     };
 
 public:
+    static std::string tokenTypeString(int token);
+    static std::string errorTypeString(ErrorType error);
+
     Lexer();
     void setCode(const std::string &code, int line = 1, int column = 0);
 
     std::vector<Token> tokens();
     Token nextToken();
-
-    static std::string tokenTypeString(int token);
-    static std::string errorTypeString(ErrorType error);
 
     int line() const;
     int column() const;

@@ -18,19 +18,33 @@
 #include "symboltable.h"
 #include "option.h"
 #include "util.h"
+#include "symbol.h"
+
+#include <assert.h>
+
+using namespace std;
 
 SymbolTable::SymbolTable()
 {
-
+    initGlobalScope();
 }
 
 SymbolTable::~SymbolTable()
+{
+    delete m_globalScope;
+    m_globalScope = nullptr;
+
+    clear();
+}
+
+void SymbolTable::clear()
 {
     for (auto p : m_scopes)
     {
         delete p;
     }
     m_scopes.clear();
+    m_curScope = m_globalScope;
 }
 
 Scope *SymbolTable::curScope() const
@@ -57,6 +71,7 @@ void SymbolTable::popScope()
                      static_cast<void *>(m_curScope),
                      m_curScope->scopeString().c_str());
     m_curScope = m_curScope->parent();
+    assert(m_curScope != nullptr);
 }
 
 void SymbolTable::define(Symbol *symbol)
@@ -66,4 +81,41 @@ void SymbolTable::define(Symbol *symbol)
         throw SymbolException("def", "cur scope is nullptr");
     }
     m_curScope->define(symbol);
+}
+
+void SymbolTable::initGlobalScope()
+{
+    m_globalScope = new Scope(Scope::Category::Global, nullptr);
+    m_curScope = m_globalScope;
+
+    shared_ptr<TypeInfo> voidType = make_shared<TypeInfo>(TypeInfo::Category::Void);
+
+    {
+        shared_ptr<TypeInfo> rectType(new CustomTypeInfo("rect"));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, rectType);
+        Symbol *drawRect = new FunctionSymbol("drawRect", voidType, paramTypes);
+        define(drawRect);
+    }
+
+    {
+        shared_ptr<TypeInfo> ptType(new CustomTypeInfo("pt"));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, ptType);
+        Symbol *drawPt = new FunctionSymbol("drawPt", voidType, paramTypes);
+        define(drawPt);
+    }
+
+    {
+        shared_ptr<TypeInfo> textType(new CustomTypeInfo("text"));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, textType);
+        Symbol *drawText = new FunctionSymbol("drawText", voidType, paramTypes);
+        define(drawText);
+    }
+
+    {
+        vector<shared_ptr<TypeInfo>> paramTypes(1, voidType);
+        Symbol *len = new FunctionSymbol("len", make_shared<TypeInfo>(TypeInfo::Category::Int), paramTypes);
+        define(len);
+        Symbol *print = new FunctionSymbol("print", voidType, paramTypes);
+        define(print);
+    }
 }

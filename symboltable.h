@@ -27,15 +27,21 @@ public:
     SymbolTable();
     ~SymbolTable();
 
+    void clear();
+
     Scope *curScope() const;
+
     void pushScope(Scope *scope);
     void popScope();
 
     void define(Symbol *symbol);
 
 private:
-    std::set<Scope *> m_scopes;
+    void initGlobalScope();
 
+private:
+    std::set<Scope *> m_scopes;
+    Scope *m_globalScope = nullptr;
     Scope *m_curScope = nullptr;
 };
 

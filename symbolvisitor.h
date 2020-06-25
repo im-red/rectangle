@@ -28,12 +28,8 @@ class SymbolVisitor : public Visitor
 public:
     SymbolVisitor();
 
-    void setDocuments(const std::vector<DocumentDecl *> &documents, SymbolTable *symbolTable);
+    void setAst(AST *ast);
     AsmText visit();
-
-private:
-    void initGlobalScope();
-    void initBuiltInStructs();
 
 protected:
     void visit(Expr *e) override { Visitor::visit(e); }
@@ -75,9 +71,6 @@ protected:
     void visit(GroupedBindingDecl *) override;
 
 private:
-    std::vector<DocumentDecl *> m_documents;
-    std::vector<std::unique_ptr<StructDecl>> m_builtInStructs;
-
     bool m_analyzingPropertyDep = false;
     PropertyDecl *m_curAnalyzingProperty = nullptr;
 
@@ -103,6 +96,6 @@ private:
 
     AsmText m_asm;
 
-    SymbolTable *m_symbolTable = nullptr;
+    AST *m_ast;
 };
 

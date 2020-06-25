@@ -4,6 +4,7 @@
 #include "symbolvisitor.h"
 #include "asmbin.h"
 #include "symboltable.h"
+#include "ast.h"
 
 #include <gtest/gtest.h>
 
@@ -99,12 +100,12 @@ TEST(symbol, ASM)
     l.setCode(code);
     unique_ptr<DocumentDecl> document = p.parse(l.tokens());
     document->print();
-    vector<DocumentDecl *> documents;
-    documents.push_back(document.get());
+    
+    AST ast;
+    ast.addDocument(move(document));
 
-    SymbolTable symbolTable;
     SymbolVisitor sv;
-    sv.setDocuments(documents, &symbolTable);
+    sv.setAst(&ast);
     AsmText txt = sv.visit();
     txt.dump();
     AsmBin bin(txt);

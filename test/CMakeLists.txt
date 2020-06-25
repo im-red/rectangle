@@ -35,6 +35,7 @@ set(RECT_SRCS
     ../svgpainter.cpp
     ../visitor.cpp
     ../symboltable.cpp
+    ../astnode.cpp
 )
 
 add_library(common

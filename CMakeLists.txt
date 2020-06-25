@@ -30,4 +30,5 @@ add_executable(rectangle
     svgpainter.cpp
     visitor.cpp
     symboltable.cpp
+    astnode.cpp
 )
