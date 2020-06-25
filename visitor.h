@@ -37,38 +37,39 @@ public:
 
 protected:
     virtual void visit(Expr *e);
-    virtual void visit(IntegerLiteral *) {}
-    virtual void visit(FloatLiteral *) {}
-    virtual void visit(StringLiteral *) {}
-    virtual void visit(InitListExpr *) {}
-    virtual void visit(BinaryOperatorExpr *) {}
-    virtual void visit(UnaryOperatorExpr *) {}
-    virtual void visit(CallExpr *) {}
-    virtual void visit(ListSubscriptExpr *) {}
-    virtual void visit(MemberExpr *) {}
-    virtual void visit(RefExpr *) {}
-    virtual void visit(VarDecl *) {}
-    virtual void visit(PropertyDecl *) {}
-    virtual void visit(GroupedPropertyDecl *) {}
-    virtual void visit(ParamDecl *) {}
-    virtual void visit(Stmt *);
-    virtual void visit(CompoundStmt *) {}
-    virtual void visit(DeclStmt *) {}
-    virtual void visit(IfStmt *) {}
-    virtual void visit(WhileStmt *) {}
-    virtual void visit(BreakStmt *) {}
-    virtual void visit(ContinueStmt *) {}
-    virtual void visit(ReturnStmt *) {}
-    virtual void visit(ExprStmt *) {}
-    virtual void visit(FunctionDecl *) {}
-    virtual void visit(EnumConstantDecl *) {}
-    virtual void visit(EnumDecl *) {}
-    virtual void visit(ComponentDefinationDecl *) {}
-    virtual void visit(FieldDecl *) {}
-    virtual void visit(StructDecl *) {}
-    virtual void visit(BindingDecl *) {}
-    virtual void visit(GroupedBindingDecl *) {}
-    virtual void visit(ComponentInstanceDecl *) {}
-    virtual void visit(DocumentDecl *);
+    virtual void visit(Stmt *s);
+    virtual void visit(DocumentDecl *dd);
+
+    virtual void visit(IntegerLiteral *) = 0;
+    virtual void visit(FloatLiteral *) = 0;
+    virtual void visit(StringLiteral *) = 0;
+    virtual void visit(InitListExpr *) = 0;
+    virtual void visit(BinaryOperatorExpr *) = 0;
+    virtual void visit(UnaryOperatorExpr *) = 0;
+    virtual void visit(CallExpr *) = 0;
+    virtual void visit(ListSubscriptExpr *) = 0;
+    virtual void visit(MemberExpr *) = 0;
+    virtual void visit(RefExpr *) = 0;
+    virtual void visit(VarDecl *) = 0;
+    virtual void visit(PropertyDecl *) = 0;
+    virtual void visit(GroupedPropertyDecl *) = 0;
+    virtual void visit(ParamDecl *) = 0;
+    virtual void visit(CompoundStmt *) = 0;
+    virtual void visit(DeclStmt *) = 0;
+    virtual void visit(IfStmt *) = 0;
+    virtual void visit(WhileStmt *) = 0;
+    virtual void visit(BreakStmt *) = 0;
+    virtual void visit(ContinueStmt *) = 0;
+    virtual void visit(ReturnStmt *) = 0;
+    virtual void visit(ExprStmt *) = 0;
+    virtual void visit(FunctionDecl *) = 0;
+    virtual void visit(EnumConstantDecl *) = 0;
+    virtual void visit(EnumDecl *) = 0;
+    virtual void visit(ComponentDefinationDecl *) = 0;
+    virtual void visit(FieldDecl *) = 0;
+    virtual void visit(StructDecl *) = 0;
+    virtual void visit(BindingDecl *) = 0;
+    virtual void visit(GroupedBindingDecl *) = 0;
+    virtual void visit(ComponentInstanceDecl *) = 0;
 };
 

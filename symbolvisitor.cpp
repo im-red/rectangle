@@ -1469,3 +1469,18 @@ void SymbolVisitor::visit(GroupedBindingDecl *)
 {
 
 }
+
+void SymbolVisitor::visit(FunctionDecl *)
+{
+
+}
+
+void SymbolVisitor::visit(PropertyDecl *)
+{
+
+}
+
+void SymbolVisitor::visit(GroupedPropertyDecl *)
+{
+
+}

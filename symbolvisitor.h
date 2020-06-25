@@ -69,6 +69,9 @@ protected:
     void visit(EnumDecl *ed) override;
     void visit(BindingDecl *) override;
     void visit(GroupedBindingDecl *) override;
+    void visit(FunctionDecl *) override;
+    void visit(PropertyDecl *) override;
+    void visit(GroupedPropertyDecl *) override;
 
 private:
     bool m_analyzingPropertyDep = false;
