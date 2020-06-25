@@ -60,34 +60,34 @@ void AsmBin::assemble(const AsmText &t)
         }
         else
         {
-            Instruction instr = static_cast<Instruction>(instr::getAsmValue(firstWord));
+            instr::AsmInstruction ins = static_cast<instr::AsmInstruction>(instr::getAsmValue(firstWord));
 
-            if (instr::isBranchInstr(instr))
+            if (instr::isBranchInstr(ins))
             {
                 assert(line.size() == 2);
 
                 string label = line[1];
                 int index = defineLabel(label);
-                appendByte(instr);
+                appendByte(ins);
                 m_labelIndexAddr.push_back(m_offset);
                 appendInt(index);
             }
-            else if (instr::isCallInstr(instr))
+            else if (instr::isCallInstr(ins))
             {
                 assert(line.size() == 2);
 
                 string funcName = line[1];
                 int index = defineFunction(funcName);
-                appendByte(CALL);
+                appendByte(instr::CALL);
                 appendInt(index);
             }
-            else if (instr::is0OpInstr(instr))
+            else if (instr::is0OpInstr(ins))
             {
                 assert(line.size() == 1);
 
-                appendByte(instr);
+                appendByte(ins);
             }
-            else if (instr::is1OpInstr(instr))
+            else if (instr::is1OpInstr(ins))
             {
                 assert(line.size() == 2);
                 int op;
@@ -103,7 +103,7 @@ void AsmBin::assemble(const AsmText &t)
                 {
                     op = atoi(line[1].c_str());
                 }
-                appendByte(instr);
+                appendByte(ins);
                 appendInt(op);
             }
             else
@@ -322,7 +322,7 @@ int AsmBin::defineLabel(const string &name, int addr)
 
 void AsmBin::appendByte(unsigned char c)
 {
-    assert(c != INVALID);
+    assert(c != instr::INVALID);
     m_code.push_back(c);
     m_offset += 1;
 }

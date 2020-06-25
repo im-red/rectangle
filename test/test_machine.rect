@@ -49,5 +49,10 @@ def Rectangle {
         print(-i);
         float f = 2.0;
         print(-f);
+        printFoo();
+    }
+
+    void printFoo() {
+        print("Foo");
     }
 }

@@ -25,63 +25,6 @@
 class AsmBin
 {
 public:
-    enum Instruction : unsigned char
-    {
-        INVALID,
-        IADD,
-        ISUB,
-        IMUL,
-        IDIV,
-        IREM,
-        IEQ,
-        INE,
-        ILT,
-        IGT,
-        ILE,
-        IGE,
-        IAND,
-        IOR,
-        FADD,
-        FSUB,
-        FMUL,
-        FDIV,
-        FEQ,
-        FNE,
-        FLT,
-        FGT,
-        FLE,
-        FGE,
-        SADD,
-        SEQ,
-        SNE,
-        ICONST,
-        FCONST,
-        SCONST,
-        STRUCT,
-        POP,
-        GLOAD,
-        GSTORE,
-        LLOAD,
-        LSTORE,
-        FLOAD,
-        FSTORE,
-        VECTOR,
-        VAPPEND,
-        VLOAD,
-        VSTORE,
-        BR,
-        BRT,
-        BRF,
-        CALL,
-        RET,
-        PRINT,
-        VLEN,
-        SLEN,
-        HALT,
-        DRAWRECT,
-        DRAWTEXT
-    };
-
     struct FunctionItem
     {
         FunctionItem(const std::string &name_ = "", int addr_ = -1, int args_ = -1, int locals_ = -1)
