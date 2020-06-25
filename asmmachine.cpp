@@ -350,7 +350,7 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
     }
     case instr::RET:
     {
-        m_ip = m_frames.back().func.addr;
+        m_ip = m_frames.back().returnAddr;
         m_frames.pop_back();
         if (m_frames.size() == 0)
         {

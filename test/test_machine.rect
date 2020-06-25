@@ -50,6 +50,8 @@ def Rectangle {
         float f = 2.0;
         print(-f);
         printFoo();
+        print("haha");
+        print("haha");
     }
 
     void printFoo() {
