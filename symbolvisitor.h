@@ -37,7 +37,7 @@ protected:
     void visit(DocumentDecl *dd) override { Visitor::visit(dd); }
     void visit(StructDecl *sd) override;
     void visit(ComponentDefinationDecl *cdd) override;
-    void visit(ComponentInstanceDecl *cid) override;
+    void visit(ComponentInstanceDecl *) override;
     void visit(IntegerLiteral *e) override;
     void visit(FloatLiteral *e) override;
     void visit(StringLiteral *e) override;

@@ -128,28 +128,33 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
     }
 }
 
-void SymbolVisitor::visit(ComponentInstanceDecl *cid)
+void SymbolVisitor::visit(ComponentInstanceDecl *)
 {
-    (void) cid;
     throw VisitException("ComponentInstanceDecl", "Not implement");
 }
 
 void SymbolVisitor::visit(IntegerLiteral *e)
 {
+    assert(e != nullptr);
+
     e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
-    m_asm.appendLine({"iconst", to_string(dynamic_cast<IntegerLiteral *>(e)->value)});
+    m_asm.appendLine({"iconst", to_string(e->value)});
 }
 
 void SymbolVisitor::visit(FloatLiteral *e)
 {
+    assert(e != nullptr);
+
     e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Float));
-    m_asm.appendLine({"fconst", to_string(dynamic_cast<FloatLiteral *>(e)->value)});
+    m_asm.appendLine({"fconst", to_string(e->value)});
 }
 
 void SymbolVisitor::visit(StringLiteral *e)
 {
+    assert(e != nullptr);
+
     e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::String));
-    m_asm.appendLine({"sconst", dynamic_cast<StringLiteral *>(e)->value});
+    m_asm.appendLine({"sconst", e->value});
 }
 
 void SymbolVisitor::visit(InitListExpr *ile)
@@ -1462,25 +1467,25 @@ void SymbolVisitor::visit(EnumDecl *ed)
 
 void SymbolVisitor::visit(BindingDecl *)
 {
-
+    throw VisitException("BindingDecl", "Not implement");
 }
 
 void SymbolVisitor::visit(GroupedBindingDecl *)
 {
-
+    throw VisitException("GroupedBindingDecl", "Not implement");
 }
 
 void SymbolVisitor::visit(FunctionDecl *)
 {
-
+    throw VisitException("FunctionDecl", "Not implement");
 }
 
 void SymbolVisitor::visit(PropertyDecl *)
 {
-
+    throw VisitException("PropertyDecl", "Not implement");
 }
 
 void SymbolVisitor::visit(GroupedPropertyDecl *)
 {
-
+    throw VisitException("GroupedPropertyDecl", "Not implement");
 }
