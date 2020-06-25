@@ -411,6 +411,40 @@ ObjectPointer &ObjectPointer::operator=(ObjectPointer &&rhs)
     return *this;
 }
 
+Object operator!(const Object &o)
+{
+    assert(o.category() == Object::Category::Int);
+
+    int intData = 0;
+    if (o.intData() == 0)
+    {
+        intData = 1;
+    }
+
+    return Object(intData);
+}
+
+Object operator-(const Object &o)
+{
+    Object result;
+    if (o.category() == Object::Category::Int)
+    {
+        result.setCategory(Object::Category::Int);
+        result.setIntData(-o.intData());
+    }
+    else if (o.category() == Object::Category::Float)
+    {
+        result.setCategory(Object::Category::Float);
+        result.setFloatData(-o.floatData());
+    }
+    else
+    {
+        assert(false);
+    }
+
+    return result;
+}
+
 Object *ObjectPointer::get() const
 {
     return m_object;

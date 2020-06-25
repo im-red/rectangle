@@ -30,6 +30,10 @@ iand
 
 ior
 
+inot
+
+ineg
+
 ### float
 
 fadd
@@ -51,6 +55,8 @@ fgt
 fle
 
 fge
+
+fneg
 
 ### string
 

@@ -194,6 +194,13 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         pushOperand(ObjectPointer(new Object(op0 >= op1), true));
         break;
     }
+    case instr::INEG:
+    case instr::FNEG:
+    {
+        Object op0 = popOperand();
+        pushOperand(ObjectPointer(new Object(-op0), true));
+        break;
+    }
     case instr::IAND:
     {
         Object op1 = popOperand();
@@ -206,6 +213,12 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         Object op1 = popOperand();
         Object op0 = popOperand();
         pushOperand(ObjectPointer(new Object(op0 || op1), true));
+        break;
+    }
+    case instr::INOT:
+    {
+        Object op0 = popOperand();
+        pushOperand(ObjectPointer(new Object(!op0), true));
         break;
     }
     case instr::ICONST:

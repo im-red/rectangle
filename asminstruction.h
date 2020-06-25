@@ -61,8 +61,14 @@ enum AsmInstruction : unsigned char
     IGE,
     FGE,
 
+    INEG,
+    FNEG,
+
     IAND,
+
     IOR,
+
+    INOT,
 
     ICONST,
     FCONST,

@@ -584,6 +584,33 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
         break;
     }
     }
+
+    if (u->op != UnaryOperatorExpr::Op::Positive)
+    {
+        string prefix;
+        switch (u->typeInfo->category())
+        {
+        case TypeInfo::Category::Int:       prefix = "i"; break;
+        case TypeInfo::Category::Float:     prefix = "f"; break;
+        case TypeInfo::Category::String:
+        default:                            throw VisitException("UnaryOperatorExpr", "Unary operator is only valid for int/float");
+        }
+
+        string op;
+        switch (u->op)
+        {
+        case UnaryOperatorExpr::Op::Negative:   op = "neg"; break;
+        case UnaryOperatorExpr::Op::Not:        op = "not"; break;
+        case UnaryOperatorExpr::Op::Positive:
+        case UnaryOperatorExpr::Op::Invalid:
+        {
+            assert(false);
+            break;
+        }
+        }
+
+        m_asm.appendLine({prefix + op});
+    }
 }
 
 void SymbolVisitor::visit(CallExpr *e)

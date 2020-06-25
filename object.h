@@ -38,6 +38,8 @@ bool operator>=(const Object &lhs, const Object &rhs);
 bool operator<=(const Object &lhs, const Object &rhs);
 bool operator&&(const Object &lhs, const Object &rhs);
 bool operator||(const Object &lhs, const Object &rhs);
+Object operator!(const Object &o);
+Object operator-(const Object &o);
 
 class Object
 {

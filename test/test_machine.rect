@@ -43,5 +43,11 @@ def Rectangle {
             }
             tx = tx + 1;
         }
+
+        int i = 2;
+        print(!i);
+        print(-i);
+        float f = 2.0;
+        print(-f);
     }
 }
