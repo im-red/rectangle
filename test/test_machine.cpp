@@ -5,6 +5,7 @@
 #include "asmbin.h"
 #include "asmmachine.h"
 #include "symboltable.h"
+#include "asmvisitor.h"
 
 #include <gtest/gtest.h>
 
@@ -36,9 +37,10 @@ TEST(machine, run)
     ast.addDocument(move(document));
 
     SymbolVisitor sv;
-    sv.setAst(&ast);
+    sv.visit(&ast);
 
-    AsmText txt = sv.visit();
+    AsmVisitor av;
+    AsmText txt = av.visit(&ast);
     txt.dump();
 
     AsmBin bin(txt);

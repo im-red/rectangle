@@ -29,15 +29,11 @@ SymbolVisitor::SymbolVisitor()
 
 }
 
-void SymbolVisitor::setAst(AST *ast)
+void SymbolVisitor::visit(AST *ast)
 {
     m_ast = ast;
-    Scope::resetNextScopeId();
-}
 
-AsmText SymbolVisitor::visit()
-{
-    m_asm.clear();
+    clear();
 
     auto documents = m_ast->documents();
     for (auto doc : documents)
@@ -61,8 +57,6 @@ AsmText SymbolVisitor::visit()
             visit(doc);
         }
     }
-
-    return m_asm;
 }
 
 void SymbolVisitor::visit(StructDecl *sd)
@@ -94,7 +88,6 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
         m_ast->symbolTable()->define(sym);
 
         m_ast->symbolTable()->pushScope(dynamic_cast<Scope *>(sym));
-        m_curComponentName = name;
 
         for (auto &e : cdd->enumList)
         {
@@ -111,9 +104,6 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
             visitPropertyInitialization(p.get());
         }
 
-        m_asm.appendLine({".def", name + "::" + name, "1", "0"});
-        m_asm.appendLine({"ret"});
-
         for (auto &f : cdd->methodList)
         {
             visitMethodHeader(f.get());
@@ -123,7 +113,6 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
             visitMethodBody(f.get());
         }
 
-        m_curComponentName = "";
         m_ast->symbolTable()->popScope();
     }
 }
@@ -138,7 +127,6 @@ void SymbolVisitor::visit(IntegerLiteral *e)
     assert(e != nullptr);
 
     e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
-    m_asm.appendLine({"iconst", to_string(e->value)});
 }
 
 void SymbolVisitor::visit(FloatLiteral *e)
@@ -146,7 +134,6 @@ void SymbolVisitor::visit(FloatLiteral *e)
     assert(e != nullptr);
 
     e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Float));
-    m_asm.appendLine({"fconst", to_string(e->value)});
 }
 
 void SymbolVisitor::visit(StringLiteral *e)
@@ -154,14 +141,12 @@ void SymbolVisitor::visit(StringLiteral *e)
     assert(e != nullptr);
 
     e->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::String));
-    m_asm.appendLine({"sconst", e->value});
 }
 
 void SymbolVisitor::visit(InitListExpr *ile)
 {
     assert(ile != nullptr);
 
-    m_asm.appendLine({"vector"});
     shared_ptr<TypeInfo> eType;
     if (ile->exprList.size() == 0)
     {
@@ -172,7 +157,6 @@ void SymbolVisitor::visit(InitListExpr *ile)
         for (size_t i = 0; i < ile->exprList.size(); i++)
         {
             visit(ile->exprList[i].get());
-            m_asm.appendLine({"vappend"});
         }
 
         eType = ile->exprList[0]->typeInfo;
@@ -193,19 +177,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
 {
     assert(b != nullptr);
 
-    bool visitingLvalueBackup = m_visitingLvalue;
-
-    if (b->op == BinaryOperatorExpr::Op::Assign)
-    {
-        m_visitingLvalue = true;
-        m_lvalueCategory = LvalueCategory::Invalid;
-    }
     visit(b->left.get());
-    if (b->op == BinaryOperatorExpr::Op::Assign)
-    {
-        m_visitingLvalue = visitingLvalueBackup;
-    }
-
     visit(b->right.get());
 
     shared_ptr<TypeInfo> leftType = b->left->typeInfo;
@@ -360,186 +332,6 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         break;
     }
     }
-
-    switch (b->op)
-    {
-    case BinaryOperatorExpr::Op::LogicalAnd:
-    {
-        m_asm.appendLine({"iand"});
-        break;
-    }
-    case BinaryOperatorExpr::Op::LogicalOr:
-    {
-        m_asm.appendLine({"ior"});
-        break;
-    }
-    case BinaryOperatorExpr::Op::LessThan:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"ilt"});
-        }
-        else
-        {
-            m_asm.appendLine({"flt"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::GreaterThan:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"igt"});
-        }
-        else
-        {
-            m_asm.appendLine({"fgt"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::LessEqual:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"ile"});
-        }
-        else
-        {
-            m_asm.appendLine({"fle"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::GreaterEqual:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"ige"});
-        }
-        else
-        {
-            m_asm.appendLine({"fge"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::Equal:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"ieq"});
-        }
-        else if (leftType->category() == TypeInfo::Category::Float)
-        {
-            m_asm.appendLine({"feq"});
-        }
-        else
-        {
-            m_asm.appendLine({"seq"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::NotEqual:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"ine"});
-        }
-        else if (leftType->category() == TypeInfo::Category::Float)
-        {
-            m_asm.appendLine({"fne"});
-        }
-        else
-        {
-            m_asm.appendLine({"sne"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::Plus:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"iadd"});
-        }
-        else if (leftType->category() == TypeInfo::Category::Float)
-        {
-            m_asm.appendLine({"fadd"});
-        }
-        else
-        {
-            m_asm.appendLine({"sadd"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::Minus:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"isub"});
-        }
-        else
-        {
-            m_asm.appendLine({"fsub"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::Multiply:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"imul"});
-        }
-        else
-        {
-            m_asm.appendLine({"fmul"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::Divide:
-    {
-        if (leftType->category() == TypeInfo::Category::Int)
-        {
-            m_asm.appendLine({"idiv"});
-        }
-        else
-        {
-            m_asm.appendLine({"fdiv"});
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::Remainder:
-    {
-        m_asm.appendLine({"irem"});
-        break;
-    }
-    case BinaryOperatorExpr::Op::Assign:
-    {
-        if (m_lvalueCategory == LvalueCategory::List)
-        {
-            m_asm.appendLine({"vstore"});
-        }
-        else if (m_lvalueCategory == LvalueCategory::Local)
-        {
-            m_asm.appendLine({"lstore", to_string(m_lvalueIndex)});
-        }
-        else if (m_lvalueCategory == LvalueCategory::Global)
-        {
-            m_asm.appendLine({"gstore", to_string(m_lvalueIndex)});
-        }
-        else if (m_lvalueCategory == LvalueCategory::Field)
-        {
-            m_asm.appendLine({"fstore", to_string(m_lvalueIndex)});
-        }
-        else // (m_lvalueCategory == LvalueCategory::Invalid)
-        {
-            throw VisitException("BinaryOperatorExpr", "Invalid lvalue category");
-        }
-        break;
-    }
-    case BinaryOperatorExpr::Op::Invalid:
-    {
-        assert(false);
-        break;
-    }
-    }
 }
 
 void SymbolVisitor::visit(UnaryOperatorExpr *u)
@@ -584,33 +376,6 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
         break;
     }
     }
-
-    if (u->op != UnaryOperatorExpr::Op::Positive)
-    {
-        string prefix;
-        switch (u->typeInfo->category())
-        {
-        case TypeInfo::Category::Int:       prefix = "i"; break;
-        case TypeInfo::Category::Float:     prefix = "f"; break;
-        case TypeInfo::Category::String:
-        default:                            throw VisitException("UnaryOperatorExpr", "Unary operator is only valid for int/float");
-        }
-
-        string op;
-        switch (u->op)
-        {
-        case UnaryOperatorExpr::Op::Negative:   op = "neg"; break;
-        case UnaryOperatorExpr::Op::Not:        op = "not"; break;
-        case UnaryOperatorExpr::Op::Positive:
-        case UnaryOperatorExpr::Op::Invalid:
-        {
-            assert(false);
-            break;
-        }
-        }
-
-        m_asm.appendLine({prefix + op});
-    }
 }
 
 void SymbolVisitor::visit(CallExpr *e)
@@ -618,11 +383,6 @@ void SymbolVisitor::visit(CallExpr *e)
     assert(e != nullptr);
 
     e->scope = m_ast->symbolTable()->curScope();
-
-    if (m_visitingLvalue)
-    {
-        throw VisitException("CallExpr", "CallExpr only produce rvalue");
-    }
 
     if (m_ast->symbolTable()->curScope()->category() != Scope::Category::Local)
     {
@@ -741,7 +501,6 @@ void SymbolVisitor::visit(CallExpr *e)
              || functionName == "drawText"
              || functionName == "drawPt")
     {
-        m_asm.appendLine({functionName});
     }
     else
     {
@@ -758,37 +517,6 @@ void SymbolVisitor::visit(CallExpr *e)
                 throw VisitException("CallExpr", string(buf));
             }
         }
-        if (e->funcExpr->category == Expr::Category::Ref)
-        {
-            RefExpr *r = dynamic_cast<RefExpr *>(e->funcExpr.get());
-            assert(r != nullptr);
-            Symbol *func = m_ast->symbolTable()->curScope()->resolve(r->name);
-            assert(func != nullptr);
-
-            if (func->category() == Symbol::Category::Function)
-            {
-                m_asm.appendLine({"call", func->name()});
-            }
-            else if (func->category() == Symbol::Category::Method)
-            {
-                assert(m_curComponentName != "");
-                m_asm.appendLine({"call", m_curComponentName + "::" + func->name()});
-            }
-            else
-            {
-                assert(false);
-            }
-        }
-        else if (e->funcExpr->category == Expr::Category::Member)
-        {
-            MemberExpr *m = dynamic_cast<MemberExpr *>(e->funcExpr.get());
-            assert(m != nullptr);
-
-            shared_ptr<TypeInfo> instanceType = m->instanceExpr->typeInfo;
-            string typeName = instanceType->toString();
-
-            m_asm.appendLine({"call", typeName + "::" + m->name});
-        }
     }
 
     e->typeInfo = e->funcExpr->typeInfo;
@@ -797,9 +525,6 @@ void SymbolVisitor::visit(CallExpr *e)
 void SymbolVisitor::visit(ListSubscriptExpr *e)
 {
     assert(e != nullptr);
-
-    bool visitingLvalueBackup = m_visitingLvalue;
-    m_visitingLvalue = false;
 
     visit(e->listExpr.get());
     if (e->listExpr->typeInfo->category() != TypeInfo::Category::List)
@@ -811,17 +536,6 @@ void SymbolVisitor::visit(ListSubscriptExpr *e)
     if (e->indexExpr->typeInfo->category() != TypeInfo::Category::Int)
     {
         throw VisitException("ListSubscriptExpr", "Type of indexExpr is " + e->indexExpr->typeInfo->toString());
-    }
-
-    m_visitingLvalue = visitingLvalueBackup;
-
-    if (m_visitingLvalue)
-    {
-        m_lvalueCategory = LvalueCategory::List;
-    }
-    else
-    {
-        m_asm.appendLine({"vload"});
     }
 
     shared_ptr<TypeInfo> ti = e->listExpr->typeInfo;
@@ -837,11 +551,7 @@ void SymbolVisitor::visit(MemberExpr *e)
 
     e->scope = m_ast->symbolTable()->curScope();
 
-    bool visitingLvalueBackup = m_visitingLvalue;
-
-    m_visitingLvalue = false;
     visit(e->instanceExpr.get());
-    m_visitingLvalue = visitingLvalueBackup;
 
     shared_ptr<TypeInfo> instanceTypeInfo = e->instanceExpr->typeInfo;
     string typeString = instanceTypeInfo->toString();
@@ -908,51 +618,6 @@ void SymbolVisitor::visit(MemberExpr *e)
     e->typeInfo = member->typeInfo();
 
     ASTNode *ast = member->astNode();
-    if (m_visitingLvalue)
-    {
-        if (member->category() == Symbol::Category::Field)
-        {
-            FieldDecl *fd = dynamic_cast<FieldDecl *>(ast);
-
-            m_lvalueCategory = LvalueCategory::Field;
-            m_lvalueIndex = fd->fieldIndex;
-        }
-        else if (member->category() == Symbol::Category::Property)
-        {
-            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
-
-            m_lvalueCategory = LvalueCategory::Field;
-            m_lvalueIndex = pd->fieldIndex;
-        }
-        else
-        {
-            // do nothing
-        }
-    }
-    else
-    {
-        if (member->category() == Symbol::Category::Field)
-        {
-            FieldDecl *fd = dynamic_cast<FieldDecl *>(ast);
-            assert(fd != nullptr);
-
-            int fieldIndex = fd->fieldIndex;
-            m_asm.appendLine({"fload", to_string(fieldIndex)});
-        }
-        else if (member->category() == Symbol::Category::Property)
-        {
-            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
-            assert(pd != nullptr);
-
-            int fieldIndex = pd->fieldIndex;
-            m_asm.appendLine({"fload", to_string(fieldIndex)});
-        }
-        else
-        {
-            // do nothing
-        }
-    }
-
     if (member->category() == Symbol::Category::Property && m_analyzingPropertyDep)
     {
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
@@ -981,133 +646,6 @@ void SymbolVisitor::visit(RefExpr *e)
     e->typeInfo = sym->typeInfo();
 
     ASTNode *ast = sym->astNode();
-    if (m_visitingLvalue)
-    {
-        switch (sym->category())
-        {
-        case Symbol::Category::Variable:
-        {
-            m_lvalueCategory = LvalueCategory::Local;
-
-            VarDecl *vd = dynamic_cast<VarDecl *>(ast);
-            assert(vd != nullptr);
-
-            m_lvalueIndex = vd->localIndex;
-
-            break;
-        }
-        case Symbol::Category::Parameter:
-        {
-            m_lvalueCategory = LvalueCategory::Local;
-
-            ParamDecl *pd = dynamic_cast<ParamDecl *>(ast);
-            assert(pd != nullptr);
-
-            m_lvalueIndex = pd->localIndex;
-
-            break;
-        }
-        case Symbol::Category::Property:
-        {
-            m_lvalueCategory = LvalueCategory::Field;
-
-            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
-            assert(pd != nullptr);
-
-            m_lvalueIndex = pd->fieldIndex;
-
-            m_asm.appendLine({"lload", "0"});
-
-            break;
-        }
-        case Symbol::Category::PropertyGroup:
-        {
-            m_asm.appendLine({"lload", "0"});
-            break;
-        }
-        default:
-        {
-            throw VisitException("RefExpr",
-                                  e->name + " should't in lvalue expr");
-        }
-        }
-    }
-    else
-    {
-        switch (sym->category())
-        {
-        case Symbol::Category::Variable:
-        {
-            VarDecl *vd = dynamic_cast<VarDecl *>(ast);
-            assert(vd != nullptr);
-
-            util::condPrint(option::showGenAsm,
-                            "genAsm: ref %s(Variable) in RefExpr(rvalue)\n", sym->name().c_str());
-
-            m_asm.appendLine({"lload", to_string(vd->localIndex)});
-
-            break;
-        }
-        case Symbol::Category::Parameter:
-        {
-            ParamDecl *pd = dynamic_cast<ParamDecl *>(ast);
-            assert(pd != nullptr);
-
-            util::condPrint(option::showGenAsm,
-                            "genAsm: ref %s(Parameter) in RefExpr(rvalue)\n", sym->name().c_str());
-
-            m_asm.appendLine({"lload", to_string(pd->localIndex)});
-
-            break;
-        }
-        case Symbol::Category::Property:
-        {
-            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
-            assert(pd != nullptr);
-
-            util::condPrint(option::showGenAsm,
-                            "genAsm: ref %s(Property) in RefExpr(rvalue)\n", sym->name().c_str());
-
-            m_asm.appendLine({"lload", "0"});
-            m_asm.appendLine({"fload", to_string(pd->fieldIndex)});
-
-            break;
-        }
-        case Symbol::Category::PropertyGroup:
-        {
-            util::condPrint(option::showGenAsm,
-                            "genAsm: ref %s(PropertyGroup) in RefExpr(rvalue)\n", sym->name().c_str());
-
-            m_asm.appendLine({"lload", "0"});
-
-            break;
-        }
-        case Symbol::Category::EnumConstants:
-        {
-            EnumConstantDecl *ecd = dynamic_cast<EnumConstantDecl *>(ast);
-            assert(ecd != nullptr);
-
-            util::condPrint(option::showGenAsm,
-                            "genAsm: ref %s(EnumConstants) in RefExpr(rvalue)\n", sym->name().c_str());
-
-            m_asm.appendLine({"iconst", to_string(ecd->value)});
-
-            break;
-        }
-        case Symbol::Category::Method:
-        {
-            util::condPrint(option::showGenAsm,
-                            "genAsm: ref %s(Method) in RefExpr(rvalue)\n", sym->name().c_str());
-
-            m_asm.appendLine({"lload", "0"});
-            break;
-        }
-        default:
-        {
-        }
-        }
-    }
-
     if (sym->category() == Symbol::Category::Property && m_analyzingPropertyDep)
     {
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
@@ -1146,45 +684,6 @@ void SymbolVisitor::visit(VarDecl *vd)
                                   + ", "
                                   + vd->expr->typeInfo->toString()
                                   + ")");
-        }
-        m_asm.appendLine({"lstore", to_string(vd->localIndex)});
-    }
-    else
-    {
-        if (vd->type->category() == TypeInfo::Category::Custom)
-        {
-            std::string className = vd->type->toString();
-            Symbol *classSymbol = m_ast->symbolTable()->curScope()->resolve(className);
-            if (classSymbol == nullptr)
-            {
-                throw VisitException("VarDecl", "No symbol for type " + className);
-            }
-            util::condPrint(option::showSymbolRef, "ref: %s\n", classSymbol->symbolString().c_str());
-
-            int memberCount = 0;
-            ASTNode *ast = classSymbol->astNode();
-            if (classSymbol->category() == Symbol::Category::Struct)
-            {
-                StructDecl *sd = dynamic_cast<StructDecl *>(ast);
-                assert(sd != nullptr);
-                memberCount = static_cast<int>(sd->fieldList.size());
-            }
-            else if (classSymbol->category() == Symbol::Category::Component)
-            {
-                ComponentDefinationDecl *cdd = dynamic_cast<ComponentDefinationDecl *>(ast);
-                assert(cdd != nullptr);
-                memberCount = static_cast<int>(cdd->propertyList.size());
-            }
-            util::condPrint(option::showGenAsm, "genAsm: %s member count %d\n",
-                            classSymbol->symbolString().c_str(),
-                            memberCount);
-
-            m_asm.appendLine({"struct", to_string(memberCount)});
-            if (classSymbol->category() == Symbol::Category::Component)
-            {
-                m_asm.appendLine({"call", classSymbol->name() + "::" + classSymbol->name()});
-            }
-            m_asm.appendLine({"lstore", to_string(vd->localIndex)});
         }
     }
 }
@@ -1328,17 +827,13 @@ void SymbolVisitor::visit(IfStmt *is)
 {
     assert(is != nullptr);
 
-    const int falseLabel = m_labelCounter++;
-
     visit(is->condition.get());
     if (is->condition->typeInfo->category() != TypeInfo::Category::Int)
     {
         throw VisitException("IfStmt", "if statement requires type of condition expression is int, but actually "
                               + is->condition->typeInfo->toString());
     }
-    m_asm.appendLine({"brf", string(".L") + to_string(falseLabel)});
     visit(is->thenStmt.get());
-    m_asm.appendLine({string(".L") + to_string(falseLabel)});
     if (is->elseStmt)
     {
         visit(is->elseStmt.get());
@@ -1349,37 +844,18 @@ void SymbolVisitor::visit(WhileStmt *ws)
 {
     assert(ws != nullptr);
 
-    const int conditionLabel = m_labelCounter++;
-    const int endLabel = m_labelCounter++;
-
-    m_breakLabels.push_back(endLabel);
-    m_continueLabels.push_back(conditionLabel);
-
-    m_asm.appendLine({string(".L") + to_string(conditionLabel)});
     visit(ws->condition.get());
-    m_asm.appendLine({"brf", string(".L") + to_string(endLabel)});
     visit(ws->bodyStmt.get());
-    m_asm.appendLine({"br", string(".L") + to_string(conditionLabel)});
-    m_asm.appendLine({string(".L") + to_string(endLabel)});
-
-    m_breakLabels.pop_back();
-    m_continueLabels.pop_back();
 }
 
 void SymbolVisitor::visit(BreakStmt *bs)
 {
     assert(bs != nullptr);
-    assert(m_breakLabels.size() != 0);
-
-    m_asm.appendLine({"br", string(".L") + to_string(m_breakLabels.back())});
 }
 
 void SymbolVisitor::visit(ContinueStmt *cs)
 {
     assert(cs != nullptr);
-    assert(m_continueLabels.size() != 0);
-
-    m_asm.appendLine({"br", string(".L") + to_string(m_continueLabels.back())});
 }
 
 void SymbolVisitor::visit(ReturnStmt *rs)
@@ -1390,8 +866,6 @@ void SymbolVisitor::visit(ReturnStmt *rs)
     {
         visit(rs->returnExpr.get());
     }
-
-    m_asm.appendLine({"ret"});
 }
 
 void SymbolVisitor::visit(ExprStmt *es)
@@ -1435,11 +909,9 @@ void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
         fd->paramList[i]->localIndex = static_cast<int>(i);
     }
 
-    string name = fd->name;
     int args = static_cast<int>(fd->paramList.size());
     if (fd->component)
     {
-        name = fd->component->name + "::" + name;
         args += 1;
         for (size_t i = 0; i < fd->paramList.size(); i++)
         {
@@ -1454,14 +926,11 @@ void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
                         fd->paramList[i]->name.c_str());
     }
 
-    int headerLine = m_asm.appendBlank();
     m_stackFrameLocals = args;
     visit(fd->body.get());
 
     int locals = m_stackFrameLocals - args;
     fd->locals = locals;
-
-    m_asm.setLine(headerLine, {".def", name, to_string(args), to_string(locals)});
 
     m_ast->symbolTable()->popScope();
 }
@@ -1508,4 +977,10 @@ void SymbolVisitor::visit(PropertyDecl *)
 void SymbolVisitor::visit(GroupedPropertyDecl *)
 {
     throw VisitException("GroupedPropertyDecl", "Not implement");
+}
+
+void SymbolVisitor::clear()
+{
+    Scope::resetNextScopeId();
+    m_stackFrameLocals = -1;
 }

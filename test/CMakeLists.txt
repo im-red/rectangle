@@ -36,6 +36,7 @@ set(RECT_SRCS
     ../visitor.cpp
     ../symboltable.cpp
     ../astnode.cpp
+    ../asmvisitor.cpp
 )
 
 add_library(common

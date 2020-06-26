@@ -19,40 +19,31 @@
 
 #include "visitor.h"
 #include "asmtext.h"
-#include "symbol.h"
 
-class SymbolTable;
-
-class SymbolVisitor : public Visitor
+class AsmVisitor : public Visitor
 {
 public:
-    SymbolVisitor();
+    AsmVisitor();
 
-    void visit(AST *ast);
+    AsmText visit(AST *ast);
 
 protected:
     void visit(Expr *e) override { Visitor::visit(e); }
     void visit(Stmt *s) override { Visitor::visit(s); }
     void visit(DocumentDecl *dd) override { Visitor::visit(dd); }
-    void visit(StructDecl *sd) override;
-    void visit(ComponentDefinationDecl *cdd) override;
-    void visit(ComponentInstanceDecl *) override;
-    void visit(IntegerLiteral *e) override;
-    void visit(FloatLiteral *e) override;
-    void visit(StringLiteral *e) override;
+    void visit(IntegerLiteral *il) override;
+    void visit(FloatLiteral *fl) override;
+    void visit(StringLiteral *sl) override;
     void visit(InitListExpr *ile) override;
-    void visit(BinaryOperatorExpr *b) override;
-    void visit(UnaryOperatorExpr *u) override;
-    void visit(CallExpr *c) override;
+    void visit(BinaryOperatorExpr *boe) override;
+    void visit(UnaryOperatorExpr *uoe) override;
+    void visit(CallExpr *ce) override;
     void visit(ListSubscriptExpr *lse) override;
     void visit(MemberExpr *me) override;
     void visit(RefExpr *re) override;
     void visit(VarDecl *vd) override;
-    void visit(FieldDecl *md) override;
-    void visitPropertyDefination(PropertyDecl *pd);
-    void visitPropertyDefination(GroupedPropertyDecl *gpd);
-    void visitPropertyInitialization(PropertyDecl *pd);
-    void visitPropertyInitialization(GroupedPropertyDecl *gpd);
+    void visit(PropertyDecl *pd) override;
+    void visit(GroupedPropertyDecl *gpd) override;
     void visit(ParamDecl *pd) override;
     void visit(CompoundStmt *cs) override;
     void visit(DeclStmt *ds) override;
@@ -62,24 +53,41 @@ protected:
     void visit(ContinueStmt *cs) override;
     void visit(ReturnStmt *rs) override;
     void visit(ExprStmt *es) override;
-    void visitMethodHeader(FunctionDecl *fd);
-    void visitMethodBody(FunctionDecl *fd);
+    void visit(FunctionDecl *fd) override;
     void visit(EnumConstantDecl *ecd) override;
     void visit(EnumDecl *ed) override;
-    void visit(BindingDecl *) override;
-    void visit(GroupedBindingDecl *) override;
-    void visit(FunctionDecl *) override;
-    void visit(PropertyDecl *) override;
-    void visit(GroupedPropertyDecl *) override;
+    void visit(ComponentDefinationDecl *cdd) override;
+    void visit(FieldDecl *fd) override;
+    void visit(StructDecl *sd) override;
+    void visit(BindingDecl *bd) override;
+    void visit(GroupedBindingDecl *gbd) override;
+    void visit(ComponentInstanceDecl *cid) override;
 
 private:
-    void clear();
+    void pushVisitingLvalue(bool lvalue);
+    void popVisitingLvalue();
+    bool visitingLvalue() const;
 
 private:
-    bool m_analyzingPropertyDep = false;
-    PropertyDecl *m_curAnalyzingProperty = nullptr;
-
+    AsmText m_asm;
     AST *m_ast = nullptr;
-    int m_stackFrameLocals = -1;
+
+    int m_labelCounter = 0;
+
+    std::vector<std::string> m_breakLabels;
+    std::vector<std::string> m_continueLabels;
+
+    enum class LvalueCategory
+    {
+        Invalid,
+        Global,
+        Local,
+        Field,
+        List
+    };
+    LvalueCategory m_lvalueCategory = LvalueCategory::Invalid;
+    int m_lvalueIndex = -1;
+
+    std::vector<bool> m_visitingLvalueStack;
 };
 

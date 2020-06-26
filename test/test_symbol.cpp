@@ -105,9 +105,5 @@ TEST(symbol, ASM)
     ast.addDocument(move(document));
 
     SymbolVisitor sv;
-    sv.setAst(&ast);
-    AsmText txt = sv.visit();
-    txt.dump();
-    AsmBin bin(txt);
-    bin.dump();
+    sv.visit(&ast);
 }

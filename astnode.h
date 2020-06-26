@@ -574,7 +574,7 @@ struct DocumentDecl : public ASTNode
         Struct
     };
 
-    DocumentDecl(Type type_) : type(type_) {}
+    explicit DocumentDecl(Type type_) : type(type_) {}
 
     Type type;
 };

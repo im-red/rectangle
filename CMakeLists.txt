@@ -29,6 +29,7 @@ add_executable(rectangle
     structinfo.cpp
     svgpainter.cpp
     visitor.cpp
+    asmvisitor.cpp
     symboltable.cpp
     astnode.cpp
 )
