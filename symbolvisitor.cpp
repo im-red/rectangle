@@ -617,6 +617,8 @@ void SymbolVisitor::visit(CallExpr *e)
 {
     assert(e != nullptr);
 
+    e->scope = m_ast->symbolTable()->curScope();
+
     if (m_visitingLvalue)
     {
         throw VisitException("CallExpr", "CallExpr only produce rvalue");
@@ -833,6 +835,8 @@ void SymbolVisitor::visit(MemberExpr *e)
 {
     assert(e != nullptr);
 
+    e->scope = m_ast->symbolTable()->curScope();
+
     bool visitingLvalueBackup = m_visitingLvalue;
 
     m_visitingLvalue = false;
@@ -964,6 +968,8 @@ void SymbolVisitor::visit(MemberExpr *e)
 void SymbolVisitor::visit(RefExpr *e)
 {
     assert(e != nullptr);
+
+    e->scope = m_ast->symbolTable()->curScope();
 
     Symbol *sym = m_ast->symbolTable()->curScope()->resolve(e->name);
     if (!sym)
@@ -1118,11 +1124,13 @@ void SymbolVisitor::visit(VarDecl *vd)
 {
     assert(vd != nullptr);
 
+    vd->scope = m_ast->symbolTable()->curScope();
+
     Symbol *paramSym = new Symbol(Symbol::Category::Variable, vd->name, vd->type, vd);
     m_ast->symbolTable()->define(paramSym);
 
-    vd->localIndex = m_functionLocals;
-    m_functionLocals++;
+    vd->localIndex = m_stackFrameLocals;
+    m_stackFrameLocals++;
 
     util::condPrint(option::showGenAsm, "genAsm: localIndex [%d] %s\n",
                     vd->localIndex,
@@ -1397,6 +1405,8 @@ void SymbolVisitor::visitMethodHeader(FunctionDecl *fd)
 {
     assert(fd != nullptr);
 
+    fd->scope = m_ast->symbolTable()->curScope();
+
     Scope *componentScope = m_ast->symbolTable()->curScope();
     Symbol *componentSymbol = dynamic_cast<Symbol *>(componentScope);
     assert(componentSymbol);
@@ -1445,10 +1455,11 @@ void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
     }
 
     int headerLine = m_asm.appendBlank();
-    m_functionLocals = args;
+    m_stackFrameLocals = args;
     visit(fd->body.get());
 
-    int locals = m_functionLocals - args;
+    int locals = m_stackFrameLocals - args;
+    fd->locals = locals;
 
     m_asm.setLine(headerLine, {".def", name, to_string(args), to_string(locals)});
 

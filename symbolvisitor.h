@@ -77,7 +77,7 @@ private:
     bool m_analyzingPropertyDep = false;
     PropertyDecl *m_curAnalyzingProperty = nullptr;
 
-    int m_functionLocals = -1;
+    int m_stackFrameLocals = -1;
     int m_labelCounter = 0;
 
     std::vector<int> m_breakLabels;
