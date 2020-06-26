@@ -26,7 +26,5 @@ namespace util
 {
 
 void condPrint(bool cond, const char * const fmt, ...);
-void collectAsm(const char *const fmt, ...);
-std::vector<std::string> dumpAsm();
 
 }

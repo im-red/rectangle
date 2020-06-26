@@ -36,24 +36,4 @@ void condPrint(bool cond, const char * const fmt, ...)
     }
 }
 
-static vector<string> asmStorage;
-
-void collectAsm(const char * const fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    char buf[512];
-    vsnprintf(buf, sizeof(buf), fmt, ap);
-    va_end(ap);
-
-    asmStorage.push_back(buf);
-}
-
-std::vector<std::string> dumpAsm()
-{
-    vector<string> result;
-    result.swap(asmStorage);
-    return result;
-}
-
 }
