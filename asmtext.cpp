@@ -46,6 +46,7 @@ void AsmText::setLine(int lineNumber, const std::vector<std::string> &line)
 
 void AsmText::dump()
 {
+    printf("---------- AsmText::dump begin ----------\n");
     for (auto &line : m_text)
     {
         if (line.size() == 0)
@@ -63,12 +64,21 @@ void AsmText::dump()
             printf("    ");
         }
 
-        for (auto &word : line)
+        if (firstWord == "sconst")
         {
-            printf("%s ", word.c_str());
+            assert(line.size() == 2);
+            printf("%s \"%s\"", firstWord.c_str(), line[1].c_str());
+        }
+        else
+        {
+            for (auto &word : line)
+            {
+                printf("%s ", word.c_str());
+            }
         }
         printf("\n");
     }
+    printf("----------- AsmText::dump end -----------\n");
 }
 
 std::vector<std::vector<std::string> > AsmText::text() const
@@ -79,4 +89,9 @@ std::vector<std::vector<std::string> > AsmText::text() const
 void AsmText::clear()
 {
     m_text.clear();
+}
+
+bool operator==(const AsmText &lhs, const AsmText &rhs)
+{
+    return lhs.m_text == rhs.m_text;
 }

@@ -22,6 +22,8 @@
 
 class AsmText
 {
+    friend bool operator==(const AsmText &lhs, const AsmText &rhs);
+
 public:
     AsmText();
 
@@ -39,3 +41,4 @@ private:
     std::vector<std::vector<std::string>> m_text;
 };
 
+bool operator==(const AsmText &lhs, const AsmText &rhs);
