@@ -24,6 +24,8 @@
 #include <memory>
 #include <vector>
 
+class Scope;
+
 struct ASTNode
 {
     virtual ~ASTNode();
@@ -37,6 +39,8 @@ struct ASTNode
     {
 
     }
+
+    Scope *scope = nullptr;
 };
 
 class TypeInfo
@@ -532,6 +536,7 @@ struct FunctionDecl : public ASTNode
     std::vector<std::unique_ptr<ParamDecl>> paramList;
     std::unique_ptr<CompoundStmt> body;
     ComponentDefinationDecl *component = nullptr;
+    int locals = -1;
 };
 
 struct EnumConstantDecl : public ASTNode
