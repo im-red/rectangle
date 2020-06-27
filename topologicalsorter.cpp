@@ -104,5 +104,13 @@ TopologicalSorter::SortResult TopologicalSorter::sort(std::vector<int> &sorted)
         }
     }
 
+    for (auto c : colors)
+    {
+        if (c != NodeColor::Black)
+        {
+            sorted.clear();
+            return SortResult::LoopDetected;
+        }
+    }
     return SortResult::Success;
 }

@@ -60,4 +60,13 @@ TEST(topologicalsorter, SORT)
         EXPECT_EQ(sorter.sort(result), TopologicalSorter::SortResult::Success);
         EXPECT_EQ(result, vector<int>({2, 0, 1, 3}));
     }
+
+    {
+        sorter.clear();
+        sorter.setN(8);
+        sorter.addEdge(5, 0);
+        sorter.addEdge(6, 5);
+        sorter.addEdge(7, 7);
+        EXPECT_EQ(sorter.sort(result), TopologicalSorter::SortResult::LoopDetected);
+    }
 }
