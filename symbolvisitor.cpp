@@ -65,7 +65,7 @@ void SymbolVisitor::visit(StructDecl *sd)
 
     string name = sd->name;
     Symbol *sym(new ScopeSymbol(Symbol::Category::Struct, name,
-                                           Scope::Category::Struct, m_ast->symbolTable()->curScope()));
+                                Scope::Category::Struct, m_ast->symbolTable()->curScope()));
     sym->setAstNode(sd);
     m_ast->symbolTable()->define(sym);
 
@@ -80,41 +80,39 @@ void SymbolVisitor::visit(StructDecl *sd)
 
 void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
 {
+    string name = cdd->name;
+    Symbol *sym(new ScopeSymbol(Symbol::Category::Component, name,
+                                Scope::Category::Component, m_ast->symbolTable()->curScope()));
+    sym->setAstNode(cdd);
+    m_ast->symbolTable()->define(sym);
+
+    m_ast->symbolTable()->pushScope(dynamic_cast<Scope *>(sym));
+
+    for (auto &e : cdd->enumList)
     {
-        string name = cdd->name;
-        Symbol *sym(new ScopeSymbol(Symbol::Category::Component, name,
-                                               Scope::Category::Component, m_ast->symbolTable()->curScope()));
-        sym->setAstNode(cdd);
-        m_ast->symbolTable()->define(sym);
-
-        m_ast->symbolTable()->pushScope(dynamic_cast<Scope *>(sym));
-
-        for (auto &e : cdd->enumList)
-        {
-            visit(e.get());
-        }
-
-        for (size_t i = 0; i < cdd->propertyList.size(); i++)
-        {
-            cdd->propertyList[i]->fieldIndex = static_cast<int>(i);
-            visitPropertyDefination(cdd->propertyList[i].get());
-        }
-        for (auto &p : cdd->propertyList)
-        {
-            visitPropertyInitialization(p.get());
-        }
-
-        for (auto &f : cdd->methodList)
-        {
-            visitMethodHeader(f.get());
-        }
-        for (auto &f : cdd->methodList)
-        {
-            visitMethodBody(f.get());
-        }
-
-        m_ast->symbolTable()->popScope();
+        visit(e.get());
     }
+
+    for (size_t i = 0; i < cdd->propertyList.size(); i++)
+    {
+        cdd->propertyList[i]->fieldIndex = static_cast<int>(i);
+        visitPropertyDefination(cdd->propertyList[i].get());
+    }
+    for (auto &p : cdd->propertyList)
+    {
+        visitPropertyInitialization(p.get());
+    }
+
+    for (auto &f : cdd->methodList)
+    {
+        visitMethodHeader(f.get());
+    }
+    for (auto &f : cdd->methodList)
+    {
+        visitMethodBody(f.get());
+    }
+
+    m_ast->symbolTable()->popScope();
 }
 
 void SymbolVisitor::visit(ComponentInstanceDecl *)
@@ -165,7 +163,7 @@ void SymbolVisitor::visit(InitListExpr *ile)
             if (*eType != *(ile->exprList[i]->typeInfo))
             {
                 throw VisitException("InitListExpr",
-                                      "Elements of InitListExpr must have same type");
+                                     "Elements of InitListExpr must have same type");
             }
         }
     }
@@ -191,7 +189,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         if (!(leftType->category() == TypeInfo::Category::Int && rightType->category() == TypeInfo::Category::Int))
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'&&'/'||' operator require int operand");
+                                 "'&&'/'||' operator require int operand");
         }
         b->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
         break;
@@ -204,7 +202,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         if (*leftType != *rightType)
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'<'/'>'/'<='/'>=' operator requires type of operands is same");
+                                 "'<'/'>'/'<='/'>=' operator requires type of operands is same");
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float)
@@ -214,7 +212,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         else
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'<'/'>'/'<='/'>=' operator requires type of operands is int/float");
+                                 "'<'/'>'/'<='/'>=' operator requires type of operands is int/float");
         }
         b->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
         break;
@@ -225,9 +223,9 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         if (*leftType != *rightType)
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'=='/'!=' operator requires type of operands is same("
-                                  + leftType->toString() + ", "
-                                  + rightType->toString() + ")");
+                                 "'=='/'!=' operator requires type of operands is same("
+                                 + leftType->toString() + ", "
+                                 + rightType->toString() + ")");
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float || cat == TypeInfo::Category::String)
@@ -237,7 +235,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         else
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'=='/'!=' operator requires type of operands is int/float/string");
+                                 "'=='/'!=' operator requires type of operands is int/float/string");
         }
         b->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
         break;
@@ -247,7 +245,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         if (*leftType != *rightType)
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'+' operator requires type of operands is same");
+                                 "'+' operator requires type of operands is same");
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float || cat == TypeInfo::Category::String)
@@ -257,7 +255,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         else
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'+' operator requires type of operands is int/float/string");
+                                 "'+' operator requires type of operands is int/float/string");
         }
         b->typeInfo = leftType;
         break;
@@ -269,7 +267,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         if (*leftType != *rightType)
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'-'/'*'/'/' operator requires type of operands is same");
+                                 "'-'/'*'/'/' operator requires type of operands is same");
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float)
@@ -279,7 +277,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         else
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'-'/'*'/'/' operator requires type of operands is int/float");
+                                 "'-'/'*'/'/' operator requires type of operands is int/float");
         }
         b->typeInfo = leftType;
         break;
@@ -289,7 +287,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         if (*leftType != *rightType)
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'%' operator requires type of operands is same");
+                                 "'%' operator requires type of operands is same");
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int)
@@ -299,7 +297,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         else
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'%' operator requires type of operands is int");
+                                 "'%' operator requires type of operands is int");
         }
         b->typeInfo = leftType;
         break;
@@ -309,9 +307,9 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         if (*leftType != *rightType)
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'=' operator requires type of operands is same("
-                                  + leftType->toString() + ", "
-                                  + rightType->toString() + ")");
+                                 "'=' operator requires type of operands is same("
+                                 + leftType->toString() + ", "
+                                 + rightType->toString() + ")");
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float || cat == TypeInfo::Category::String)
@@ -321,7 +319,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         else
         {
             throw VisitException("BinaryOperatorExpr",
-                                  "'=' operator requires type of operands is int/float/string");
+                                 "'=' operator requires type of operands is int/float/string");
         }
         b->typeInfo = leftType;
         break;
@@ -353,7 +351,7 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
         else
         {
             throw VisitException("UnaryOperatorExpr",
-                                  "Unary operator '-'/'+' can only used for int/float expr");
+                                 "Unary operator '-'/'+' can only used for int/float expr");
         }
         break;
     }
@@ -366,7 +364,7 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
         else
         {
             throw VisitException("UnaryOperatorExpr",
-                                  "Unary operator '!' can only used for int expr");
+                                 "Unary operator '!' can only used for int expr");
         }
         break;
     }
@@ -387,7 +385,7 @@ void SymbolVisitor::visit(CallExpr *e)
     if (m_ast->symbolTable()->curScope()->category() != Scope::Category::Local)
     {
         throw VisitException("CallExpr",
-                              "CallExpr can only be used in LocalScope");
+                             "CallExpr can only be used in LocalScope");
     }
 
     string functionName;
@@ -422,9 +420,9 @@ void SymbolVisitor::visit(CallExpr *e)
         else
         {
             throw VisitException("CallExpr",
-                                  r->name
-                                  + " is a "
-                                  + Symbol::symbolCategoryString(func->category()));
+                                 r->name
+                                 + " is a "
+                                 + Symbol::symbolCategoryString(func->category()));
         }
 
         util::condPrint(option::showSymbolRef, "ref: %s\n", func->symbolString().c_str());
@@ -448,8 +446,8 @@ void SymbolVisitor::visit(CallExpr *e)
         if (!scopeSym)
         {
             throw VisitException("CallExpr", typeName + " is a "
-                                  + Symbol::symbolCategoryString(instanceTypeSymbol->category())
-                                  + ", doesn't contains method");
+                                 + Symbol::symbolCategoryString(instanceTypeSymbol->category())
+                                 + ", doesn't contains method");
         }
         Symbol *method = scopeSym->resolve(m->name);
         if (!method)
@@ -467,9 +465,9 @@ void SymbolVisitor::visit(CallExpr *e)
         else
         {
             throw VisitException("CallExpr",
-                                  m->name
-                                  + " is a "
-                                  + Symbol::symbolCategoryString(method->category()));
+                                 m->name
+                                 + " is a "
+                                 + Symbol::symbolCategoryString(method->category()));
         }
 
         util::condPrint(option::showSymbolRef, "ref: %s\n", method->symbolString().c_str());
@@ -496,10 +494,10 @@ void SymbolVisitor::visit(CallExpr *e)
     }
 
     if (functionName == "len"
-             || functionName == "print"
-             || functionName == "drawRect"
-             || functionName == "drawText"
-             || functionName == "drawPt")
+            || functionName == "print"
+            || functionName == "drawRect"
+            || functionName == "drawText"
+            || functionName == "drawPt")
     {
     }
     else
@@ -569,12 +567,12 @@ void SymbolVisitor::visit(MemberExpr *e)
         if (!componentSym)
         {
             throw VisitException("MemberExpr",
-                                  "No symbol for componentName " + componentName);
+                                 "No symbol for componentName " + componentName);
         }
         if (componentSym->category() != Symbol::Category::Component)
         {
             throw VisitException("MemberExpr",
-                                  componentName + " is not a component symbol");
+                                 componentName + " is not a component symbol");
         }
         ScopeSymbol *componentScope = dynamic_cast<ScopeSymbol *>(componentSym);
         assert(componentScope != nullptr);
@@ -604,8 +602,8 @@ void SymbolVisitor::visit(MemberExpr *e)
     if (!scopeSym)
     {
         throw VisitException("MemberExpr", typeString + " is a "
-                              + Symbol::symbolCategoryString(instanceTypeSymbol->category())
-                              + ", doesn't contains member");
+                             + Symbol::symbolCategoryString(instanceTypeSymbol->category())
+                             + ", doesn't contains member");
     }
 
     Symbol *member = scopeSym->resolve(e->name);
@@ -680,10 +678,10 @@ void SymbolVisitor::visit(VarDecl *vd)
         if (!(*vd->type == *vd->expr->typeInfo) && !vd->type->assignCompatible(vd->expr->typeInfo))
         {
             throw VisitException("VarDecl", "Type doesn't match("
-                                  + vd->type->toString()
-                                  + ", "
-                                  + vd->expr->typeInfo->toString()
-                                  + ")");
+                                 + vd->type->toString()
+                                 + ", "
+                                 + vd->expr->typeInfo->toString()
+                                 + ")");
         }
     }
 }
@@ -742,8 +740,8 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
         {
             // the group is defined as a non-PropertyGroup, that's bad
             throw VisitException("GroupedPropertyDecl",
-                                  group->name() + " is already defined as "
-                                  + group->symbolString());
+                                 group->name() + " is already defined as "
+                                 + group->symbolString());
         }
     }
     else
@@ -753,10 +751,10 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
         shared_ptr<TypeInfo> customType(new CustomTypeInfo(componentSym->name()));
 
         Symbol *groupSym(new ScopeSymbol(Symbol::Category::PropertyGroup,
-                                                    groupName,
-                                                    Scope::Category::Group,
-                                                    m_ast->symbolTable()->curScope(),
-                                                    shared_ptr<TypeInfo>(new GroupTypeInfo(groupName, customType))));
+                                         groupName,
+                                         Scope::Category::Group,
+                                         m_ast->symbolTable()->curScope(),
+                                         shared_ptr<TypeInfo>(new GroupTypeInfo(groupName, customType))));
         m_ast->symbolTable()->define(groupSym);
 
         Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd);
@@ -831,7 +829,7 @@ void SymbolVisitor::visit(IfStmt *is)
     if (is->condition->typeInfo->category() != TypeInfo::Category::Int)
     {
         throw VisitException("IfStmt", "if statement requires type of condition expression is int, but actually "
-                              + is->condition->typeInfo->toString());
+                             + is->condition->typeInfo->toString());
     }
     visit(is->thenStmt.get());
     if (is->elseStmt)
