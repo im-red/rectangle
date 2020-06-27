@@ -32,10 +32,6 @@ def Rectangle {
         points[0][0] = points[0][1];
     }
     void draw() {
-        Rectangle r;
-        r.draw();
-        getDasharray(r.border.type);
-
         rect re;
         drawRect(re);
 
@@ -74,20 +70,12 @@ def Rectangle {
         int b = border.width;
     }
     void propertyLvalue() {
-        Rectangle r;
+        rect r;
         r.x = 0;
     }
-    void groupedPropertyLvalue() {
-        Rectangle r;
-        r.border.width = 0;
-    }
     void propertyRvalue() {
-        Rectangle r;
+        rect r;
         int a = r.x;
-    }
-    void groupedPropertyRvalue() {
-        Rectangle r;
-        int b = r.border.width;
     }
     void thisPropertyLvalueList() {
         list0[0] = 1;
@@ -101,34 +89,7 @@ def Rectangle {
     void thisGroupedPropertyRvalueList() {
         int b = test.list1[0];
     }
-    void propertyLvalueList() {
-        Rectangle r;
-        r.list0[0] = 1;
-    }
-    void groupedPropertyLvalueList() {
-        Rectangle r;
-        r.test.list1[0] = 1;
-    }
-    void propertyRvalueList() {
-        Rectangle r;
-        int a = r.list0[0];
-    }
-    void groupedPropertyRvalueList() {
-        Rectangle r;
-        int b = r.test.list1[0];
-    }
-    void thisGroupedPropertyLRvalueList() {
-        list0[1] = test.list1[0];
-    }
-    void groupedPropertyLRvalueList() {
-        Rectangle r;
-        r.list0[1] = r.test.list1[0];
-    }
     void thisMethod(int foo) {
         thisMethod(x);
-    }
-    void instanceMethod(int foo) {
-        Rectangle r;
-        r.instanceMethod(r.x);
     }
 }
