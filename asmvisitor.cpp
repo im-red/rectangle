@@ -545,10 +545,6 @@ void AsmVisitor::visit(VarDecl *vd)
             int memberCount = static_cast<int>(sd->fieldList.size());
 
             m_asm.appendLine({"struct", to_string(memberCount)});
-            if (typeSymbol->category() == Symbol::Category::Component)
-            {
-                m_asm.appendLine({"call", typeName + "::" + typeName});
-            }
             m_asm.appendLine({"lstore", to_string(vd->localIndex)});
         }
     }
