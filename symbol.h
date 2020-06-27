@@ -29,7 +29,7 @@ public:
         : std::runtime_error(s)
     {}
     SymbolException(const std::string &type, const std::string &s)
-        : SymbolException("symbol " + type + " exception: " + s)
+        : SymbolException(type + " symbol exception: " + s)
     {}
 };
 

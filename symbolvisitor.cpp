@@ -678,8 +678,28 @@ void SymbolVisitor::visit(VarDecl *vd)
 
     vd->scope = m_ast->symbolTable()->curScope();
 
-    Symbol *paramSym = new Symbol(Symbol::Category::Variable, vd->name, vd->type, vd);
-    m_ast->symbolTable()->define(paramSym);
+    Symbol *variableSym = new Symbol(Symbol::Category::Variable, vd->name, vd->type, vd);
+    m_ast->symbolTable()->define(variableSym);
+
+    if (vd->type->category() == TypeInfo::Category::Custom)
+    {
+        Symbol *typeSymbol = m_ast->symbolTable()->curScope()->resolve(vd->type->toString());
+        if (!typeSymbol)
+        {
+            throw SymbolException("VarDecl", "No such type \"" + vd->type->toString() + "\"");
+        }
+        switch (typeSymbol->category())
+        {
+        case Symbol::Category::Struct:
+            break;
+        case Symbol::Category::Enum:
+            throw SymbolException("VarDecl", "Please use int type instead of enum type");
+        case Symbol::Category::Component:
+            throw SymbolException("VarDecl", "Define variable with component type is illegal");
+        default:
+            throw SymbolException("VarDecl", "\"" + typeSymbol->name() + "\" is a " + Symbol::symbolCategoryString(typeSymbol->category()));
+        }
+    }
 
     vd->localIndex = m_stackFrameLocals;
     m_stackFrameLocals++;
