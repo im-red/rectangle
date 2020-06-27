@@ -7,8 +7,12 @@ def Rectangle {
         Dash
     }
     int border.type: Solid
-    list<int> list0: {}
-    list<int> test.list1: {}
+    list<int> list0: {1, 2, 3}
+    list<int> test.list1: {4, 5, 6}
+
+    int a: x
+    int test.b: a
+    int c: test.b
 
     void main() {
         print("Hello, world!");

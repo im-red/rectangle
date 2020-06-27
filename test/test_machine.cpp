@@ -20,7 +20,7 @@ using namespace std;
 
 TEST(machine, run)
 {
-    option::showAst = true;
+    option::verbose = true;
 
     ifstream t("../test_machine.rect");
     stringstream buffer;

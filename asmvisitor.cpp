@@ -568,6 +568,7 @@ void AsmVisitor::visit(PropertyDecl *pd)
 {
     assert(pd != nullptr);
 
+    m_asm.appendLine({"lload", "0"});
     GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
     if (gpd)
     {
@@ -577,6 +578,7 @@ void AsmVisitor::visit(PropertyDecl *pd)
     {
         visit(pd->expr.get());
     }
+    m_asm.appendLine({"fstore", to_string(pd->fieldIndex)});
 }
 
 void AsmVisitor::visit(GroupedPropertyDecl *gpd)
@@ -724,13 +726,13 @@ void AsmVisitor::visit(ComponentDefinationDecl *cdd)
     {
         visit(e.get());
     }
+
     for (auto &p : cdd->propertyList)
     {
+        m_asm.appendLine({".def", name + "::" + name + "::" + to_string(p->fieldIndex), "1", "0"});
         visit(p.get());
+        m_asm.appendLine({"ret"});
     }
-
-    m_asm.appendLine({".def", name + "::" + name, "1", "0"});
-    m_asm.appendLine({"ret"});
 
     for (auto &m : cdd->methodList)
     {
