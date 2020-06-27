@@ -32,4 +32,5 @@ add_executable(rectangle
     asmvisitor.cpp
     symboltable.cpp
     astnode.cpp
+    topologicalsorter.cpp
 )
