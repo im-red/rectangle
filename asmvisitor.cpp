@@ -535,25 +535,15 @@ void AsmVisitor::visit(VarDecl *vd)
             Symbol *typeSymbol = scope->resolve(typeName);
             assert(typeSymbol != nullptr);
 
-            int memberCount = 0;
             ASTNode *astNode = typeSymbol->astNode();
             assert(astNode != nullptr);
-            if (typeSymbol->category() == Symbol::Category::Struct)
-            {
-                StructDecl *sd = dynamic_cast<StructDecl *>(astNode);
-                assert(sd != nullptr);
-                memberCount = static_cast<int>(sd->fieldList.size());
-            }
-            else if (typeSymbol->category() == Symbol::Category::Component)
-            {
-                ComponentDefinationDecl *cdd = dynamic_cast<ComponentDefinationDecl *>(astNode);
-                assert(cdd != nullptr);
-                memberCount = static_cast<int>(cdd->propertyList.size());
-            }
-            else
-            {
-                assert(false);
-            }
+            assert(typeSymbol->category() == Symbol::Category::Struct);
+
+            StructDecl *sd = dynamic_cast<StructDecl *>(astNode);
+            assert(sd != nullptr);
+
+            int memberCount = static_cast<int>(sd->fieldList.size());
+
             m_asm.appendLine({"struct", to_string(memberCount)});
             if (typeSymbol->category() == Symbol::Category::Component)
             {
