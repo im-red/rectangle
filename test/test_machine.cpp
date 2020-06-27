@@ -22,7 +22,7 @@ TEST(machine, run)
 {
     option::verbose = true;
 
-    ifstream t("../test_machine.rect");
+    ifstream t("../rect/test_machine.rect");
     stringstream buffer;
     buffer << t.rdbuf();
     string code = buffer.str();

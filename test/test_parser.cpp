@@ -13,7 +13,7 @@ using namespace std;
 
 TEST(parser, PARSE_DEFINATION_RECT)
 {
-    std::ifstream t("../defination.rect");
+    std::ifstream t("../rect/defination.rect");
     std::stringstream buffer;
     buffer << t.rdbuf();
     std::string code = buffer.str();
@@ -26,7 +26,7 @@ TEST(parser, PARSE_DEFINATION_RECT)
 
 TEST(parser, PARSE_INSTANCE_RECT)
 {
-    std::ifstream t("../instance.rect");
+    std::ifstream t("../rect/instance.rect");
     std::stringstream buffer;
     buffer << t.rdbuf();
     std::string code = buffer.str();

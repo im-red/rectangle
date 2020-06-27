@@ -90,7 +90,7 @@ TEST(symbol, ASM)
     option::showGenAsm = true;
     option::showAssemble = true;
 
-    ifstream t("../symbol_asm.rect");
+    ifstream t("../rect/symbol_asm.rect");
     stringstream buffer;
     buffer << t.rdbuf();
     string code = buffer.str();
