@@ -20,6 +20,7 @@
 #include "visitor.h"
 #include "asmtext.h"
 #include "symbol.h"
+#include "topologicalsorter.h"
 
 class SymbolTable;
 
@@ -81,5 +82,7 @@ private:
 
     AST *m_ast = nullptr;
     int m_stackFrameLocals = -1;
+
+    TopologicalSorter m_sorter;
 };
 

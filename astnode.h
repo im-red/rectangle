@@ -357,9 +357,6 @@ struct PropertyDecl : public ASTNode
     std::unique_ptr<Expr> expr;
 
     int fieldIndex = -1;
-    int initSequence = -1;
-    std::vector<int> out;
-    std::vector<int> in;
 };
 
 struct GroupedPropertyDecl : public PropertyDecl
@@ -604,6 +601,7 @@ struct ComponentDefinationDecl : public DocumentDecl
     std::vector<std::unique_ptr<PropertyDecl>> propertyList;
     std::vector<std::unique_ptr<FunctionDecl>> methodList;
     std::vector<std::unique_ptr<EnumDecl>> enumList;
+    std::vector<int> propertyInitOrder;
 };
 
 struct FieldDecl : public ASTNode

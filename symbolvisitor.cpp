@@ -96,11 +96,27 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
     for (size_t i = 0; i < cdd->propertyList.size(); i++)
     {
         cdd->propertyList[i]->fieldIndex = static_cast<int>(i);
-        visitPropertyDefination(cdd->propertyList[i].get());
     }
     for (auto &p : cdd->propertyList)
     {
+        visitPropertyDefination(p.get());
+    }
+
+    m_sorter.setN(static_cast<int>(cdd->propertyList.size()));
+    for (auto &p : cdd->propertyList)
+    {
         visitPropertyInitialization(p.get());
+    }
+    vector<int> order;
+    auto result = m_sorter.sort(order);
+    if (result == TopologicalSorter::SortResult::LoopDetected)
+    {
+        throw SymbolException("ComponentDefinationDecl", "Loop detected in property dependency");
+    }
+    else
+    {
+        assert(order.size() == cdd->propertyList.size());
+        cdd->propertyInitOrder.swap(order);
     }
 
     for (auto &f : cdd->methodList)
@@ -606,25 +622,25 @@ void SymbolVisitor::visit(MemberExpr *e)
                              + ", doesn't contains member");
     }
 
-    Symbol *member = scopeSym->resolve(e->name);
-    if (!member)
+    Symbol *memberSymbol = scopeSym->resolve(e->name);
+    if (!memberSymbol)
     {
         throw VisitException("MemberExpr", typeString + " doesn't contains member named " + e->name);
     }
 
-    util::condPrint(option::showSymbolRef, "ref: %s\n", member->symbolString().c_str());
-    e->typeInfo = member->typeInfo();
+    util::condPrint(option::showSymbolRef, "ref: %s\n", memberSymbol->symbolString().c_str());
+    e->typeInfo = memberSymbol->typeInfo();
 
-    ASTNode *ast = member->astNode();
-    if (member->category() == Symbol::Category::Property && m_analyzingPropertyDep)
+    if (memberSymbol->category() == Symbol::Category::Property && m_analyzingPropertyDep)
     {
+        ASTNode *ast = memberSymbol->astNode();
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 
         assert(m_curAnalyzingProperty != nullptr);
-        m_curAnalyzingProperty->out.push_back(pd->fieldIndex);
-        pd->in.push_back(m_curAnalyzingProperty->fieldIndex);
-        util::condPrint(option::showPropertyDep, "property [%d] -> [%d]\n", m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
+
+        m_sorter.addEdge(m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
+        util::condPrint(option::showPropertyDep, "property: [%d] -> [%d]\n", m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
     }
 }
 
@@ -643,16 +659,16 @@ void SymbolVisitor::visit(RefExpr *e)
     util::condPrint(option::showSymbolRef, "ref: %s\n", sym->symbolString().c_str());
     e->typeInfo = sym->typeInfo();
 
-    ASTNode *ast = sym->astNode();
     if (sym->category() == Symbol::Category::Property && m_analyzingPropertyDep)
     {
+        ASTNode *ast = sym->astNode();
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 
         assert(m_curAnalyzingProperty != nullptr);
-        m_curAnalyzingProperty->out.push_back(pd->fieldIndex);
-        pd->in.push_back(m_curAnalyzingProperty->fieldIndex);
-        util::condPrint(option::showPropertyDep, "property [%d] -> [%d]\n", m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
+        m_sorter.addEdge(m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
+
+        util::condPrint(option::showPropertyDep, "property: [%d] -> [%d]\n", m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
     }
 }
 
@@ -709,7 +725,7 @@ void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
         Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, pd->type, pd);
         m_ast->symbolTable()->define(propertySym);
 
-        util::condPrint(option::showPropertyDep, "property [%d] %s\n", pd->fieldIndex, propertySym->symbolString().c_str());
+        util::condPrint(option::showPropertyDep, "property: [%d] %s\n", pd->fieldIndex, propertySym->symbolString().c_str());
     }
 }
 
@@ -734,7 +750,7 @@ void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
             Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd);
             scopeSym->define(propertySym);
 
-            util::condPrint(option::showPropertyDep, "property [%d] %s\n", gpd->fieldIndex, propertySym->symbolString().c_str());
+            util::condPrint(option::showPropertyDep, "property: [%d] %s\n", gpd->fieldIndex, propertySym->symbolString().c_str());
         }
         else
         {
@@ -981,4 +997,5 @@ void SymbolVisitor::clear()
 {
     Scope::resetNextScopeId();
     m_stackFrameLocals = -1;
+    m_sorter.clear();
 }
