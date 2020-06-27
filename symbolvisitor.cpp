@@ -973,13 +973,16 @@ void SymbolVisitor::visit(EnumConstantDecl *ecd)
 {
     assert(ecd != nullptr);
 
-    Symbol *enumSym = new Symbol(Symbol::Category::EnumConstants, ecd->name, make_shared<TypeInfo>(TypeInfo::Category::Int), ecd);
-    m_ast->symbolTable()->define(enumSym);
+    Symbol *enumConstantSym = new Symbol(Symbol::Category::EnumConstants, ecd->name, make_shared<TypeInfo>(TypeInfo::Category::Int), ecd);
+    m_ast->symbolTable()->define(enumConstantSym);
 }
 
 void SymbolVisitor::visit(EnumDecl *ed)
 {
     assert(ed != nullptr);
+
+    Symbol *enumSym = new Symbol(Symbol::Category::Enum, ed->name, std::shared_ptr<TypeInfo>(), ed);
+    m_ast->symbolTable()->define(enumSym);
 
     for (size_t i = 0; i < ed->constantList.size(); i++)
     {

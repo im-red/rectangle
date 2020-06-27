@@ -58,6 +58,7 @@ def Rectangle {
         print("haha");
         print(len("haha"));
         print(len(sv));
+        LineType lt;
     }
 
     void printFoo() {
