@@ -81,6 +81,8 @@ void SymbolVisitor::visit(StructDecl *sd)
 
 void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
 {
+    assert(cdd != nullptr);
+
     string name = cdd->name;
     Symbol *sym(new ScopeSymbol(Symbol::Category::Component, name,
                                 Scope::Category::Component, m_ast->symbolTable()->curScope()));

@@ -498,6 +498,12 @@ struct DocumentDecl : public ASTNode
     };
 
     explicit DocumentDecl(Type type_) : type(type_) {}
+    void dump() const
+    {
+        util::condPrint(option::showAst, "---------- DocumentDecl::dump begin ----------\n");
+        print(0);
+        util::condPrint(option::showAst, "----------- DocumentDecl::dump end -----------\n");
+    }
 
     Type type;
 };
@@ -594,7 +600,7 @@ struct GroupedBindingDecl : public BindingDecl
 
 struct ComponentInstanceDecl : public DocumentDecl
 {
-    ComponentInstanceDecl() : DocumentDecl(DocumentDecl::Type::Defination) {}
+    ComponentInstanceDecl() : DocumentDecl(DocumentDecl::Type::Instance) {}
     void doPrint(int indent) const override
     {
         util::condPrint(option::showAst, "ComponentInstanceDecl(%s)\n",componentName.c_str());
