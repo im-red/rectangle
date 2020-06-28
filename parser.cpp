@@ -18,6 +18,7 @@
 #include "parser.h"
 #include "option.h"
 #include "util.h"
+#include "typeinfo.h"
 
 #include <assert.h>
 

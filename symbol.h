@@ -17,10 +17,13 @@
 
 #pragma once
 
-#include "astnode.h"
+#include "typeinfo.h"
 
 #include <string>
 #include <map>
+#include <vector>
+
+struct ASTNode;
 
 class SymbolException : public std::runtime_error
 {

@@ -33,4 +33,5 @@ add_executable(rectangle
     symboltable.cpp
     astnode.cpp
     topologicalsorter.cpp
+    typeinfo.cpp
 )

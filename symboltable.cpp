@@ -19,6 +19,7 @@
 #include "option.h"
 #include "util.h"
 #include "symbol.h"
+#include "typeinfo.h"
 
 #include <assert.h>
 

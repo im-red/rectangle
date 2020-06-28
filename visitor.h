@@ -18,6 +18,7 @@
 #pragma once
 
 #include "ast.h"
+#include "astnode.h"
 
 class VisitException : public std::runtime_error
 {

@@ -19,6 +19,7 @@
 #include "symbolvisitor.h"
 #include "structinfo.h"
 #include "symboltable.h"
+#include "typeinfo.h"
 
 #include <assert.h>
 

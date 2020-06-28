@@ -38,6 +38,7 @@ set(RECT_SRCS
     ../astnode.cpp
     ../asmvisitor.cpp
     ../topologicalsorter.cpp
+    ../typeinfo.cpp
 )
 
 add_library(common

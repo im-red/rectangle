@@ -16,6 +16,8 @@
  ********************************************************************************/
 
 #include "asmvisitor.h"
+#include "symboltable.h"
+#include "typeinfo.h"
 
 #include <assert.h>
 

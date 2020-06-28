@@ -16,7 +16,8 @@
  ********************************************************************************/
 
 #include "visitor.h"
-#include "symbol.h"
+#include "symboltable.h"
+#include "typeinfo.h"
 
 #include <memory>
 

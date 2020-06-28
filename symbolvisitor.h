@@ -22,8 +22,6 @@
 #include "symbol.h"
 #include "topologicalsorter.h"
 
-class SymbolTable;
-
 class SymbolVisitor : public Visitor
 {
 public:

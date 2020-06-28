@@ -27,6 +27,7 @@ class AST
 {
 public:
     AST();
+    ~AST();
 
     void clear();
     void addDocument(std::unique_ptr<DocumentDecl> &&document);
@@ -40,5 +41,5 @@ private:
 private:
     std::vector<std::unique_ptr<DocumentDecl>> m_documents;
     std::vector<std::unique_ptr<DocumentDecl>> m_builtinDocuments;
-    SymbolTable m_symbolTable;
+    std::unique_ptr<SymbolTable> m_symbolTable = nullptr;
 };

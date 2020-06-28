@@ -22,13 +22,19 @@ using namespace std;
 
 AST::AST()
 {
+    m_symbolTable.reset(new SymbolTable);
     initBuiltinDocuments();
+}
+
+AST::~AST()
+{
+
 }
 
 void AST::clear()
 {
     m_documents.clear();
-    m_symbolTable.clear();
+    m_symbolTable->clear();
 }
 
 void AST::addDocument(std::unique_ptr<DocumentDecl> &&document)
@@ -52,7 +58,7 @@ std::vector<DocumentDecl *> AST::documents() const
 
 SymbolTable *AST::symbolTable()
 {
-    return &m_symbolTable;
+    return m_symbolTable.get();
 }
 
 void AST::initBuiltinDocuments()

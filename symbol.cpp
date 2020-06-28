@@ -18,6 +18,8 @@
 #include "symbol.h"
 #include "option.h"
 #include "util.h"
+#include "astnode.h"
+#include "typeinfo.h"
 
 #include <utility>
 
@@ -98,8 +100,6 @@ void Symbol::setAstNode(ASTNode *astNode)
 {
     m_astNode = astNode;
 }
-
-
 
 int Scope::m_nextScopeId = 0;
 

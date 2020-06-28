@@ -19,6 +19,7 @@
 
 #include "util.h"
 #include "option.h"
+#include "typeinfo.h"
 
 #include <string>
 #include <memory>
@@ -31,7 +32,7 @@ struct ASTNode
     virtual ~ASTNode();
     virtual void print(int indent = 0) const
     {
-        std::string space(indent, ' ');
+        std::string space(static_cast<size_t>(indent), ' ');
         util::condPrint(option::showAst, "%s", space.c_str());
         doPrint(indent);
     }
@@ -41,81 +42,6 @@ struct ASTNode
     }
 
     Scope *scope = nullptr;
-};
-
-class TypeInfo
-{
-public:
-    enum class Category
-    {
-        Int,
-        Void,
-        Point,
-        Float,
-        String,
-        List,
-        Group,
-        Custom,
-    };
-
-public:
-    explicit TypeInfo(Category cat);
-    virtual ~TypeInfo();
-
-    Category category() const;
-    bool operator==(const TypeInfo &rhs) const
-    {
-        return m_category == rhs.m_category && toString() == rhs.toString();
-    }
-    bool operator!=(const TypeInfo &rhs) const
-    {
-        return !operator==(rhs);
-    }
-
-    virtual std::string toString() const;
-    virtual bool assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const;
-
-private:
-    Category m_category;
-};
-
-class ListTypeInfo : public TypeInfo
-{
-public:
-    explicit ListTypeInfo(const std::shared_ptr<TypeInfo> &ele);
-    std::shared_ptr<TypeInfo> elementType() const { return m_elementType; }
-
-    std::string toString() const override;
-    bool assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const override;
-
-private:
-    std::shared_ptr<TypeInfo> m_elementType;
-};
-
-class CustomTypeInfo : public TypeInfo
-{
-public:
-    explicit CustomTypeInfo(const std::string &name);
-    std::string name() const { return m_name; }
-
-    std::string toString() const override;
-
-private:
-    std::string m_name;
-};
-
-class GroupTypeInfo : public TypeInfo
-{
-public:
-    GroupTypeInfo(const std::string &name, const std::shared_ptr<TypeInfo> &component);
-    std::string name() const { return m_name; }
-    std::shared_ptr<TypeInfo> componentType() const { return m_componentType; }
-
-    std::string toString() const override;
-
-private:
-    std::string m_name;
-    std::shared_ptr<TypeInfo> m_componentType;
 };
 
 struct Expr : public ASTNode

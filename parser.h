@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "ast.h"
+#include "astnode.h"
 #include "lexer.h"
 
 #include <map>

@@ -17,10 +17,11 @@
 
 #pragma once
 
-#include "symbol.h"
+#include "typeinfo.h"
 
 #include <map>
 #include <string>
+#include <vector>
 
 namespace builtin
 {
