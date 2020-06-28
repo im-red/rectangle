@@ -713,6 +713,14 @@ void AsmVisitor::visit(ComponentDefinationDecl *cdd)
         visit(e.get());
     }
 
+    m_asm.appendLine({".def", name + "::" + name, "1", "0"});
+    m_asm.appendLine({"lload", "0"});
+    for (auto i : cdd->propertyInitOrder)
+    {
+        m_asm.appendLine({"call", name + "::" + name + "::" + to_string(i)});
+    }
+    m_asm.appendLine({"ret"});
+
     for (auto &p : cdd->propertyList)
     {
         m_asm.appendLine({".def", name + "::" + name + "::" + to_string(p->fieldIndex), "1", "0"});
