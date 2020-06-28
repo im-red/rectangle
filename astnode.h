@@ -567,7 +567,7 @@ struct BindingDecl : public ASTNode
     BindingDecl(const std::string &n, std::unique_ptr<Expr> &&e)
         : name(n), expr(move(e))
     {}
-    ~BindingDecl();
+    ~BindingDecl() override;
     void doPrint(int indent) const override
     {
         util::condPrint(option::showAst, "BindingDecl(%s)\n", name.c_str());
