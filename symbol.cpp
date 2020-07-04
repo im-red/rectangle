@@ -91,6 +91,11 @@ std::shared_ptr<TypeInfo> Symbol::typeInfo() const
     return m_typeInfo;
 }
 
+void Symbol::setTypeInfo(const std::shared_ptr<TypeInfo> &typeInfo)
+{
+    m_typeInfo = typeInfo;
+}
+
 ASTNode *Symbol::astNode() const
 {
     return m_astNode;
@@ -121,22 +126,24 @@ Scope::~Scope()
 
 Symbol *Scope::resolve(const string &name)
 {
+    Symbol *result = nullptr;
     auto iter = m_symbols.find(name);
     if (iter == m_symbols.end())
     {
         if (m_parent)
         {
-            return m_parent->resolve(name);
-        }
-        else
-        {
-            return nullptr;
+            result = m_parent->resolve(name);
         }
     }
     else
     {
-        return iter->second;
+        result = iter->second;
     }
+    if (result == nullptr && m_componentScope != nullptr)
+    {
+        result = m_componentScope->resolve(name);
+    }
+    return result;
 }
 
 void Scope::define(Symbol *sym)
@@ -162,6 +169,16 @@ int Scope::scopeId() const
 void Scope::setScopeId(int scopeId)
 {
     m_scopeId = scopeId;
+}
+
+Scope *Scope::componentScope() const
+{
+    return m_componentScope;
+}
+
+void Scope::setComponentScope(Scope *componentScope)
+{
+    m_componentScope = componentScope;
 }
 
 ScopeSymbol::ScopeSymbol(Symbol::Category symCat, const string &name, Scope::Category scopeCat, Scope *parent, const std::shared_ptr<TypeInfo> &ti)

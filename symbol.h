@@ -68,6 +68,7 @@ public:
     Category category() const;
     std::string name() const;
     std::shared_ptr<TypeInfo> typeInfo() const;
+    void setTypeInfo(const std::shared_ptr<TypeInfo> &typeInfo);
     ASTNode *astNode() const;
     void setAstNode(ASTNode *astNode);
 
@@ -160,9 +161,13 @@ public:
 
     static void resetNextScopeId() { m_nextScopeId = 0; }
 
+    Scope *componentScope() const;
+    void setComponentScope(Scope *componentScope);
+
 private:
     std::map<std::string, Symbol *> m_symbols;
     Scope *m_parent = nullptr;
+    Scope *m_componentScope = nullptr;
     Category m_category = Category::Invalid;
     std::string m_scopeName = "anonymous";
     int m_scopeId = -1;
