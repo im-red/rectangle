@@ -13,5 +13,6 @@ bool showLLTry = false;
 bool showLocalIndex = false;
 bool showGenAsm = false;
 bool showAssemble = false;
+bool showBindingDep = false;
 
 }

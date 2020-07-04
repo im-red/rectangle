@@ -14,6 +14,7 @@ extern bool showLLTry;
 extern bool showLocalIndex;
 extern bool showGenAsm;
 extern bool showAssemble;
+extern bool showBindingDep;
 
 }
 
