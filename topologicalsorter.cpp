@@ -42,13 +42,23 @@ TopologicalSorter::SortResult TopologicalSorter::sort(std::vector<int> &sorted)
     {
         return SortResult::EmptyGraph;
     }
+
     sorted.clear();
     set<int> nodesWithoutOut;
+    set<int> nextLayer;
+    set<int> remain;
+    std::vector<int> node2outCount(static_cast<size_t>(m_n), 0);
+
     for (size_t i = 0; i < m_node2outs.size(); i++)
     {
         if (m_node2outs[i].size() == 0)
         {
             nodesWithoutOut.insert(static_cast<int>(i));
+        }
+        else
+        {
+            remain.insert(static_cast<int>(i));
+            node2outCount[i] = static_cast<int>(m_node2outs[i].size());
         }
     }
 
@@ -57,60 +67,34 @@ TopologicalSorter::SortResult TopologicalSorter::sort(std::vector<int> &sorted)
         return SortResult::LoopDetected;
     }
 
-    enum class NodeColor
+    while (!remain.empty())
     {
-        White,
-        Gray,
-        Black
-    };
-
-    vector<NodeColor> colors(static_cast<size_t>(m_n), NodeColor::White);
-    vector<int> growing;
-    for (auto node : nodesWithoutOut)
-    {
-        sorted.push_back(node);
-        growing.push_back(node);
-        colors[static_cast<size_t>(node)] = NodeColor::Gray;
-    }
-
-    while (!growing.empty())
-    {
-        int back = growing.back();
-        bool everyInIsBlack = true;
-        for (auto in : m_node2ins[static_cast<size_t>(back)])
+        for (auto node : nodesWithoutOut)
         {
-            if (colors[static_cast<size_t>(in)] == NodeColor::White)
+            sorted.push_back(node);
+            for (auto in : m_node2ins[static_cast<size_t>(node)])
             {
-                sorted.push_back(in);
-                growing.push_back(in);
-                colors[static_cast<size_t>(in)] = NodeColor::Gray;
-                everyInIsBlack = false;
-                break;
-            }
-            else if (colors[static_cast<size_t>(in)] == NodeColor::Gray)
-            {
-                sorted.clear();
-                return SortResult::LoopDetected;
-            }
-            else // Black
-            {
-                // do nothing
+                node2outCount[static_cast<size_t>(in)]--;
+                if (node2outCount[static_cast<size_t>(in)] == 0)
+                {
+                    nextLayer.insert(in);
+                    remain.erase(in);
+                }
             }
         }
-        if (everyInIsBlack)
-        {
-            colors[static_cast<size_t>(back)] = NodeColor::Black;
-            growing.pop_back();
-        }
-    }
-
-    for (auto c : colors)
-    {
-        if (c != NodeColor::Black)
+        nodesWithoutOut.clear();
+        nodesWithoutOut.swap(nextLayer);
+        if (!remain.empty() && nodesWithoutOut.empty())
         {
             sorted.clear();
             return SortResult::LoopDetected;
         }
     }
+
+    for (auto node : nodesWithoutOut)
+    {
+        sorted.push_back(node);
+    }
+
     return SortResult::Success;
 }

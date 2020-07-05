@@ -58,7 +58,7 @@ TEST(topologicalsorter, SORT)
         sorter.addEdge(1, 2);
         sorter.addEdge(3, 2);
         EXPECT_EQ(sorter.sort(result), TopologicalSorter::SortResult::Success);
-        EXPECT_EQ(result, vector<int>({2, 0, 1, 3}));
+        EXPECT_EQ(result, vector<int>({2, 1, 3, 0}));
     }
 
     {
@@ -67,6 +67,25 @@ TEST(topologicalsorter, SORT)
         sorter.addEdge(5, 0);
         sorter.addEdge(6, 5);
         sorter.addEdge(7, 7);
+        EXPECT_EQ(sorter.sort(result), TopologicalSorter::SortResult::LoopDetected);
+    }
+
+    {
+        sorter.clear();
+        sorter.setN(4);
+        sorter.addEdge(1, 0);
+        sorter.addEdge(2, 1);
+        sorter.addEdge(2, 3);
+        EXPECT_EQ(sorter.sort(result), TopologicalSorter::SortResult::Success);
+        EXPECT_EQ(result, vector<int>({0, 3, 1, 2}));
+    }
+
+    {
+        sorter.clear();
+        sorter.setN(3);
+        sorter.addEdge(1, 0);
+        sorter.addEdge(0, 1);
+        sorter.addEdge(0, 2);
         EXPECT_EQ(sorter.sort(result), TopologicalSorter::SortResult::LoopDetected);
     }
 }
