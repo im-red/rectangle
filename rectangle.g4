@@ -9,32 +9,30 @@ componentDefination     // Def
     : Def Identifier LBrace memberItemList RBrace
     ;
 
-memberItemList  // Int | Void | Point | Float | String | List | Enum | Identifier
-    : memberItem*    // Int | Void | Point | Float | String | List | Enum | Identifier
+memberItemList  // Int | Void | Float | String | List | Enum | Identifier
+    : memberItem*    // Int | Void | Float | String | List | Enum | Identifier
     ;
 
-memberItem  // Int | Void | Point | Float | String | List | Enum | Identifier
-    : propertyDefination    // Int | Point | Float | String | List
-    | functionDefination    // Int | Void | Point | Float | String | List | Identifier
+memberItem  // Int | Void | Float | String | List | Enum | Identifier
+    : propertyDefination    // Int | Float | String | List
+    | functionDefination    // Int | Void | Float | String | List | Identifier
     | enumDefination        // Enum
     ;
 
-propertyDefination  // Int | Point | Float | String | List
-    : propertyType Identifier Colon initializer  // Int | Point | Float | String | List
+propertyDefination  // Int | Float | String | List
+    : propertyType Identifier Colon initializer  // Int | Float | String | List
     ;
 
-propertyType    // Int | Point | Float | String | List
+propertyType    // Int | Float | String | List
     : Int
-    | Point
     | Float
     | String
     | listType  // List
     ;
 
-type    // Int | Void | Point | Float | String | List | Identifier
+type    // Int | Void | Float | String | List | Identifier
     : Int
     | Void
-    | Point
     | Float
     | String
     | listType  // List
@@ -50,33 +48,33 @@ literal // StringLiteral | NumberLiteral
     | NumberLiteral
     ;
 
-functionDefination  // Int | Void | Point | Float | String | List | Identifier
-    : type Identifier LParen paramList? RParen compoundStatement    // Int | Void | Point | Float | String | List | Identifier
+functionDefination  // Int | Void | Float | String | List | Identifier
+    : type Identifier LParen paramList? RParen compoundStatement    // Int | Void | Float | String | List | Identifier
     ;
 
-paramList   // Int | Void | Point | Float | String | List | Identifier
-    : paramItem (Comma paramItem)*  // Int | Void | Point | Float | String | List | Identifier
+paramList   // Int | Void | Float | String | List | Identifier
+    : paramItem (Comma paramItem)*  // Int | Void | Float | String | List | Identifier
     ;
 
-paramItem   // Int | Void | Point | Float | String | List | Identifier
-    : type Identifier   // Int | Void | Point | Float | String | List | Identifier
+paramItem   // Int | Void | Float | String | List | Identifier
+    : type Identifier   // Int | Void | Float | String | List | Identifier
     ;
 
 compoundStatement   // LBrace
     : LBrace blockItemList RBrace
     ;
 
-blockItemList   // Int | Void | Point | Float | String | List | Identifier | LBrace | If | While | Continue | Break | Return | StringLiteral | NumberLiteral | LParen
-    : blockItem*    // Int | Void | Point | Float | String | List | Identifier | LBrace | If | While | Continue | Break | Return | StringLiteral | NumberLiteral | LParen
+blockItemList   // Int | Void | Float | String | List | Identifier | LBrace | If | While | Continue | Break | Return | StringLiteral | NumberLiteral | LParen
+    : blockItem*    // Int | Void | Float | String | List | Identifier | LBrace | If | While | Continue | Break | Return | StringLiteral | NumberLiteral | LParen
     ;
 
-blockItem   // Int | Void | Point | Float | String | List | Identifier | LBrace | If | While | Continue | Break | Return | StringLiteral | NumberLiteral | LParen
-    : declaration   // Int | Void | Point | Float | String | List | Identifier
+blockItem   // Int | Void | Float | String | List | Identifier | LBrace | If | While | Continue | Break | Return | StringLiteral | NumberLiteral | LParen
+    : declaration   // Int | Void | Float | String | List | Identifier
     | statement     // LBrace | If | While | Continue | Break | Return | Identifier | StringLiteral | NumberLiteral | LParen
     ;
 
-declaration // Int | Void | Point | Float | String | List | Identifier
-    : type Identifier (Assign initializer)? Semicolon   // Int | Void | Point | Float | String | List | Identifier
+declaration // Int | Void | Float | String | List | Identifier
+    : type Identifier (Assign initializer)? Semicolon   // Int | Void | Float | String | List | Identifier
     ;
 
 initializer // Identifier | StringLiteral | NumberLiteral | LParen | Plus | Minus | Not | LBrace
@@ -233,7 +231,6 @@ List : 'list';
 Void : 'void';
 Break : 'break';
 Float : 'float';
-Point : 'point';
 While : 'while';
 Return : 'return';
 String : 'string';

@@ -64,7 +64,6 @@ public:
         T_VOID,
         T_BREAK,
         T_FLOAT,
-        T_POINT,
         T_WHILE,
         T_RETURN,
         T_STRING,

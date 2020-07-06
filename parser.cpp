@@ -179,7 +179,6 @@ static const set<int> memberItemFirst =
 {
     Lexer::T_INT,
     Lexer::T_VOID,
-    Lexer::T_POINT,
     Lexer::T_FLOAT,
     Lexer::T_STRING,
     Lexer::T_LIST,
@@ -198,7 +197,6 @@ void Parser::parseMemberItemList(unique_ptr<ComponentDefinationDecl> &defination
 static const set<int> propertyTypeFirst =
 {
     Lexer::T_INT,
-    Lexer::T_POINT,
     Lexer::T_FLOAT,
     Lexer::T_STRING,
     Lexer::T_LIST
@@ -208,7 +206,6 @@ static const set<int> propertyDefinationFirst = propertyTypeFirst;
 static const set<int> typeFirst =
 {
     Lexer::T_INT,
-    Lexer::T_POINT,
     Lexer::T_FLOAT,
     Lexer::T_STRING,
     Lexer::T_LIST,
@@ -216,9 +213,9 @@ static const set<int> typeFirst =
     Lexer::T_IDENTIFIER
 };
 
-//memberItem  // Int | Void | Point | Float | String | List | Enum | Identifier
-//    : propertyDefination    // Int | Point | Float | String | List
-//    | functionDefination    // Int | Void | Point | Float | String | List | Identifier
+//memberItem  // Int | Void | Float | String | List | Enum | Identifier
+//    : propertyDefination    // Int | Float | String | List
+//    | functionDefination    // Int | Void | Float | String | List | Identifier
 //    | enumDefination        // Enum
 //    ;
 
@@ -354,12 +351,6 @@ std::shared_ptr<TypeInfo> Parser::parsePropertyType()
         match(curTokenType());
         break;
     }
-    case Lexer::T_POINT:
-    {
-        result.reset(new TypeInfo(TypeInfo::Category::Point));
-        match(curTokenType());
-        break;
-    }
     case Lexer::T_FLOAT:
     {
         result.reset(new TypeInfo(TypeInfo::Category::Float));
@@ -410,12 +401,6 @@ std::shared_ptr<TypeInfo> Parser::parseType()
     case Lexer::T_VOID:
     {
         result.reset(new TypeInfo(TypeInfo::Category::Void));
-        match(curTokenType());
-        break;
-    }
-    case Lexer::T_POINT:
-    {
-        result.reset(new TypeInfo(TypeInfo::Category::Point));
         match(curTokenType());
         break;
     }
@@ -634,7 +619,6 @@ static const set<int> blockItemFirst =
 {
     Lexer::T_INT,
     Lexer::T_VOID,
-    Lexer::T_POINT,
     Lexer::T_FLOAT,
     Lexer::T_STRING,
     Lexer::T_LIST,
@@ -659,7 +643,7 @@ void Parser::parseBlockItemList(std::vector<std::unique_ptr<Stmt>> &stmts)
 }
 
 //blockItem
-//    : declaration   // Int | Void | Point | Float | String | List | Identifier
+//    : declaration   // Int | Void | Float | String | List | Identifier
 //    | statement     // LBrace | If | While | Continue | Break | Return | Identifier | StringLiteral | NumberLiteral | LParen
 //    ;
 

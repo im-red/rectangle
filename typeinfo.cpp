@@ -40,7 +40,6 @@ std::string TypeInfo::toString() const
     {
         { Category::Int,    "int" },
         { Category::Void,   "void" },
-        { Category::Point,  "point" },
         { Category::Float,  "float" },
         { Category::String, "string" },
         { Category::List,   "list" },

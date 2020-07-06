@@ -36,11 +36,11 @@ static void singleTokenErrorHelper(const std::string &code, int error)
 
 TEST(lexer, KEYWORD)
 {
-    string code = "if\ndef\nint\nelse\nenum\nlist\nvoid\nbreak\nfloat\npoint\n" \
+    string code = "if\ndef\nint\nelse\nenum\nlist\nvoid\nbreak\nfloat\n" \
         "while\nreturn\nstring\ncontinue";
     vector<int> expect = { Lexer::T_IF, Lexer::T_DEF, Lexer::T_INT, Lexer::T_ELSE, 
         Lexer::T_ENUM, Lexer::T_LIST, Lexer::T_VOID, Lexer::T_BREAK, 
-        Lexer::T_FLOAT, Lexer::T_POINT, Lexer::T_WHILE, Lexer::T_RETURN, 
+        Lexer::T_FLOAT, Lexer::T_WHILE, Lexer::T_RETURN, 
         Lexer::T_STRING, Lexer::T_CONTINUE, Lexer::T_EOF };
     vector<int> actual;
 

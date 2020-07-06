@@ -27,7 +27,6 @@ public:
     {
         Int,
         Void,
-        Point,
         Float,
         String,
         List,

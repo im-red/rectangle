@@ -142,22 +142,6 @@ static inline Lexer::TokenType classify5(const char *s)
             }
         }
     }
-    if (s[0] == 'p')
-    {
-        if (s[1] == 'o')
-        {
-            if (s[2] == 'i')
-            {
-                if (s[3] == 'n')
-                {
-                    if (s[4] == 't')
-                    {
-                        return Lexer::T_POINT;
-                    }
-                }
-            }
-        }
-    }
     if (s[0] == 'w')
     {
         if (s[1] == 'h')

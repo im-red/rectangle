@@ -35,7 +35,6 @@ string Lexer::tokenTypeString(int token)
         ENUM_ELEMENT(T_INT),
         ENUM_ELEMENT(T_FLOAT),
         ENUM_ELEMENT(T_VOID),
-        ENUM_ELEMENT(T_POINT),
         ENUM_ELEMENT(T_STRING_LITERAL),
         ENUM_ELEMENT(T_NUMBER_LITERAL),
         ENUM_ELEMENT(T_IF),
