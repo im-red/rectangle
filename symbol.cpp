@@ -49,16 +49,6 @@ string Symbol::symbolString() const
         assert(m_astNode != nullptr);
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(m_astNode);
         assert(pd != nullptr);
-        GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
-        if (gpd)
-        {
-            snprintf(buf, sizeof(buf), "%s <%s.%s:%s>",
-                     symbolCategoryString(m_category).c_str(),
-                     gpd->groupName.c_str(),
-                     m_name.c_str(),
-                     m_typeInfo->toString().c_str());
-            return std::string(buf);
-        }
     }
     if (m_typeInfo)
     {

@@ -53,7 +53,6 @@ protected:
     virtual void visit(RefExpr *) = 0;
     virtual void visit(VarDecl *) = 0;
     virtual void visit(PropertyDecl *) = 0;
-    virtual void visit(GroupedPropertyDecl *) = 0;
     virtual void visit(ParamDecl *) = 0;
     virtual void visit(CompoundStmt *) = 0;
     virtual void visit(DeclStmt *) = 0;
@@ -70,7 +69,6 @@ protected:
     virtual void visit(FieldDecl *) = 0;
     virtual void visit(StructDecl *) = 0;
     virtual void visit(BindingDecl *) = 0;
-    virtual void visit(GroupedBindingDecl *) = 0;
     virtual void visit(ComponentInstanceDecl *) = 0;
 };
 

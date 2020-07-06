@@ -47,7 +47,6 @@ public:
         Struct,
         Field,
         Component,
-        PropertyGroup,
         Property,
         Method,
         InstanceId,
@@ -126,7 +125,6 @@ public:
         Function,
         Component,
         Method,
-        Group,
         Struct,
         Instance
     };

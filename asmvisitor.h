@@ -43,7 +43,6 @@ protected:
     void visit(RefExpr *re) override;
     void visit(VarDecl *vd) override;
     void visit(PropertyDecl *pd) override;
-    void visit(GroupedPropertyDecl *gpd) override;
     void visit(ParamDecl *pd) override;
     void visit(CompoundStmt *cs) override;
     void visit(DeclStmt *ds) override;
@@ -60,7 +59,6 @@ protected:
     void visit(FieldDecl *fd) override;
     void visit(StructDecl *sd) override;
     void visit(BindingDecl *bd) override;
-    void visit(GroupedBindingDecl *gbd) override;
     void visit(ComponentInstanceDecl *cid) override;
 
     void genAsmForInitInstance(ComponentInstanceDecl *cid);

@@ -108,14 +108,3 @@ string CustomTypeInfo::toString() const
 {
     return m_name;
 }
-
-GroupTypeInfo::GroupTypeInfo(const string &name, const std::shared_ptr<TypeInfo> &component)
-    : TypeInfo(TypeInfo::Category::Group), m_name(name), m_componentType(component)
-{
-
-}
-
-string GroupTypeInfo::toString() const
-{
-    return "(" + m_componentType->toString() + "::" + m_name + ")";
-}

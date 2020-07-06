@@ -29,7 +29,6 @@ std::string Symbol::symbolCategoryString(Category category)
         ENUM_ELEMENT(Category::Struct),
         ENUM_ELEMENT(Category::Field),
         ENUM_ELEMENT(Category::Component),
-        ENUM_ELEMENT(Category::PropertyGroup),
         ENUM_ELEMENT(Category::Property),
         ENUM_ELEMENT(Category::Method),
         ENUM_ELEMENT(Category::InstanceId),
@@ -52,7 +51,6 @@ std::string Scope::scopeCategoryString(Category category)
         ENUM_ELEMENT(Category::Function),
         ENUM_ELEMENT(Category::Component),
         ENUM_ELEMENT(Category::Method),
-        ENUM_ELEMENT(Category::Group),
         ENUM_ELEMENT(Category::Struct),
         ENUM_ELEMENT(Category::Instance)
     };

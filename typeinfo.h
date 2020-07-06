@@ -31,7 +31,6 @@ public:
         Float,
         String,
         List,
-        Group,
         Custom,
     };
 
@@ -80,18 +79,3 @@ public:
 private:
     std::string m_name;
 };
-
-class GroupTypeInfo : public TypeInfo
-{
-public:
-    GroupTypeInfo(const std::string &name, const std::shared_ptr<TypeInfo> &component);
-    std::string name() const { return m_name; }
-    std::shared_ptr<TypeInfo> componentType() const { return m_componentType; }
-
-    std::string toString() const override;
-
-private:
-    std::string m_name;
-    std::shared_ptr<TypeInfo> m_componentType;
-};
-

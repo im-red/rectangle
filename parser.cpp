@@ -318,53 +318,23 @@ bool Parser::tryMemberItemAlt2()
 
 std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
 {
-    string name1;
-    string name2;
+    string name;
     shared_ptr<TypeInfo> ti;
     unique_ptr<Expr> initExpr;
 
     ti = parsePropertyType();
     match(Lexer::T_IDENTIFIER);
-    name1 = token(m_index - 1).str;
+    name = token(m_index - 1).str;
 
-    if (curToken().is(Lexer::T_COLON))
-    {
-        match(Lexer::T_COLON);
-        initExpr = parseInitializer();
-    }
-    else if (curToken().is(Lexer::T_DOT))
-    {
-        match(Lexer::T_DOT);
-        match(Lexer::T_IDENTIFIER);
-        name2 = token(m_index - 1).str;
-        match(Lexer::T_COLON);
-        initExpr = parseInitializer();
-    }
-    else
-    {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect ':'/'.' at line %d column %d",
-                 tok.line, tok.column);
-        throw ParseException(buf);
-    }
+    match(Lexer::T_COLON);
+    initExpr = parseInitializer();
 
     unique_ptr<PropertyDecl> propertyDecl;
 
     if (!trying())
     {
-        if (name2 == "")
-        {
-            propertyDecl.reset(new PropertyDecl);
-            propertyDecl->name = name1;
-        }
-        else
-        {
-            GroupedPropertyDecl *spd = new GroupedPropertyDecl;
-            spd->name = name2;
-            spd->groupName = name1;
-            propertyDecl.reset(spd);
-        }
+        propertyDecl.reset(new PropertyDecl);
+        propertyDecl->name = name;
         propertyDecl->type = move(ti);
         propertyDecl->expr = move(initExpr);
     }
@@ -1675,26 +1645,16 @@ void Parser::parseBindingItemList(std::unique_ptr<ComponentInstanceDecl> &instan
 
 void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDecl)
 {
-    string name1;
-    string name2;
+    string name;
     unique_ptr<Expr> expr;
     unique_ptr<ComponentInstanceDecl> child;
 
     match(Lexer::T_IDENTIFIER);
-    name1 = token(m_index - 1).str;
+    name = token(m_index - 1).str;
     switch (curTokenType())
     {
     case Lexer::T_COLON:
     {
-        match(Lexer::T_COLON);
-        expr = parseInitializer();
-        break;
-    }
-    case Lexer::T_DOT:
-    {
-        match(Lexer::T_DOT);
-        match(Lexer::T_IDENTIFIER);
-        name2 = token(m_index - 1).str;
         match(Lexer::T_COLON);
         expr = parseInitializer();
         break;
@@ -1709,7 +1669,7 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
     {
         char buf[512];
         Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a ':'/'.'/'{' after Identifier at line %d column %d(%s)",
+        snprintf(buf, sizeof(buf), "expect a ':'/'{' after Identifier at line %d column %d(%s)",
                  tok.line, tok.column, tok.str.c_str());
         throw ParseException(buf);
     }
@@ -1724,17 +1684,11 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
         }
         else
         {
-            assert(name1 != "");
+            assert(name != "");
             assert(expr);
-            if (name2 == "")
-            {
-                instanceDecl->bindingList.emplace_back(new BindingDecl(name1, move(expr)));
-                instanceDecl->bindingList.back()->componentInstance = instanceDecl.get();
-            }
-            else
-            {
-                instanceDecl->bindingList.emplace_back(new GroupedBindingDecl(name1, name2, move(expr)));
-            }
+
+            instanceDecl->bindingList.emplace_back(new BindingDecl(name, move(expr)));
+            instanceDecl->bindingList.back()->componentInstance = instanceDecl.get();
         }
     }
 }

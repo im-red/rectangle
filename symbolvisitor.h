@@ -38,7 +38,6 @@ protected:
     void visit(ComponentInstanceDecl *cid) override;
     void calculateOrderedMemberInitList();
     void visit(BindingDecl *bd) override;
-    void visit(GroupedBindingDecl *gbd) override;
     int visitInstanceIndex(ComponentInstanceDecl *cid);
     void visitInstanceId(ComponentInstanceDecl *cid);
     void visit(IntegerLiteral *e) override;
@@ -54,9 +53,7 @@ protected:
     void visit(VarDecl *vd) override;
     void visit(FieldDecl *md) override;
     void visitPropertyDefination(PropertyDecl *pd);
-    void visitPropertyDefination(GroupedPropertyDecl *gpd);
     void visitPropertyInitialization(PropertyDecl *pd);
-    void visitPropertyInitialization(GroupedPropertyDecl *gpd);
     void visit(ParamDecl *pd) override;
     void visit(CompoundStmt *cs) override;
     void visit(DeclStmt *ds) override;
@@ -72,7 +69,6 @@ protected:
     void visit(EnumDecl *ed) override;
     void visit(FunctionDecl *) override;
     void visit(PropertyDecl *) override;
-    void visit(GroupedPropertyDecl *) override;
 
 private:
     void clear();

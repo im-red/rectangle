@@ -290,16 +290,6 @@ struct PropertyDecl : public ASTNode
     ComponentDefinationDecl *componentDefination = nullptr;
 };
 
-struct GroupedPropertyDecl : public PropertyDecl
-{
-    void doPrint(int indent) const override
-    {
-        util::condPrint(option::showAst, "GroupedPropertyDecl(%s %s.%s)\n", type->toString().c_str(), groupName.c_str(), name.c_str());
-        expr->print(indent + 1);
-    }
-    std::string groupName;
-};
-
 struct ParamDecl : public ASTNode
 {
     ParamDecl(const std::string &n, const std::shared_ptr<TypeInfo> &t) : name(n), type(t) {}
@@ -599,20 +589,6 @@ struct BindingDecl : public ASTNode
 
     PropertyDecl *propertyDecl = nullptr;
     ComponentInstanceDecl *componentInstance = nullptr;
-};
-
-struct GroupedBindingDecl : public BindingDecl
-{
-    GroupedBindingDecl(const std::string &sn, const std::string &n, std::unique_ptr<Expr> &&e)
-        : BindingDecl(n, move(e)), groupName(sn)
-    {}
-    void doPrint(int indent) const override
-    {
-        util::condPrint(option::showAst, "GroupedBindingDecl(%s.%s)\n",groupName.c_str(), name.c_str());
-        expr->print(indent + 1);
-    }
-
-    std::string groupName;
 };
 
 struct ComponentInstanceDecl : public DocumentDecl

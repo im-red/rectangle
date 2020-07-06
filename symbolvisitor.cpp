@@ -327,46 +327,33 @@ void SymbolVisitor::visit(BindingDecl *bd)
 {
     assert(bd != nullptr);
 
-    GroupedBindingDecl *gbd = dynamic_cast<GroupedBindingDecl *>(bd);
-    if (gbd)
+    if (bd->isId())
     {
-        visit(gbd);
+        return;
     }
-    else
+
+    Scope *componentScope = m_ast->symbolTable()->curScope()->componentScope();
+    assert(componentScope != nullptr);
+    Symbol *componentSymbol = dynamic_cast<Symbol *>(componentScope);
+    assert(componentSymbol != nullptr);
+    Symbol *propertySymbol = componentScope->resolve(bd->name);
+    if (!propertySymbol)
     {
-        if (bd->isId())
-        {
-            return;
-        }
-
-        Scope *componentScope = m_ast->symbolTable()->curScope()->componentScope();
-        assert(componentScope != nullptr);
-        Symbol *componentSymbol = dynamic_cast<Symbol *>(componentScope);
-        assert(componentSymbol != nullptr);
-        Symbol *propertySymbol = componentScope->resolve(bd->name);
-        if (!propertySymbol)
-        {
-            throw SymbolException("BindingDecl",
-                                  "Component \"" + componentSymbol->name() + "\"" +
-                                  " has no property named \"" + bd->name + "\"");
-        }
-        ASTNode *astNode = propertySymbol->astNode();
-        assert(astNode != nullptr);
-        PropertyDecl *pd = dynamic_cast<PropertyDecl *>(astNode);
-        assert(pd != nullptr);
-
-        bd->propertyDecl = pd;
-
-        setAnalyzingBindingDep(true, bd);
-        m_bindingId2bindingDecl[bindingId(curInstanceId(), bindingIndexAnalyzing())] = bd;
-        visit(bd->expr.get());
-        setAnalyzingBindingDep(false);
+        throw SymbolException("BindingDecl",
+                              "Component \"" + componentSymbol->name() + "\"" +
+                              " has no property named \"" + bd->name + "\"");
     }
-}
+    ASTNode *astNode = propertySymbol->astNode();
+    assert(astNode != nullptr);
+    PropertyDecl *pd = dynamic_cast<PropertyDecl *>(astNode);
+    assert(pd != nullptr);
 
-void SymbolVisitor::visit(GroupedBindingDecl *gbd)
-{
-    assert(gbd != nullptr);
+    bd->propertyDecl = pd;
+
+    setAnalyzingBindingDep(true, bd);
+    m_bindingId2bindingDecl[bindingId(curInstanceId(), bindingIndexAnalyzing())] = bd;
+    visit(bd->expr.get());
+    setAnalyzingBindingDep(false);
 }
 
 int SymbolVisitor::visitInstanceIndex(ComponentInstanceDecl *cid)
@@ -866,37 +853,7 @@ void SymbolVisitor::visit(MemberExpr *e)
     string typeString = instanceTypeInfo->toString();
 
     Symbol *instanceTypeSymbol;
-    if (instanceTypeInfo->category() == TypeInfo::Category::Group)
-    {
-        shared_ptr<GroupTypeInfo> groupTypeInfo = dynamic_pointer_cast<GroupTypeInfo>(instanceTypeInfo);
-        assert(groupTypeInfo != nullptr);
-
-        string componentName = groupTypeInfo->componentType()->toString();
-        string groupName = groupTypeInfo->name();
-
-        Symbol *componentSym = m_ast->symbolTable()->curScope()->resolve(componentName);
-        if (!componentSym)
-        {
-            throw VisitException("MemberExpr",
-                                 "No symbol for componentName " + componentName);
-        }
-        if (componentSym->category() != Symbol::Category::Component)
-        {
-            throw VisitException("MemberExpr",
-                                 componentName + " is not a component symbol");
-        }
-        ScopeSymbol *componentScope = dynamic_cast<ScopeSymbol *>(componentSym);
-        assert(componentScope != nullptr);
-
-        Symbol *groupSym = componentScope->resolve(groupName);
-        if (!groupSym)
-        {
-            throw VisitException("MemberExpr", componentName + " doesn't contains group named " + groupName);
-        }
-
-        instanceTypeSymbol = groupSym;
-    }
-    else if (instanceTypeInfo->category() == TypeInfo::Category::Custom)
+    if (instanceTypeInfo->category() == TypeInfo::Category::Custom)
     {
         instanceTypeSymbol = m_ast->symbolTable()->curScope()->resolve(typeString);
         if (!instanceTypeSymbol)
@@ -1006,10 +963,6 @@ void SymbolVisitor::visit(RefExpr *e)
 
             m_curAnalyzingBindingToId = cid->instanceId;
         }
-        else if (sym->category() == Symbol::Category::PropertyGroup)
-        {
-            m_curAnalyzingBindingToId = curInstanceId();
-        }
     }
 }
 
@@ -1075,70 +1028,12 @@ void SymbolVisitor::visit(FieldDecl *md)
 void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
 {
     assert(pd != nullptr);
-    GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
-    if (gpd)
-    {
-        visitPropertyDefination(gpd);
-    }
-    else
-    {
-        string propertyName = pd->name;
-        Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, pd->type, pd);
-        m_ast->symbolTable()->define(propertySym);
 
-        util::condPrint(option::showPropertyDep, "property: [%d] %s\n", pd->fieldIndex, propertySym->symbolString().c_str());
-    }
-}
+    string propertyName = pd->name;
+    Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, pd->type, pd);
+    m_ast->symbolTable()->define(propertySym);
 
-void SymbolVisitor::visitPropertyDefination(GroupedPropertyDecl *gpd)
-{
-    assert(gpd != nullptr);
-
-    string groupName = gpd->groupName;
-    string propertyName = gpd->name;
-
-    Symbol *group = m_ast->symbolTable()->curScope()->resolve(groupName);
-    if (group)
-    {
-        // the group is already defined
-        if (group->category() == Symbol::Category::PropertyGroup)
-        {
-            // the group is defined as a PropertyGroup, that's good
-            ScopeSymbol *scopeSym = dynamic_cast<ScopeSymbol *>(group);
-            assert(scopeSym != nullptr);
-            util::condPrint(option::showSymbolRef, "ref: %s\n", scopeSym->symbolString().c_str());
-
-            Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd);
-            scopeSym->define(propertySym);
-
-            util::condPrint(option::showPropertyDep, "property: [%d] %s\n", gpd->fieldIndex, propertySym->symbolString().c_str());
-        }
-        else
-        {
-            // the group is defined as a non-PropertyGroup, that's bad
-            throw VisitException("GroupedPropertyDecl",
-                                 group->name() + " is already defined as "
-                                 + group->symbolString());
-        }
-    }
-    else
-    {
-        // the group is not defined, define it
-        ScopeSymbol *componentSym = dynamic_cast<ScopeSymbol *>(m_ast->symbolTable()->curScope());
-        shared_ptr<TypeInfo> customType(new CustomTypeInfo(componentSym->name()));
-
-        Symbol *groupSym(new ScopeSymbol(Symbol::Category::PropertyGroup,
-                                         groupName,
-                                         Scope::Category::Group,
-                                         m_ast->symbolTable()->curScope(),
-                                         shared_ptr<TypeInfo>(new GroupTypeInfo(groupName, customType))));
-        m_ast->symbolTable()->define(groupSym);
-
-        Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, gpd->type, gpd);
-        dynamic_cast<ScopeSymbol *>(groupSym)->define(propertySym);
-
-        util::condPrint(option::showPropertyDep, "property [%d] %s\n", gpd->fieldIndex, propertySym->symbolString().c_str());
-    }
+    util::condPrint(option::showPropertyDep, "property: [%d] %s\n", pd->fieldIndex, propertySym->symbolString().c_str());
 }
 
 void SymbolVisitor::visitPropertyInitialization(PropertyDecl *pd)
@@ -1147,24 +1042,9 @@ void SymbolVisitor::visitPropertyInitialization(PropertyDecl *pd)
 
     setAnalyzingPropertyDep(true, pd);
 
-    GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
-    if (gpd)
-    {
-        visitPropertyInitialization(gpd);
-    }
-    else
-    {
-        visit(pd->expr.get());
-    }
+    visit(pd->expr.get());
 
     setAnalyzingPropertyDep(false);
-}
-
-void SymbolVisitor::visitPropertyInitialization(GroupedPropertyDecl *gpd)
-{
-    assert(gpd != nullptr);
-
-    visit(gpd->expr.get());
 }
 
 void SymbolVisitor::visit(ParamDecl *pd)
@@ -1339,11 +1219,6 @@ void SymbolVisitor::visit(FunctionDecl *)
 void SymbolVisitor::visit(PropertyDecl *)
 {
     throw VisitException("PropertyDecl", "Not implement");
-}
-
-void SymbolVisitor::visit(GroupedPropertyDecl *)
-{
-    throw VisitException("GroupedPropertyDecl", "Not implement");
 }
 
 void SymbolVisitor::clear()

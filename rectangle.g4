@@ -20,10 +20,7 @@ memberItem  // Int | Void | Point | Float | String | List | Enum | Identifier
     ;
 
 propertyDefination  // Int | Point | Float | String | List
-    : propertyType Identifier   // Int | Point | Float | String | List
-        ( Colon initializer                 // Colon
-        | Dot Identifier Colon initializer  // Dot
-        )
+    : propertyType Identifier Colon initializer  // Int | Point | Float | String | List
     ;
 
 propertyType    // Int | Point | Float | String | List
@@ -224,7 +221,6 @@ bindingItemList // Identifier ( Colon | Dot | LBrace)
 
 bindingItem // Identifier ( Colon | Dot | LBrace)
     : Identifier Colon initializer                  // Identifier Colon
-    | Identifier Dot Identifier Colon initializer   // Identifier Dot
     | componentInstance                                 // Identifier LBrace
     ;
 

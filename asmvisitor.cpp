@@ -343,27 +343,7 @@ void AsmVisitor::visit(MemberExpr *me)
     string instanceTypeName = instanceTypeInfo->toString();
 
     Symbol *instanceTypeSymbol = nullptr;
-    if (instanceTypeInfo->category() == TypeInfo::Category::Group)
-    {
-        shared_ptr<GroupTypeInfo> groupTypeInfo = dynamic_pointer_cast<GroupTypeInfo>(instanceTypeInfo);
-        assert(groupTypeInfo != nullptr);
-
-        string componentName = groupTypeInfo->componentType()->toString();
-        string groupName = groupTypeInfo->name();
-
-        Symbol *componentSymbol = scope->resolve(componentName);
-        assert(componentSymbol != nullptr);
-        assert(componentSymbol->category() == Symbol::Category::Component);
-
-        ScopeSymbol *componentScope = dynamic_cast<ScopeSymbol *>(componentSymbol);
-        assert(componentScope != nullptr);
-
-        Symbol *groupSymbol = componentScope->resolve(groupName);
-        assert(groupSymbol != nullptr);
-
-        instanceTypeSymbol = groupSymbol;
-    }
-    else if (instanceTypeInfo->category() == TypeInfo::Category::Custom)
+    if (instanceTypeInfo->category() == TypeInfo::Category::Custom)
     {
         instanceTypeSymbol = scope->resolve(instanceTypeName);
         assert(instanceTypeSymbol != nullptr);
@@ -395,10 +375,6 @@ void AsmVisitor::visit(MemberExpr *me)
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(astNode);
         assert(pd != nullptr);
         fieldIndex = pd->fieldIndex;
-    }
-    else if (member->category() == Symbol::Category::PropertyGroup) // PropertyGroup
-    {
-        fieldIndex = -1;
     }
     else if (member->category() == Symbol::Category::EnumConstants)
     {
@@ -473,12 +449,6 @@ void AsmVisitor::visit(RefExpr *re)
 
             break;
         }
-        case Symbol::Category::PropertyGroup:
-        {
-            m_asm.appendLine({"lload", "0"});
-
-            break;
-        }
         default:
         {
             assert(false);
@@ -528,12 +498,6 @@ void AsmVisitor::visit(RefExpr *re)
 
             m_asm.appendLine({"lload", to_string(localIndex)});
             m_asm.appendLine({"fload", to_string(pd->fieldIndex)});
-
-            break;
-        }
-        case Symbol::Category::PropertyGroup:
-        {
-            m_asm.appendLine({"lload", "0"});
 
             break;
         }
@@ -606,22 +570,7 @@ void AsmVisitor::visit(PropertyDecl *pd)
 {
     assert(pd != nullptr);
 
-    GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
-    if (gpd)
-    {
-        visit(gpd);
-    }
-    else
-    {
-        visit(pd->expr.get());
-    }
-}
-
-void AsmVisitor::visit(GroupedPropertyDecl *gpd)
-{
-    assert(gpd != nullptr);
-
-    visit(gpd->expr.get());
+    visit(pd->expr.get());
 }
 
 void AsmVisitor::visit(ParamDecl *pd)
@@ -790,11 +739,6 @@ void AsmVisitor::visit(BindingDecl *bd)
     visit(bd->expr.get());
     assert(bd->fieldIndex() != -1);
     m_asm.appendLine({"fstore", to_string(bd->fieldIndex())});
-}
-
-void AsmVisitor::visit(GroupedBindingDecl *gbd)
-{
-    assert(gbd != nullptr);
 }
 
 void AsmVisitor::visit(ComponentInstanceDecl *cid)
