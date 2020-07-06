@@ -34,27 +34,42 @@ AsmText AsmVisitor::visit(AST *ast)
     m_asm.clear();
 
     auto documents = m_ast->documents();
+
+    vector<DocumentDecl *> structs;
+    vector<DocumentDecl *> definations;
+    vector<DocumentDecl *> instances;
+
     for (auto doc : documents)
     {
-        if (doc && doc->type == DocumentDecl::Type::Struct)
+        if (doc)
         {
-            visit(doc);
+            switch (doc->type)
+            {
+            case DocumentDecl::Type::Struct:        structs.push_back(doc);     break;
+            case DocumentDecl::Type::Defination:    definations.push_back(doc); break;
+            case DocumentDecl::Type::Instance:      instances.push_back(doc);   break;
+            }
         }
     }
-    for (auto doc : documents)
+
+    for (auto doc : structs)
     {
-        if (doc && doc->type == DocumentDecl::Type::Defination)
-        {
-            visit(doc);
-        }
+        visit(doc);
     }
-    for (auto doc : documents)
+    for (auto doc : definations)
     {
-        if (doc && doc->type == DocumentDecl::Type::Instance)
-        {
-            visit(doc);
-        }
+        visit(doc);
     }
+
+    assert(instances.size() == 1);
+    ComponentInstanceDecl *cid = dynamic_cast<ComponentInstanceDecl *>(instances[0]);
+    assert(cid != nullptr);
+
+    m_asm.appendLine({".def", "main", "0", to_string(cid->instanceTreeSize)});
+    genAsmForInitInstance(cid);
+    genAsmForAllMember(cid);
+    visit(cid);
+    m_asm.appendLine({"ret"});
 
     return m_asm;
 }
@@ -281,10 +296,10 @@ void AsmVisitor::visit(CallExpr *ce)
     }
 
     if (functionName == "len"
-             || functionName == "print"
-             || functionName == "drawRect"
-             || functionName == "drawText"
-             || functionName == "drawPt")
+            || functionName == "print"
+            || functionName == "drawRect"
+            || functionName == "drawText"
+            || functionName == "drawPt")
     {
         m_asm.appendLine({functionName});
     }
@@ -365,23 +380,36 @@ void AsmVisitor::visit(MemberExpr *me)
     assert(member != nullptr);
 
     ASTNode *astNode = member->astNode();
-    assert(astNode != nullptr);
+
     int fieldIndex = -1;
     if (member->category() == Symbol::Category::Field)
     {
+        assert(astNode != nullptr);
         FieldDecl *fd = dynamic_cast<FieldDecl *>(astNode);
         assert(fd != nullptr);
         fieldIndex = fd->fieldIndex;
     }
     else if (member->category() == Symbol::Category::Property)
     {
+        assert(astNode != nullptr);
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(astNode);
         assert(pd != nullptr);
         fieldIndex = pd->fieldIndex;
     }
-    else
+    else if (member->category() == Symbol::Category::PropertyGroup) // PropertyGroup
     {
         fieldIndex = -1;
+    }
+    else if (member->category() == Symbol::Category::EnumConstants)
+    {
+        assert(astNode != nullptr);
+        EnumConstantDecl *ecd = dynamic_cast<EnumConstantDecl *>(astNode);
+        assert(ecd != nullptr);
+        m_asm.appendLine({"iconst", to_string(ecd->value)});
+    }
+    else
+    {
+        assert(false);
     }
 
     if (fieldIndex != -1)
@@ -484,7 +512,21 @@ void AsmVisitor::visit(RefExpr *re)
             PropertyDecl *pd = dynamic_cast<PropertyDecl *>(astNode);
             assert(pd != nullptr);
 
-            m_asm.appendLine({"lload", "0"});
+            int localIndex = -1;
+            if (visitingMethod())
+            {
+                localIndex = 0;
+            }
+            else if (visitingInstance())
+            {
+                localIndex = instanceIndexVisiting();
+            }
+            else
+            {
+                assert(false);
+            }
+
+            m_asm.appendLine({"lload", to_string(localIndex)});
             m_asm.appendLine({"fload", to_string(pd->fieldIndex)});
 
             break;
@@ -508,6 +550,14 @@ void AsmVisitor::visit(RefExpr *re)
         {
             m_asm.appendLine({"lload", "0"});
 
+            break;
+        }
+        case Symbol::Category::InstanceId:
+        {
+            ComponentInstanceDecl *cid = dynamic_cast<ComponentInstanceDecl *>(astNode);
+            assert(cid != nullptr);
+
+            m_asm.appendLine({"lload", to_string(cid->instanceIndex)});
             break;
         }
         default:
@@ -556,7 +606,6 @@ void AsmVisitor::visit(PropertyDecl *pd)
 {
     assert(pd != nullptr);
 
-    m_asm.appendLine({"lload", "0"});
     GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
     if (gpd)
     {
@@ -566,7 +615,6 @@ void AsmVisitor::visit(PropertyDecl *pd)
     {
         visit(pd->expr.get());
     }
-    m_asm.appendLine({"fstore", to_string(pd->fieldIndex)});
 }
 
 void AsmVisitor::visit(GroupedPropertyDecl *gpd)
@@ -675,6 +723,8 @@ void AsmVisitor::visit(FunctionDecl *fd)
 {
     assert(fd != nullptr);
 
+    setVisitingMethod(true);
+
     string name = fd->name;
     int args = static_cast<int>(fd->paramList.size());
     if (fd->component)
@@ -687,6 +737,8 @@ void AsmVisitor::visit(FunctionDecl *fd)
     m_asm.appendLine({".def", name, to_string(args), to_string(locals)});
 
     visit(fd->body.get());
+
+    setVisitingMethod(false);
 }
 
 void AsmVisitor::visit(EnumConstantDecl *ecd)
@@ -708,26 +760,9 @@ void AsmVisitor::visit(ComponentDefinationDecl *cdd)
 {
     assert(cdd != nullptr);
 
-    const string name = cdd->name;
-
     for (auto &e : cdd->enumList)
     {
         visit(e.get());
-    }
-
-    m_asm.appendLine({".def", name + "::" + name, "1", "0"});
-    m_asm.appendLine({"lload", "0"});
-    for (auto i : cdd->propertyInitOrder)
-    {
-        m_asm.appendLine({"call", name + "::" + name + "::" + to_string(i)});
-    }
-    m_asm.appendLine({"ret"});
-
-    for (auto &p : cdd->propertyList)
-    {
-        m_asm.appendLine({".def", name + "::" + name + "::" + to_string(p->fieldIndex), "1", "0"});
-        visit(p.get());
-        m_asm.appendLine({"ret"});
     }
 
     for (auto &m : cdd->methodList)
@@ -749,6 +784,12 @@ void AsmVisitor::visit(StructDecl *sd)
 void AsmVisitor::visit(BindingDecl *bd)
 {
     assert(bd != nullptr);
+
+    assert(bd->instanceIndex() != -1);
+    m_asm.appendLine({"lload", to_string(bd->instanceIndex())});
+    visit(bd->expr.get());
+    assert(bd->fieldIndex() != -1);
+    m_asm.appendLine({"fstore", to_string(bd->fieldIndex())});
 }
 
 void AsmVisitor::visit(GroupedBindingDecl *gbd)
@@ -759,6 +800,84 @@ void AsmVisitor::visit(GroupedBindingDecl *gbd)
 void AsmVisitor::visit(ComponentInstanceDecl *cid)
 {
     assert(cid != nullptr);
+
+    int instanceIndex = cid->instanceIndex;
+    string componentName = cid->componentName;
+
+    m_asm.appendLine({"lload", to_string(instanceIndex)});
+    m_asm.appendLine({"call", componentName + "::draw"});
+    for (auto &child : cid->childrenList)
+    {
+        visit(child.get());
+    }
+}
+
+void AsmVisitor::genAsmForInitInstance(ComponentInstanceDecl *cid)
+{
+    assert(cid != nullptr);
+
+    vector<ComponentInstanceDecl *> instances = cid->instanceList();
+    for (auto instance : instances)
+    {
+        int instanceIndex = instance->instanceIndex;
+        int fieldCount = static_cast<int>(instance->componentDefination->propertyList.size());
+
+        m_asm.appendLine({"struct", to_string(fieldCount)});
+        m_asm.appendLine({"lstore", to_string(instanceIndex)});
+    }
+}
+
+void AsmVisitor::genAsmForAllMember(ComponentInstanceDecl *cid)
+{
+    for (auto pair : cid->orderedMemberInitList)
+    {
+        ComponentInstanceDecl *instance = pair.first;
+        PropertyDecl *pd = dynamic_cast<PropertyDecl *>(pair.second);
+        BindingDecl *bd = dynamic_cast<BindingDecl *>(pair.second);
+
+        if ((pd == nullptr && bd == nullptr) || (pd != nullptr && bd != nullptr))
+        {
+            assert(false);
+        }
+        if (pd)
+        {
+            genAsmForPropertyDecl(instance, pd);
+        }
+        else
+        {
+            genAsmForBindingDecl(instance, bd);
+        }
+    }
+}
+
+void AsmVisitor::genAsmForPropertyDecl(ComponentInstanceDecl *cid, PropertyDecl *pd)
+{
+    int instanceIndex = cid->instanceIndex;
+    assert(instanceIndex != -1);
+
+    int fieldIndex = pd->fieldIndex;
+    assert(fieldIndex != -1);
+
+    m_asm.appendLine({"lload", to_string(instanceIndex)});
+    setVisitingInstance(true, cid->componentDefination, cid->instanceIndex);
+    visit(pd->expr.get());
+    setVisitingInstance(false);
+    m_asm.appendLine({"fstore", to_string(fieldIndex)});
+}
+
+void AsmVisitor::genAsmForBindingDecl(ComponentInstanceDecl *cid, BindingDecl *bd)
+{
+    int instanceIndex = cid->instanceIndex;
+    assert(instanceIndex != -1);
+
+    int fieldIndex = bd->fieldIndex();
+    assert(fieldIndex != -1);
+
+    m_asm.appendLine({"lload", to_string(instanceIndex)});
+    setVisitingInstance(true, cid->componentDefination, cid->instanceIndex);
+    visit(bd->expr.get());
+    setVisitingInstance(false);
+    m_asm.appendLine({"fstore", to_string(fieldIndex)});
 }
 
 void AsmVisitor::pushVisitingLvalue(bool lvalue)
@@ -775,4 +894,48 @@ void AsmVisitor::popVisitingLvalue()
 bool AsmVisitor::visitingLvalue() const
 {
     return m_visitingLvalueStack.back();
+}
+
+void AsmVisitor::setVisitingInstance(bool visiting, ComponentDefinationDecl *cdd, int index)
+{
+    assert(visiting != m_visitingInstance);
+    assert(!m_visitingMethod);
+    if (visiting)
+    {
+        assert(cdd != nullptr);
+        assert(index >= 0);
+    }
+
+    m_visitingInstance = visiting;
+    m_componentVisiting = cdd;
+    m_instanceIndexVisiting = index;
+}
+
+void AsmVisitor::setVisitingMethod(bool visiting)
+{
+    assert(visiting != m_visitingMethod);
+    assert(!m_visitingInstance);
+
+    m_visitingMethod = visiting;
+}
+
+bool AsmVisitor::visitingInstance() const
+{
+    return m_visitingInstance;
+}
+
+int AsmVisitor::instanceIndexVisiting() const
+{
+    return m_instanceIndexVisiting;
+}
+
+bool AsmVisitor::visitingMethod() const
+{
+    return m_visitingMethod;
+}
+
+void AsmVisitor::clear()
+{
+    setVisitingMethod(false);
+    setVisitingInstance(false);
 }

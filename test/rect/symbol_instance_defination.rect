@@ -1,0 +1,43 @@
+// defination.rect
+def Rectangle {
+    enum LineType {
+        Solid,
+        Dot,
+        Dash
+    }
+    int x: 0
+    int y: 0
+    int width: 100
+    int height: 100
+    int border_type: Solid
+    string fill_color: "#FFFFFF"
+    void draw() {
+        rect r;
+
+        //int x = 0;
+        //int y = 0;
+        //int height = 100;
+        //string fill_color = "#FFFFFF";
+        //int border_type = Solid;
+
+        r.x = x;
+        r.y = y;
+        r.width = width;
+        r.height = height;
+        r.fill_color = fill_color;
+        r.stroke_width = 5;
+        r.stroke_color = "#FF0000";
+        r.stroke_dasharray = getDasharray(border_type);
+        print(r.stroke_dasharray);
+        drawRect(r);
+    }
+    string getDasharray(int type) {
+        if (type == Solid) {
+            return "";
+        } else if (type == Dot) {
+            return "5,5";
+        } else {
+            return "2,1";
+        }
+    }
+}

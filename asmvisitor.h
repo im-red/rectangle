@@ -63,10 +63,25 @@ protected:
     void visit(GroupedBindingDecl *gbd) override;
     void visit(ComponentInstanceDecl *cid) override;
 
+    void genAsmForInitInstance(ComponentInstanceDecl *cid);
+    void genAsmForAllMember(ComponentInstanceDecl *cid);
+    void genAsmForPropertyDecl(ComponentInstanceDecl *cid, PropertyDecl *pd);
+    void genAsmForBindingDecl(ComponentInstanceDecl *cid, BindingDecl *bd);
+
 private:
     void pushVisitingLvalue(bool lvalue);
     void popVisitingLvalue();
     bool visitingLvalue() const;
+
+    void setVisitingInstance(bool visiting, ComponentDefinationDecl *cdd = nullptr, int index = -1);
+    void setVisitingMethod(bool visiting);
+
+    bool visitingInstance() const;
+    int instanceIndexVisiting() const;
+    ComponentDefinationDecl *componentVisiting() const;
+    bool visitingMethod() const;
+
+    void clear();
 
 private:
     AsmText m_asm;
@@ -89,5 +104,10 @@ private:
     int m_lvalueIndex = -1;
 
     std::vector<bool> m_visitingLvalueStack;
+
+    bool m_visitingInstance = false;
+    int m_instanceIndexVisiting = -1;
+    ComponentDefinationDecl *m_componentVisiting = nullptr;
+    bool m_visitingMethod = false;
 };
 

@@ -34,9 +34,6 @@ string AsmMachine::run(const AsmBin &bin, const std::string &funcName)
     m_asm = bin;
     reset();
 
-    // dummy this object
-    pushOperand(ObjectPointer(new Object(), true));
-
     interpret(instr::CALL, func.index);
     mainLoop();
 

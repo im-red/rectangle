@@ -5,6 +5,8 @@
 #include "asmbin.h"
 #include "symboltable.h"
 #include "ast.h"
+#include "asmvisitor.h"
+#include "asmmachine.h"
 
 #include <gtest/gtest.h>
 
@@ -84,26 +86,63 @@ using namespace std;
 //     sv.visit();
 // }
 
-TEST(symbol, ASM)
-{
-    option::showAst = true;
-    option::showGenAsm = true;
-    option::showAssemble = true;
+// TEST(symbol, ASM)
+// {
+//     ifstream t("../rect/symbol_asm.rect");
+//     stringstream buffer;
+//     buffer << t.rdbuf();
+//     string code = buffer.str();
 
-    ifstream t("../rect/symbol_asm.rect");
-    stringstream buffer;
-    buffer << t.rdbuf();
-    string code = buffer.str();
-
-    Parser p;
-    Lexer l;
-    l.setCode(code);
-    unique_ptr<DocumentDecl> document = p.parse(l.tokens());
-    document->print();
+//     Parser p;
+//     Lexer l;
+//     l.setCode(code);
+//     unique_ptr<DocumentDecl> document = p.parse(l.tokens());
+//     document->print();
     
+//     AST ast;
+//     ast.addDocument(move(document));
+
+//     SymbolVisitor sv;
+//     sv.visit(&ast);
+// }
+
+TEST(symbol, INSTANCE)
+{
+    option::showPropertyDep = true;
+    option::showBindingDep = true;
+
+    vector<string> files = {"../rect/symbol_instance_defination.rect", "../rect/symbol_instance_instance.rect"};
+
     AST ast;
-    ast.addDocument(move(document));
+    for (auto &file : files)
+    {
+        ifstream t(file);
+        stringstream buffer;
+        buffer << t.rdbuf();
+
+        string code = buffer.str();
+
+        Parser p;
+        Lexer l;
+        l.setCode(code);
+        unique_ptr<DocumentDecl> document = p.parse(l.tokens());
+        document->dump();
+
+        ast.addDocument(move(document));
+    }
 
     SymbolVisitor sv;
     sv.visit(&ast);
+
+    AsmVisitor av;
+    AsmText txt = av.visit(&ast);
+    txt.dump();
+
+    AsmBin bin(txt);
+    bin.dump();
+
+    AsmMachine machine;
+    string svg = machine.run(bin, "main");
+
+    printf("%s\n", svg.c_str());
 }

@@ -258,6 +258,7 @@ void Parser::parseMemberItem(unique_ptr<ComponentDefinationDecl> &defination)
         }
         else if (propertyDecl)
         {
+            propertyDecl->componentDefination = defination.get();
             defination->propertyList.push_back(move(propertyDecl));
         }
         else if (functionDecl)
@@ -1677,7 +1678,7 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
     string name1;
     string name2;
     unique_ptr<Expr> expr;
-    unique_ptr<ComponentInstanceDecl> subInstance;
+    unique_ptr<ComponentInstanceDecl> child;
 
     match(Lexer::T_IDENTIFIER);
     name1 = token(m_index - 1).str;
@@ -1701,7 +1702,7 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
     case Lexer::T_L_BRACE:
     {
         m_index--;
-        subInstance = parseComponentInstance();
+        child = parseComponentInstance();
         break;
     }
     default:
@@ -1716,9 +1717,10 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
 
     if (!trying())
     {
-        if (subInstance)
+        if (child)
         {
-            instanceDecl->instanceList.push_back(move(subInstance));
+            child->parent = instanceDecl.get();
+            instanceDecl->childrenList.push_back(move(child));
         }
         else
         {
@@ -1727,6 +1729,7 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
             if (name2 == "")
             {
                 instanceDecl->bindingList.emplace_back(new BindingDecl(name1, move(expr)));
+                instanceDecl->bindingList.back()->componentInstance = instanceDecl.get();
             }
             else
             {

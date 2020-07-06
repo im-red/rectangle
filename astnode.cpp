@@ -39,6 +39,32 @@ BindingDecl::~BindingDecl()
 
 }
 
+string BindingDecl::bindingId() const
+{
+    assert(componentInstance != nullptr);
+    assert(componentInstance->instanceId != "");
+    assert(propertyDecl != nullptr);
+    assert(propertyDecl->fieldIndex != -1);
+
+    return componentInstance->instanceId + "[" + to_string(propertyDecl->fieldIndex) + "]";
+}
+
+int BindingDecl::fieldIndex() const
+{
+    assert(propertyDecl != nullptr);
+    assert(propertyDecl->fieldIndex != -1);
+
+    return propertyDecl->fieldIndex;
+}
+
+int BindingDecl::instanceIndex() const
+{
+    assert(componentInstance != nullptr);
+    assert(componentInstance->instanceIndex != -1);
+
+    return componentInstance->instanceIndex;
+}
+
 PropertyDecl::~PropertyDecl()
 {
 
@@ -107,4 +133,44 @@ void FunctionDecl::doPrint(int indent) const
         p->print(indent + 1);
     }
     body->print(indent + 1);
+}
+
+std::vector<ComponentInstanceDecl *> ComponentInstanceDecl::instanceList()
+{
+    vector<ComponentInstanceDecl *> result;
+
+    vector<ComponentInstanceDecl *> stack({this});
+    while (stack.size() != 0)
+    {
+        ComponentInstanceDecl *back = stack.back();
+        stack.pop_back();
+        result.push_back(back);
+        for (auto &instance : back->childrenList)
+        {
+            stack.push_back(instance.get());
+        }
+    }
+
+    return result;
+}
+
+std::vector<int> ComponentInstanceDecl::unboundProperty() const
+{
+    vector<bool> bound(componentDefination->propertyList.size(), false);
+    for (auto &b : bindingList)
+    {
+        if (!b->isId())
+        {
+            bound[static_cast<size_t>(b->fieldIndex())] = true;
+        }
+    }
+    vector<int> result;
+    for (size_t i = 0; i < bound.size(); i++)
+    {
+        if (bound[i] == false)
+        {
+            result.push_back(static_cast<int>(i));
+        }
+    }
+    return result;
 }

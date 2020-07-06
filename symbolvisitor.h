@@ -35,7 +35,12 @@ protected:
     void visit(DocumentDecl *dd) override { Visitor::visit(dd); }
     void visit(StructDecl *sd) override;
     void visit(ComponentDefinationDecl *cdd) override;
-    void visit(ComponentInstanceDecl *) override;
+    void visit(ComponentInstanceDecl *cid) override;
+    void calculateOrderedMemberInitList();
+    void visit(BindingDecl *bd) override;
+    void visit(GroupedBindingDecl *gbd) override;
+    int visitInstanceIndex(ComponentInstanceDecl *cid);
+    void visitInstanceId(ComponentInstanceDecl *cid);
     void visit(IntegerLiteral *e) override;
     void visit(FloatLiteral *e) override;
     void visit(StringLiteral *e) override;
@@ -65,8 +70,6 @@ protected:
     void visitMethodBody(FunctionDecl *fd);
     void visit(EnumConstantDecl *ecd) override;
     void visit(EnumDecl *ed) override;
-    void visit(BindingDecl *) override;
-    void visit(GroupedBindingDecl *) override;
     void visit(FunctionDecl *) override;
     void visit(PropertyDecl *) override;
     void visit(GroupedPropertyDecl *) override;
@@ -74,13 +77,43 @@ protected:
 private:
     void clear();
 
+    void setAnalyzingPropertyDep(bool analyzing, PropertyDecl *pd = nullptr);
+
+    bool analyzingPropertyDep() const;
+    int propertyIndexAnalyzing() const;
+    PropertyDecl *propertyAnalyzing() const;
+    ComponentDefinationDecl *componentDefinationAnalyzing() const;
+
+    void setAnalyzingBindingDep(bool analyzing, BindingDecl *bd = nullptr);
+
+    bool analyzingBindingDep() const;
+    int bindingIndexAnalyzing() const;
+    BindingDecl *bindingAnalyzing() const;
+
+    void pushInstanceStack(ComponentInstanceDecl *cid);
+    void popInstanceStack();
+    ComponentInstanceDecl *curInstance() const;
+    std::string curInstanceId() const;
+
 private:
     bool m_analyzingPropertyDep = false;
-    PropertyDecl *m_curAnalyzingProperty = nullptr;
+    PropertyDecl *m_propertyAnalyzing = nullptr;
+    int m_propertyIndexAnalyzing = -1;
+
+    bool m_analyzingBindingDep = false;
+    std::string m_curAnalyzingBindingToId;
+
+    std::map<std::string, BindingDecl *> m_bindingId2bindingDecl;
+    std::vector<std::pair<std::string, std::string>> m_bindingIdDeps;
+
+    BindingDecl *m_bindingAnalyzing = nullptr;
+    std::vector<ComponentInstanceDecl *> m_instanceStack;
 
     AST *m_ast = nullptr;
     int m_stackFrameLocals = -1;
 
-    TopologicalSorter m_sorter;
+    int m_nextInstanceIndex = -1;
+
+    ComponentInstanceDecl *m_topLevelInstance = nullptr;
 };
 

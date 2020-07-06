@@ -24,6 +24,8 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <map>
+#include <set>
 
 class Scope;
 
@@ -266,6 +268,8 @@ struct VarDecl : public ASTNode
     int localIndex = -1;
 };
 
+struct ComponentDefinationDecl;
+
 struct PropertyDecl : public ASTNode
 {
     ~PropertyDecl() override;
@@ -283,6 +287,7 @@ struct PropertyDecl : public ASTNode
     std::unique_ptr<Expr> expr;
 
     int fieldIndex = -1;
+    ComponentDefinationDecl *componentDefination = nullptr;
 };
 
 struct GroupedPropertyDecl : public PropertyDecl
@@ -534,6 +539,7 @@ struct ComponentDefinationDecl : public DocumentDecl
     std::vector<std::unique_ptr<FunctionDecl>> methodList;
     std::vector<std::unique_ptr<EnumDecl>> enumList;
     std::vector<int> propertyInitOrder;
+    std::map<int, std::set<int>> propertyDeps;
 };
 
 struct FieldDecl : public ASTNode
@@ -568,6 +574,8 @@ struct StructDecl : public DocumentDecl
     std::vector<std::unique_ptr<FieldDecl>> fieldList;
 };
 
+struct ComponentInstanceDecl;
+
 struct BindingDecl : public ASTNode
 {
     BindingDecl(const std::string &n, std::unique_ptr<Expr> &&e)
@@ -580,8 +588,17 @@ struct BindingDecl : public ASTNode
         expr->print(indent + 1);
     }
 
+    bool isId() const { return name == "id"; }
+
+    std::string bindingId() const;
+    int fieldIndex() const;
+    int instanceIndex() const;
+
     std::string name;
     std::unique_ptr<Expr> expr;
+
+    PropertyDecl *propertyDecl = nullptr;
+    ComponentInstanceDecl *componentInstance = nullptr;
 };
 
 struct GroupedBindingDecl : public BindingDecl
@@ -608,13 +625,24 @@ struct ComponentInstanceDecl : public DocumentDecl
         {
             p->print(indent + 1);
         }
-        for (auto &p : instanceList)
+        for (auto &p : childrenList)
         {
             p->print(indent + 1);
         }
     }
 
+    std::vector<ComponentInstanceDecl *> instanceList();
+    std::vector<int> unboundProperty() const;
+
     std::string componentName;
     std::vector<std::unique_ptr<BindingDecl>> bindingList;
-    std::vector<std::unique_ptr<ComponentInstanceDecl>> instanceList;
+    std::vector<std::unique_ptr<ComponentInstanceDecl>> childrenList;
+    ComponentInstanceDecl *parent = nullptr;
+
+    ComponentDefinationDecl *componentDefination = nullptr;
+    int instanceIndex = -1;
+    int instanceTreeSize = -1;
+    std::string instanceId;
+
+    std::vector<std::pair<ComponentInstanceDecl *, ASTNode *>> orderedMemberInitList;
 };

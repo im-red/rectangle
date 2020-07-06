@@ -21,6 +21,8 @@
 #include "symboltable.h"
 #include "typeinfo.h"
 
+#include <list>
+
 #include <assert.h>
 
 using namespace std;
@@ -33,31 +35,52 @@ SymbolVisitor::SymbolVisitor()
 void SymbolVisitor::visit(AST *ast)
 {
     m_ast = ast;
-
     clear();
 
     auto documents = m_ast->documents();
+
+    vector<DocumentDecl *> structs;
+    vector<DocumentDecl *> definations;
+    vector<DocumentDecl *> instances;
+
     for (auto doc : documents)
     {
-        if (doc && doc->type == DocumentDecl::Type::Struct)
+        if (doc)
         {
-            visit(doc);
+            switch (doc->type)
+            {
+            case DocumentDecl::Type::Struct:        structs.push_back(doc);     break;
+            case DocumentDecl::Type::Defination:    definations.push_back(doc); break;
+            case DocumentDecl::Type::Instance:      instances.push_back(doc);   break;
+            }
         }
     }
-    for (auto doc : documents)
+
+    for (auto doc : structs)
     {
-        if (doc && doc->type == DocumentDecl::Type::Defination)
-        {
-            visit(doc);
-        }
+        visit(doc);
     }
-    for (auto doc : documents)
+    for (auto doc : definations)
     {
-        if (doc && doc->type == DocumentDecl::Type::Instance)
-        {
-            visit(doc);
-        }
+        visit(doc);
     }
+
+    assert(instances.size() == 1);
+    ComponentInstanceDecl *cid = dynamic_cast<ComponentInstanceDecl *>(instances[0]);
+    assert(cid != nullptr);
+    m_topLevelInstance = cid;
+
+    Scope *mainScope = new Scope(Scope::Category::Function, m_ast->symbolTable()->curScope());
+    mainScope->setScopeName("main");
+    m_ast->symbolTable()->pushScope(mainScope);
+
+    visitInstanceIndex(cid);
+    visitInstanceId(cid);
+    visit(cid);
+
+    calculateOrderedMemberInitList();
+
+    m_ast->symbolTable()->popScope();
 }
 
 void SymbolVisitor::visit(StructDecl *sd)
@@ -87,6 +110,8 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
     Symbol *sym(new ScopeSymbol(Symbol::Category::Component, name,
                                 Scope::Category::Component, m_ast->symbolTable()->curScope()));
     sym->setAstNode(cdd);
+    sym->setTypeInfo(shared_ptr<TypeInfo>(new CustomTypeInfo(name)));
+
     m_ast->symbolTable()->define(sym);
 
     m_ast->symbolTable()->pushScope(dynamic_cast<Scope *>(sym));
@@ -105,21 +130,9 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
         visitPropertyDefination(p.get());
     }
 
-    m_sorter.setN(static_cast<int>(cdd->propertyList.size()));
     for (auto &p : cdd->propertyList)
     {
         visitPropertyInitialization(p.get());
-    }
-    vector<int> order;
-    auto result = m_sorter.sort(order);
-    if (result == TopologicalSorter::SortResult::LoopDetected)
-    {
-        throw SymbolException("ComponentDefinationDecl", "Loop detected in property dependency");
-    }
-    else
-    {
-        assert(order.size() == cdd->propertyList.size());
-        cdd->propertyInitOrder.swap(order);
     }
 
     for (auto &f : cdd->methodList)
@@ -134,9 +147,288 @@ void SymbolVisitor::visit(ComponentDefinationDecl *cdd)
     m_ast->symbolTable()->popScope();
 }
 
-void SymbolVisitor::visit(ComponentInstanceDecl *)
+void SymbolVisitor::visit(ComponentInstanceDecl *cid)
 {
-    throw VisitException("ComponentInstanceDecl", "Not implement");
+    assert(cid != nullptr);
+
+    Scope *instanceScope = new Scope(Scope::Category::Instance, m_ast->symbolTable()->curScope());
+    instanceScope->setScopeName(cid->instanceId);
+    Symbol *componentSymbol = m_ast->symbolTable()->curScope()->resolve(cid->componentName);
+    if (!componentSymbol)
+    {
+        throw SymbolException("ComponentInstanceDecl",
+                              "No component named \"" + cid->componentName + "\"");
+    }
+    Scope *componentScope = dynamic_cast<Scope *>(componentSymbol);
+    assert(componentScope != nullptr);
+    instanceScope->setComponentScope(componentScope);
+
+    ASTNode *componentDef = componentSymbol->astNode();
+    assert(componentDef != nullptr);
+    ComponentDefinationDecl *cdd = dynamic_cast<ComponentDefinationDecl *>(componentDef);
+    assert(cdd != nullptr);
+    cid->componentDefination = cdd;
+
+    m_ast->symbolTable()->pushScope(instanceScope);
+    if (cid->parent)
+    {
+        Symbol *parentSymbol = new Symbol(Symbol::Category::InstanceId, "parent",
+                                          shared_ptr<TypeInfo>(new CustomTypeInfo(cid->parent->componentName)),
+                                          cid->parent);
+        m_ast->symbolTable()->define(parentSymbol);
+    }
+
+    pushInstanceStack(cid);
+    for (auto &b : cid->bindingList)
+    {
+        visit(b.get());
+    }
+    for (auto &c : cid->childrenList)
+    {
+        visit(c.get());
+    }
+    popInstanceStack();
+
+    m_ast->symbolTable()->popScope();
+}
+
+static string bindingId(const string &instanceId, int fieldIndex)
+{
+    return instanceId + "[" + to_string(fieldIndex) + "]";
+}
+
+void SymbolVisitor::calculateOrderedMemberInitList()
+{
+    assert(m_topLevelInstance != nullptr);
+
+    map<string, int> id2seq;
+    map<int, ASTNode *> seq2astNode;
+    map<int, string> seq2id;
+    map<int, ComponentInstanceDecl *> seq2instance;
+
+    int nextSeq = 0;
+    for (auto &p : m_bindingId2bindingDecl)
+    {
+        int seq = nextSeq++;
+        string id = p.first;
+        BindingDecl *astNode = p.second;
+        ComponentInstanceDecl *cid = astNode->componentInstance;
+        assert(cid != nullptr);
+
+        id2seq[id] = seq;
+        seq2astNode[seq] = astNode;
+        seq2id[seq] = id;
+        seq2instance[seq] = cid;
+
+        util::condPrint(option::showBindingDep, "binding: seq [%d] %s(%p)\n",
+                        seq,
+                        id.c_str(),
+                        astNode);
+    }
+
+    vector<ComponentInstanceDecl *> instances = m_topLevelInstance->instanceList();
+    for (auto instance : instances)
+    {
+        string instanceId = instance->instanceId;
+        ComponentDefinationDecl *cdd = instance->componentDefination;
+        vector<int> unbound = instance->unboundProperty();
+        for (int propertyIndex : unbound)
+        {
+            int seq = nextSeq++;
+            string id = bindingId(instanceId, propertyIndex);
+            ASTNode *astNode = cdd->propertyList[static_cast<size_t>(propertyIndex)].get();
+
+            id2seq[id] = seq;
+            seq2astNode[seq] = astNode;
+            seq2id[seq] = id;
+            seq2instance[seq] = instance;
+
+            util::condPrint(option::showBindingDep, "binding: seq [%d] %s(%p)\n",
+                            seq,
+                            id.c_str(),
+                            astNode);
+        }
+    }
+
+    TopologicalSorter sorter(static_cast<int>(id2seq.size()));
+
+    for (auto &p : m_bindingIdDeps)
+    {
+        string fromId = p.first;
+        string toId = p.second;
+
+        auto fromIter = id2seq.find(fromId);
+        auto toIter = id2seq.find(toId);
+        assert(fromIter != id2seq.end() && toIter != id2seq.end());
+
+        int fromSeq = fromIter->second;
+        int toSeq = toIter->second;
+
+        sorter.addEdge(fromSeq, toSeq);
+        util::condPrint(option::showBindingDep, "binding: edge %d -> %d(%s -> %s)\n",
+                        fromSeq,
+                        toSeq,
+                        fromId.c_str(),
+                        toId.c_str());
+    }
+
+    for (auto instance : instances)
+    {
+        string instanceId = instance->instanceId;
+        ComponentDefinationDecl *cdd = instance->componentDefination;
+        vector<int> unbound = instance->unboundProperty();
+        for (int fromIndex : unbound)
+        {
+            string fromId = bindingId(instanceId, fromIndex);
+            for (int toIndex : cdd->propertyDeps[fromIndex])
+            {
+                string toId = bindingId(instanceId, toIndex);
+
+                auto fromIter = id2seq.find(fromId);
+                auto toIter = id2seq.find(toId);
+                assert(fromIter != id2seq.end() && toIter != id2seq.end());
+
+                int fromSeq = fromIter->second;
+                int toSeq = toIter->second;
+
+                sorter.addEdge(fromSeq, toSeq);
+                util::condPrint(option::showBindingDep, "binding: edge %d -> %d(%s -> %s)\n",
+                                fromSeq,
+                                toSeq,
+                                fromId.c_str(),
+                                toId.c_str());
+            }
+        }
+    }
+
+    vector<int> order;
+    TopologicalSorter::SortResult result = sorter.sort(order);
+    if (result == TopologicalSorter::SortResult::LoopDetected)
+    {
+        throw VisitException("BindingDecl", "Loop detected in property dependency");
+    }
+
+    for (int i = 0; i < static_cast<int>(order.size()); i++)
+    {
+        int seq = order[static_cast<size_t>(i)];
+        string id = seq2id[seq];
+        ASTNode *astNode = seq2astNode[seq];
+        ComponentInstanceDecl *cid = seq2instance[seq];
+        m_topLevelInstance->orderedMemberInitList.push_back(make_pair(cid, astNode));
+        util::condPrint(option::showBindingDep, "binding: order [%d] [%d] %s(%p)\n",
+                        i,
+                        seq,
+                        id.c_str(),
+                        astNode);
+    }
+}
+
+void SymbolVisitor::visit(BindingDecl *bd)
+{
+    assert(bd != nullptr);
+
+    GroupedBindingDecl *gbd = dynamic_cast<GroupedBindingDecl *>(bd);
+    if (gbd)
+    {
+        visit(gbd);
+    }
+    else
+    {
+        if (bd->isId())
+        {
+            return;
+        }
+
+        Scope *componentScope = m_ast->symbolTable()->curScope()->componentScope();
+        assert(componentScope != nullptr);
+        Symbol *componentSymbol = dynamic_cast<Symbol *>(componentScope);
+        assert(componentSymbol != nullptr);
+        Symbol *propertySymbol = componentScope->resolve(bd->name);
+        if (!propertySymbol)
+        {
+            throw SymbolException("BindingDecl",
+                                  "Component \"" + componentSymbol->name() + "\"" +
+                                  " has no property named \"" + bd->name + "\"");
+        }
+        ASTNode *astNode = propertySymbol->astNode();
+        assert(astNode != nullptr);
+        PropertyDecl *pd = dynamic_cast<PropertyDecl *>(astNode);
+        assert(pd != nullptr);
+
+        bd->propertyDecl = pd;
+
+        setAnalyzingBindingDep(true, bd);
+        m_bindingId2bindingDecl[bindingId(curInstanceId(), bindingIndexAnalyzing())] = bd;
+        visit(bd->expr.get());
+        setAnalyzingBindingDep(false);
+    }
+}
+
+void SymbolVisitor::visit(GroupedBindingDecl *gbd)
+{
+    assert(gbd != nullptr);
+}
+
+int SymbolVisitor::visitInstanceIndex(ComponentInstanceDecl *cid)
+{
+    assert(cid != nullptr);
+
+    cid->scope = m_ast->symbolTable()->curScope();
+    assert(cid->scope != nullptr);
+
+    cid->instanceIndex = m_nextInstanceIndex++;
+    cid->instanceTreeSize = 1;
+
+    for (auto &d : cid->childrenList)
+    {
+        cid->instanceTreeSize += visitInstanceIndex(d.get());
+    }
+    return cid->instanceTreeSize;
+}
+
+static std::string getId(ComponentInstanceDecl *cid)
+{
+    std::string id;
+    for (auto &b : cid->bindingList)
+    {
+        if (b->name == "id")
+        {
+            RefExpr *re = dynamic_cast<RefExpr *>(b->expr.get());
+            if (!re)
+            {
+                throw SymbolException("ComponentInstanceDecl", "Instance id should be a valid identifier");
+            }
+            id = re->name;
+            break;
+        }
+    }
+    return id;
+}
+
+void SymbolVisitor::visitInstanceId(ComponentInstanceDecl *cid)
+{
+    assert(cid != nullptr);
+
+    // instance id is global.
+    // we define instance id in the virtual "main" function scope.
+    // then we will define "parent" in instance scope.
+
+    Scope *mainScope = cid->scope;
+
+    string id = getId(cid);
+    if (id == "")
+    {
+        id = "#" + to_string(cid->instanceIndex);
+    }
+
+    cid->instanceId = id;
+    Symbol *symbol = new Symbol(Symbol::Category::InstanceId, id, shared_ptr<TypeInfo>(new CustomTypeInfo(cid->componentName)), cid);
+    mainScope->define(symbol);
+
+    for (auto &c : cid->childrenList)
+    {
+        visitInstanceId(c.get());
+    }
 }
 
 void SymbolVisitor::visit(IntegerLiteral *e)
@@ -634,16 +926,33 @@ void SymbolVisitor::visit(MemberExpr *e)
     util::condPrint(option::showSymbolRef, "ref: %s\n", memberSymbol->symbolString().c_str());
     e->typeInfo = memberSymbol->typeInfo();
 
-    if (memberSymbol->category() == Symbol::Category::Property && m_analyzingPropertyDep)
+    if (memberSymbol->category() == Symbol::Category::Property && analyzingPropertyDep())
     {
         ASTNode *ast = memberSymbol->astNode();
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 
-        assert(m_curAnalyzingProperty != nullptr);
+        componentDefinationAnalyzing()->propertyDeps[propertyIndexAnalyzing()].insert(pd->fieldIndex);
+        util::condPrint(option::showPropertyDep, "property: [%d] -> [%d]\n", propertyIndexAnalyzing(), pd->fieldIndex);
+    }
 
-        m_sorter.addEdge(m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
-        util::condPrint(option::showPropertyDep, "property: [%d] -> [%d]\n", m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
+    if (analyzingBindingDep())
+    {
+        if (memberSymbol->category() == Symbol::Category::Property)
+        {
+            ASTNode *ast = memberSymbol->astNode();
+            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
+            assert(pd != nullptr);
+
+            util::condPrint(option::showBindingDep, "binding: %s[%d](%p) -> %s[%d]\n",
+                            curInstanceId().c_str(),
+                            bindingIndexAnalyzing(),
+                            bindingAnalyzing(),
+                            m_curAnalyzingBindingToId.c_str(),
+                            pd->fieldIndex);
+            m_bindingIdDeps.push_back(pair<string, string>(bindingId(curInstanceId(), bindingIndexAnalyzing()),
+                                                           bindingId(m_curAnalyzingBindingToId, pd->fieldIndex)));
+        }
     }
 }
 
@@ -662,16 +971,45 @@ void SymbolVisitor::visit(RefExpr *e)
     util::condPrint(option::showSymbolRef, "ref: %s\n", sym->symbolString().c_str());
     e->typeInfo = sym->typeInfo();
 
-    if (sym->category() == Symbol::Category::Property && m_analyzingPropertyDep)
+    if (sym->category() == Symbol::Category::Property && analyzingPropertyDep())
     {
         ASTNode *ast = sym->astNode();
         PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
         assert(pd != nullptr);
 
-        assert(m_curAnalyzingProperty != nullptr);
-        m_sorter.addEdge(m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
+        componentDefinationAnalyzing()->propertyDeps[propertyIndexAnalyzing()].insert(pd->fieldIndex);
+        util::condPrint(option::showPropertyDep, "property: [%d] -> [%d]\n", propertyIndexAnalyzing(), pd->fieldIndex);
+    }
 
-        util::condPrint(option::showPropertyDep, "property: [%d] -> [%d]\n", m_curAnalyzingProperty->fieldIndex, pd->fieldIndex);
+    if (analyzingBindingDep())
+    {
+        if (sym->category() == Symbol::Category::Property)
+        {
+            ASTNode *ast = sym->astNode();
+            PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
+            assert(pd != nullptr);
+
+            util::condPrint(option::showBindingDep, "binding: %s[%d](%p) -> %s[%d]\n",
+                            curInstanceId().c_str(),
+                            bindingIndexAnalyzing(),
+                            bindingAnalyzing(),
+                            curInstanceId().c_str(),
+                            pd->fieldIndex);
+            m_bindingIdDeps.push_back(pair<string, string>(bindingId(curInstanceId(), bindingIndexAnalyzing()),
+                                                           bindingId(curInstanceId(), pd->fieldIndex)));
+        }
+        else if (sym->category() == Symbol::Category::InstanceId)
+        {
+            ASTNode *ast = sym->astNode();
+            ComponentInstanceDecl *cid = dynamic_cast<ComponentInstanceDecl *>(ast);
+            assert(cid != nullptr);
+
+            m_curAnalyzingBindingToId = cid->instanceId;
+        }
+        else if (sym->category() == Symbol::Category::PropertyGroup)
+        {
+            m_curAnalyzingBindingToId = curInstanceId();
+        }
     }
 }
 
@@ -807,8 +1145,7 @@ void SymbolVisitor::visitPropertyInitialization(PropertyDecl *pd)
 {
     assert(pd != nullptr);
 
-    m_analyzingPropertyDep = true;
-    m_curAnalyzingProperty = pd;
+    setAnalyzingPropertyDep(true, pd);
 
     GroupedPropertyDecl *gpd = dynamic_cast<GroupedPropertyDecl *>(pd);
     if (gpd)
@@ -820,7 +1157,7 @@ void SymbolVisitor::visitPropertyInitialization(PropertyDecl *pd)
         visit(pd->expr.get());
     }
 
-    m_analyzingPropertyDep = false;
+    setAnalyzingPropertyDep(false);
 }
 
 void SymbolVisitor::visitPropertyInitialization(GroupedPropertyDecl *gpd)
@@ -994,16 +1331,6 @@ void SymbolVisitor::visit(EnumDecl *ed)
     }
 }
 
-void SymbolVisitor::visit(BindingDecl *)
-{
-    throw VisitException("BindingDecl", "Not implement");
-}
-
-void SymbolVisitor::visit(GroupedBindingDecl *)
-{
-    throw VisitException("GroupedBindingDecl", "Not implement");
-}
-
 void SymbolVisitor::visit(FunctionDecl *)
 {
     throw VisitException("FunctionDecl", "Not implement");
@@ -1023,5 +1350,120 @@ void SymbolVisitor::clear()
 {
     Scope::resetNextScopeId();
     m_stackFrameLocals = -1;
-    m_sorter.clear();
+    m_nextInstanceIndex = 0;
+    m_topLevelInstance = nullptr;
+    m_instanceStack.clear();
+    m_propertyIndexAnalyzing = -1;
+    m_propertyAnalyzing = nullptr;
+    m_bindingAnalyzing = nullptr;
+}
+
+void SymbolVisitor::setAnalyzingPropertyDep(bool analyzing, PropertyDecl *pd)
+{
+    assert(analyzing != m_analyzingPropertyDep);
+    if (analyzing)
+    {
+        assert(pd->fieldIndex >= 0);
+
+        m_propertyIndexAnalyzing = pd->fieldIndex;
+        m_propertyAnalyzing = pd;
+    }
+    else
+    {
+        m_propertyIndexAnalyzing = -1;
+        m_propertyAnalyzing = nullptr;
+    }
+
+    m_analyzingPropertyDep = analyzing;
+}
+
+bool SymbolVisitor::analyzingPropertyDep() const
+{
+    return m_analyzingPropertyDep;
+}
+
+int SymbolVisitor::propertyIndexAnalyzing() const
+{
+    assert(m_propertyIndexAnalyzing != -1);
+
+    return m_propertyIndexAnalyzing;
+}
+
+PropertyDecl *SymbolVisitor::propertyAnalyzing() const
+{
+    assert(m_propertyAnalyzing != nullptr);
+
+    return m_propertyAnalyzing;
+}
+
+ComponentDefinationDecl *SymbolVisitor::componentDefinationAnalyzing() const
+{
+    assert(m_propertyAnalyzing != nullptr);
+    assert(m_propertyAnalyzing->componentDefination != nullptr);
+
+    return m_propertyAnalyzing->componentDefination;
+}
+
+void SymbolVisitor::setAnalyzingBindingDep(bool analyzing, BindingDecl *bd)
+{
+    assert(analyzing != m_analyzingBindingDep);
+    if (analyzing)
+    {
+        assert(bd != nullptr);
+        m_bindingAnalyzing = bd;
+    }
+    else
+    {
+        m_bindingAnalyzing = nullptr;
+    }
+
+    m_analyzingBindingDep = analyzing;
+}
+
+bool SymbolVisitor::analyzingBindingDep() const
+{
+    return m_analyzingBindingDep;
+}
+
+int SymbolVisitor::bindingIndexAnalyzing() const
+{
+    assert(m_bindingAnalyzing != nullptr);
+    assert(m_bindingAnalyzing->fieldIndex() != -1);
+
+    return m_bindingAnalyzing->fieldIndex();
+}
+
+BindingDecl *SymbolVisitor::bindingAnalyzing() const
+{
+    assert(m_bindingAnalyzing != nullptr);
+
+    return m_bindingAnalyzing;
+}
+
+void SymbolVisitor::pushInstanceStack(ComponentInstanceDecl *cid)
+{
+    assert(cid != nullptr);
+
+    m_instanceStack.push_back(cid);
+}
+
+void SymbolVisitor::popInstanceStack()
+{
+    assert(m_instanceStack.size() != 0);
+
+    m_instanceStack.pop_back();
+}
+
+ComponentInstanceDecl *SymbolVisitor::curInstance() const
+{
+    assert(m_instanceStack.size() != 0);
+
+    return m_instanceStack.back();
+}
+
+string SymbolVisitor::curInstanceId() const
+{
+    assert(m_instanceStack.size() != 0);
+
+    return m_instanceStack.back()->instanceId;
 }
