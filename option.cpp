@@ -31,5 +31,6 @@ bool showLocalIndex = false;
 bool showGenAsm = false;
 bool showAssemble = false;
 bool showBindingDep = false;
+bool showSvgDraw = false;
 
 }

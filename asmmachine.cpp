@@ -17,6 +17,8 @@
 
 #include "asmmachine.h"
 #include "structinfo.h"
+#include "util.h"
+#include "option.h"
 
 using namespace std;
 
@@ -389,26 +391,26 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         Object y = popOperand();
         Object x = popOperand();
         pushOrigin(x.intData(), y.intData());
-        printf("> pushOrigin (%d, %d)\n", x.intData(), y.intData());
+        util::condPrint(option::showSvgDraw, "svg: pushOrigin (%d, %d)\n", x.intData(), y.intData());
         break;
     }
     case instr::POPORIGIN:
     {
         popOrigin();
-        printf("> popOrigin\n");
+        util::condPrint(option::showSvgDraw, "svg: popOrigin\n");
         break;
     }
     case instr::DRAWRECT:
     {
         Object o = popOperand();
-        printf("> drawRect %s\n", o.toString().c_str());
+        util::condPrint(option::showSvgDraw, "svg: drawRect %s\n", o.toString().c_str());
         drawRect(o);
         break;
     }
     case instr::DRAWTEXT:
     {
         Object o = popOperand();
-        printf("> drawText %s\n", o.toString().c_str());
+        util::condPrint(option::showSvgDraw, "svg: drawText %s\n", o.toString().c_str());
         drawText(o);
         break;
     }
