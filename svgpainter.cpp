@@ -70,6 +70,11 @@ void SvgPainter::draw(const TextData &d)
     m_shapes.emplace_back(new TextShape(d, m_curOrigin.x, m_curOrigin.y));
 }
 
+void SvgPainter::draw(const EllipseData &d)
+{
+    m_shapes.emplace_back(new EllipseShape(d, m_curOrigin.x, m_curOrigin.y));
+}
+
 std::string SvgPainter::generate() const
 {
     char buf[512];
@@ -111,8 +116,16 @@ RectangleShape::RectangleShape(const RectangleData &rect, int originX, int origi
 std::string RectangleShape::generate()
 {
     char buf[512];
-    snprintf(buf, sizeof(buf), "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" style=\"fill:%s; stroke-width:%d; stroke:%s; stroke-dasharray:%s\"/>",
-             m_data.x + m_originX, m_data.y + m_originY, m_data.width, m_data.height, m_data.fill_color.c_str(), m_data.stroke_width, m_data.stroke_color.c_str(), m_data.stroke_dasharray.c_str());
+    snprintf(buf, sizeof(buf),
+             "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" style=\"fill:%s; stroke-width:%d; stroke:%s; stroke-dasharray:%s\"/>",
+             m_data.x + m_originX,
+             m_data.y + m_originY,
+             m_data.width,
+             m_data.height,
+             m_data.fill_color.c_str(),
+             m_data.stroke_width,
+             m_data.stroke_color.c_str(),
+             m_data.stroke_dasharray.c_str());
     return string(buf);
 }
 
@@ -126,8 +139,35 @@ TextShape::TextShape(const TextData &text, int originX, int originY)
 std::string TextShape::generate()
 {
     char buf[512];
-    snprintf(buf, sizeof(buf), "<text x=\"%d\" y=\"%d\" font-size=\"%d\" dominant-baseline=\"text-before-edge\">%s</text>",
-             m_data.x + m_originX, m_data.y + m_originY, m_data.size, m_data.text.c_str());
+    snprintf(buf, sizeof(buf),
+             "<text x=\"%d\" y=\"%d\" font-size=\"%d\" dominant-baseline=\"text-before-edge\">%s</text>",
+             m_data.x + m_originX,
+             m_data.y + m_originY,
+             m_data.size,
+             m_data.text.c_str());
+    return string(buf);
+}
+
+EllipseShape::EllipseShape(const EllipseData &ellipse, int originX, int originY)
+    : Shape(originX, originY)
+    , m_data(ellipse)
+{
+
+}
+
+string EllipseShape::generate()
+{
+    char buf[512];
+    snprintf(buf, sizeof(buf),
+             "<ellipse cx=\"%d\" cy=\"%d\" rx=\"%d\" ry=\"%d\" style=\"fill:%s; stroke-width:%d; stroke:%s; stroke-dasharray:%s\"/>",
+             m_data.x + m_data.x_radius + m_originX,
+             m_data.y + m_data.y_radius + m_originY,
+             m_data.x_radius,
+             m_data.y_radius,
+             m_data.fill_color.c_str(),
+             m_data.stroke_width,
+             m_data.stroke_color.c_str(),
+             m_data.stroke_dasharray.c_str());
     return string(buf);
 }
 

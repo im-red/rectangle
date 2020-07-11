@@ -19,4 +19,15 @@ struct svg_text
     int size;
     string text;
 }
+struct svg_ellipse
+{
+    int x;
+    int y;
+    int x_radius;
+    int y_radius;
+    string fill_color;
+    int stroke_width;
+    string stroke_color;
+    string stroke_dasharray;
+};
 ```

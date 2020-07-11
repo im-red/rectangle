@@ -297,7 +297,7 @@ void AsmVisitor::visit(CallExpr *ce)
             || functionName == "print"
             || functionName == "drawRect"
             || functionName == "drawText"
-            || functionName == "drawPt")
+            || functionName == "drawEllipse")
     {
         m_asm.appendLine({functionName});
     }

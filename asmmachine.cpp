@@ -414,6 +414,13 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         drawText(o);
         break;
     }
+    case instr::DRAWELLIPSE:
+    {
+        Object o = popOperand();
+        util::condPrint(option::showSvgDraw, "svg: drawEllipse %s\n", o.toString().c_str());
+        drawEllipse(o);
+        break;
+    }
     }
 }
 
@@ -448,5 +455,19 @@ void AsmMachine::drawText(const Object &o)
     d.y = o.field(builtin::textInfo.fieldIndex("y")).intData();
     d.size = o.field(builtin::textInfo.fieldIndex("size")).intData();
     d.text = o.field(builtin::textInfo.fieldIndex("text")).stringData();
+    m_painter.draw(d);
+}
+
+void AsmMachine::drawEllipse(const Object &o)
+{
+    draw::EllipseData d;
+    d.x = o.field(builtin::ellipseInfo.fieldIndex("x")).intData();
+    d.y = o.field(builtin::ellipseInfo.fieldIndex("y")).intData();
+    d.x_radius = o.field(builtin::ellipseInfo.fieldIndex("x_radius")).intData();
+    d.y_radius = o.field(builtin::ellipseInfo.fieldIndex("y_radius")).intData();
+    d.fill_color = o.field(builtin::ellipseInfo.fieldIndex("fill_color")).stringData();
+    d.stroke_width = o.field(builtin::ellipseInfo.fieldIndex("stroke_width")).intData();
+    d.stroke_color = o.field(builtin::ellipseInfo.fieldIndex("stroke_color")).stringData();
+    d.stroke_dasharray = o.field(builtin::ellipseInfo.fieldIndex("stroke_dasharray")).stringData();
     m_painter.draw(d);
 }

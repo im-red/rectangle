@@ -48,4 +48,11 @@ Rectangle {
         fill_color: "#000000"
         border_type: Rectangle.Dash
     }
+    Ellipse {
+        id: ellipse
+        x: 0
+        y: 0
+        x_radius: 100
+        y_radius: 888
+    }
 }

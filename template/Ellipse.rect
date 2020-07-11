@@ -1,0 +1,45 @@
+def Ellipse {
+    enum LineType {
+        Invalid,
+        Solid,
+        Dot,
+        Dash
+    }
+    int x: 0
+    int y: 0
+    int x_radius: 100
+    int y_radius: 100
+    int border_type: Invalid
+    string fill_color: "#FFFFFF"
+    int stroke_width: 1
+    string stroke_color: "#000000"
+    string stroke_dasharray: "1,0"
+
+    void draw() {
+        svg_ellipse e;
+
+        e.x = x;
+        e.y = y;
+        e.x_radius = x_radius;
+        e.y_radius = x_radius;
+        e.fill_color = fill_color;
+        e.stroke_width = stroke_width;
+        e.stroke_color = stroke_color;
+        if (border_type != Invalid) {
+            e.stroke_dasharray = getDasharray(border_type);
+        } else {
+            e.stroke_dasharray = stroke_dasharray;
+        }
+        
+        drawEllipse(e);
+    }
+    string getDasharray(int type) {
+        if (type == Solid) {
+            return "1,0";
+        } else if (type == Dot) {
+            return "5,5";
+        } else {
+            return "4,1";
+        }
+    }
+}

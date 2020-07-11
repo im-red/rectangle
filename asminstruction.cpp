@@ -73,6 +73,7 @@ std::string getAsmName(unsigned char value)
         { POPORIGIN, "popOrigin" },
         { DRAWRECT, "drawRect" },
         { DRAWTEXT, "drawText" },
+        { DRAWELLIPSE, "drawEllipse" },
         { GLOAD, "gload" },
         { GSTORE, "gstore" },
         { LLOAD, "lload" },
@@ -140,6 +141,7 @@ unsigned char getAsmValue(const std::string &name)
         { "pushOrigin", PUSHORIGIN },
         { "popOrigin", POPORIGIN },
         { "drawRect", DRAWRECT },
+        { "drawEllipse", DRAWELLIPSE },
         { "drawText", DRAWTEXT },
         { "gload", GLOAD },
         { "gstore", GSTORE },
@@ -209,6 +211,7 @@ bool is0OpInstr(unsigned char value)
         POPORIGIN,
         DRAWRECT,
         DRAWTEXT,
+        DRAWELLIPSE
     };
 
     return s_instr0.find(value) != s_instr0.end();

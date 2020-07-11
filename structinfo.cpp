@@ -67,29 +67,32 @@ std::string StructInfo::name() const
 }
 
 const StructInfo rectInfo = StructInfo("svg_rect", {
-                                     { "x",                 TypeInfo::Category::Int },
-                                     { "y",                 TypeInfo::Category::Int },
-                                     { "width",             TypeInfo::Category::Int },
-                                     { "height",            TypeInfo::Category::Int },
-                                     { "fill_color",        TypeInfo::Category::String },
-                                     { "stroke_width",      TypeInfo::Category::Int },
-                                     { "stroke_color",      TypeInfo::Category::String },
-                                     { "stroke_dasharray",  TypeInfo::Category::String },
-                                 });
-
+                                           { "x",                 TypeInfo::Category::Int },
+                                           { "y",                 TypeInfo::Category::Int },
+                                           { "width",             TypeInfo::Category::Int },
+                                           { "height",            TypeInfo::Category::Int },
+                                           { "fill_color",        TypeInfo::Category::String },
+                                           { "stroke_width",      TypeInfo::Category::Int },
+                                           { "stroke_color",      TypeInfo::Category::String },
+                                           { "stroke_dasharray",  TypeInfo::Category::String },
+                                       });
 const StructInfo textInfo = StructInfo("svg_text", {
-                                     { "x",     TypeInfo::Category::Int },
-                                     { "y",     TypeInfo::Category::Int },
-                                     { "size",  TypeInfo::Category::Int },
-                                     { "text",  TypeInfo::Category::String },
-                                 });
-const StructInfo circleInfo = StructInfo("svg_circle", {
-                                   { "x",           TypeInfo::Category::Int },
-                                   { "y",           TypeInfo::Category::Int },
-                                   { "radius",      TypeInfo::Category::Int },
-                                   { "fill_color",  TypeInfo::Category::String },
-                               });
+                                           { "x",     TypeInfo::Category::Int },
+                                           { "y",     TypeInfo::Category::Int },
+                                           { "size",  TypeInfo::Category::Int },
+                                           { "text",  TypeInfo::Category::String },
+                                       });
+const StructInfo ellipseInfo = StructInfo("svg_ellipse", {
+                                             { "x",           TypeInfo::Category::Int },
+                                             { "y",           TypeInfo::Category::Int },
+                                             { "x_radius",      TypeInfo::Category::Int },
+                                             { "y_radius",      TypeInfo::Category::Int },
+                                             { "fill_color",  TypeInfo::Category::String },
+                                             { "stroke_width",      TypeInfo::Category::Int },
+                                             { "stroke_color",      TypeInfo::Category::String },
+                                             { "stroke_dasharray",  TypeInfo::Category::String },
+                                         });
 
-std::vector<const StructInfo *> infoList = {&rectInfo, &textInfo, &circleInfo};
+std::vector<const StructInfo *> infoList = {&rectInfo, &textInfo, &ellipseInfo};
 
 }

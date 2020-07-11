@@ -103,7 +103,8 @@ enum AsmInstruction : unsigned char
     POPORIGIN,
 
     DRAWRECT,
-    DRAWTEXT
+    DRAWTEXT,
+    DRAWELLIPSE
 };
 
 std::string getAsmName(unsigned char value);

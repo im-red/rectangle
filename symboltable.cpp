@@ -100,10 +100,10 @@ void SymbolTable::initGlobalScope()
     }
 
     {
-        shared_ptr<TypeInfo> ptType(new CustomTypeInfo(builtin::circleInfo.name()));
-        vector<shared_ptr<TypeInfo>> paramTypes(1, ptType);
-        Symbol *drawPt = new FunctionSymbol("drawCircle", voidType, paramTypes);
-        define(drawPt);
+        shared_ptr<TypeInfo> ellipseType(new CustomTypeInfo(builtin::ellipseInfo.name()));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, ellipseType);
+        Symbol *drawEllipse = new FunctionSymbol("drawEllipse", voidType, paramTypes);
+        define(drawEllipse);
     }
 
     {

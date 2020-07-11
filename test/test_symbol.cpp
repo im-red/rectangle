@@ -22,7 +22,14 @@ using namespace std;
 
 TEST(symbol, INSTANCE)
 {
-    vector<string> files = {"../../template/Rectangle.rect", "../../template/Text.rect", "../rect/symbol_instance_instance.rect"};
+    option::verbose = true;
+    vector<string> files = 
+    {
+        "../../template/Rectangle.rect", 
+        "../../template/Text.rect", 
+        "../../template/Ellipse.rect", 
+        "../rect/symbol_instance_instance.rect"
+    };
 
     AST ast;
     for (auto &file : files)
@@ -46,7 +53,7 @@ TEST(symbol, INSTANCE)
 
     AsmVisitor av;
     AsmText txt = av.visit(&ast);
-    //txt.dump();
+    txt.dump();
 
     AsmBin bin(txt);
     //bin.dump();

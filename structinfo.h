@@ -54,7 +54,7 @@ private:
 
 extern const StructInfo rectInfo;
 extern const StructInfo textInfo;
-extern const StructInfo circleInfo;
+extern const StructInfo ellipseInfo;
 
 extern std::vector<const StructInfo *> infoList;
 

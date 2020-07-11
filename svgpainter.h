@@ -51,6 +51,18 @@ struct TextData
     std::string text;
 };
 
+struct EllipseData
+{
+    int x;
+    int y;
+    int x_radius;
+    int y_radius;
+    std::string fill_color;
+    int stroke_width;
+    std::string stroke_color;
+    std::string stroke_dasharray;
+};
+
 class Shape
 {
 public:
@@ -83,6 +95,16 @@ private:
     TextData m_data;
 };
 
+class EllipseShape : public Shape
+{
+public:
+    explicit EllipseShape(const EllipseData &ellipse, int originX, int originY);
+    std::string generate() override;
+
+private:
+    EllipseData m_data;
+};
+
 class SvgPainter
 {
 public:
@@ -95,6 +117,7 @@ public:
 
     void draw(const RectangleData &d);
     void draw(const TextData &d);
+    void draw(const EllipseData &d);
 
     std::string generate() const;
 
