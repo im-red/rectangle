@@ -27,16 +27,13 @@ TEST(symbol, INSTANCE)
     AST ast;
     for (auto &file : files)
     {
-        ifstream t(file);
-        stringstream buffer;
-        buffer << t.rdbuf();
-
-        string code = buffer.str();
+        string code = util::readFile(file);
 
         Parser p;
         Lexer l;
         l.setCode(code);
         unique_ptr<DocumentDecl> document = p.parse(l.tokens());
+        document->filename = file;
 
         ast.addDocument(move(document));
     }

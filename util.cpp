@@ -18,6 +18,9 @@
 #include "util.h"
 #include "option.h"
 
+#include <fstream>
+#include <sstream>
+
 #include <stdio.h>
 
 using namespace std;
@@ -34,6 +37,25 @@ void condPrint(bool cond, const char * const fmt, ...)
         vfprintf(stderr, fmt, ap);
         va_end(ap);
     }
+}
+
+bool fileExists(const string &filename)
+{
+    ifstream fs(filename);
+    return fs.is_open();
+}
+
+string readFile(const string &filename)
+{
+    string result;
+    if (fileExists(filename))
+    {
+        ifstream file(filename);
+        stringstream buffer;
+        buffer << file.rdbuf();
+        result = buffer.str();
+    }
+    return result;
 }
 
 }

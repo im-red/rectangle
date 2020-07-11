@@ -345,6 +345,7 @@ struct DocumentDecl : public ASTNode
     explicit DocumentDecl(Type type_) : type(type_) {}
 
     Type type;
+    std::string filename;
 };
 
 struct ComponentDefinationDecl : public DocumentDecl

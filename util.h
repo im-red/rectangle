@@ -26,5 +26,7 @@ namespace util
 {
 
 void condPrint(bool cond, const char * const fmt, ...);
+bool fileExists(const std::string &filename);
+std::string readFile(const std::string &filename);
 
 }

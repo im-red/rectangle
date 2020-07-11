@@ -34,10 +34,16 @@ void DumpVisitor::visit(AST *ast)
     for (auto doc : documents)
     {
         assert(doc != nullptr);
-        printf("---------- dump DocumentDecl begin ----------\n");
+
         visit(doc);
-        printf("----------- dump DocumentDecl end -----------\n");
     }
+}
+
+void DumpVisitor::visit(DocumentDecl *dd)
+{
+    printf("---------- dump %s begin ----------\n", dd->filename.c_str());
+    Visitor::visit(dd);
+    printf("----------- dump %s end -----------\n", dd->filename.c_str());
 }
 
 void DumpVisitor::visit(IntegerLiteral *il)

@@ -29,7 +29,7 @@ public:
 protected:
     void visit(Expr *e) override { Visitor::visit(e); }
     void visit(Stmt *s) override { Visitor::visit(s); }
-    void visit(DocumentDecl *dd) override { Visitor::visit(dd); }
+    void visit(DocumentDecl *dd) override;
     void visit(IntegerLiteral *il) override;
     void visit(FloatLiteral *fl) override;
     void visit(StringLiteral *sl) override;
