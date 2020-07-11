@@ -107,6 +107,7 @@ std::string Object::toString() const
             {
                 result += ", " + m_vData[i].toString();
             }
+            result += ")";
         }
         break;
     }
@@ -128,6 +129,7 @@ std::string Object::toString() const
             {
                 result += ", " + m_vData[i].toString();
             }
+            result += ")";
         }
         break;
     }

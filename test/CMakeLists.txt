@@ -39,6 +39,7 @@ set(RECT_SRCS
     ../asmvisitor.cpp
     ../topologicalsorter.cpp
     ../typeinfo.cpp
+    ../dumpvisitor.cpp
 )
 
 add_library(common

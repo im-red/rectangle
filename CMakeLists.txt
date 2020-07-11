@@ -34,4 +34,5 @@ add_executable(rectangle
     astnode.cpp
     topologicalsorter.cpp
     typeinfo.cpp
+    dumpvisitor.cpp
 )

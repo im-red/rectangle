@@ -41,14 +41,12 @@ AsmText AsmVisitor::visit(AST *ast)
 
     for (auto doc : documents)
     {
-        if (doc)
+        assert(doc != nullptr);
+        switch (doc->type)
         {
-            switch (doc->type)
-            {
-            case DocumentDecl::Type::Struct:        structs.push_back(doc);     break;
-            case DocumentDecl::Type::Defination:    definations.push_back(doc); break;
-            case DocumentDecl::Type::Instance:      instances.push_back(doc);   break;
-            }
+        case DocumentDecl::Type::Struct:        structs.push_back(doc);     break;
+        case DocumentDecl::Type::Defination:    definations.push_back(doc); break;
+        case DocumentDecl::Type::Instance:      instances.push_back(doc);   break;
         }
     }
 
