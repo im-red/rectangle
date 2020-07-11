@@ -1,0 +1,17 @@
+def Text {
+    int x: 0
+    int y: 0
+    int size: 20
+    string text: ""
+
+    void draw() {
+        svg_text t;
+
+        t.x = x;
+        t.y = y;
+        t.size = size;
+        t.text = text;
+
+        drawText(t);
+    }
+}
