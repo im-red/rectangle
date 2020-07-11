@@ -24,6 +24,13 @@
 namespace draw
 {
 
+struct Point
+{
+    Point(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+    int x;
+    int y;
+};
+
 struct RectangleData
 {
     int x;
@@ -93,8 +100,8 @@ public:
 
 private:
     std::vector<std::unique_ptr<Shape>> m_shapes;
-    std::vector<std::pair<int, int>> m_originStack;
-    std::pair<int, int> m_curOrigin;
+    std::vector<Point> m_originStack;
+    Point m_curOrigin;
 
     int m_svgWidth = 0;
     int m_svgHeight = 0;

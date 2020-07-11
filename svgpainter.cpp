@@ -33,24 +33,24 @@ void SvgPainter::clear()
 {
     m_shapes.clear();
     m_originStack.clear();
-    m_curOrigin.first = m_leftMargin;
-    m_curOrigin.second = m_topMargin;
+    m_curOrigin.x = m_leftMargin;
+    m_curOrigin.y = m_topMargin;
     m_svgWidth = 0;
     m_svgHeight = 0;
 }
 
 void SvgPainter::pushOrigin(int x, int y)
 {
-    m_curOrigin.first += x;
-    m_curOrigin.second += y;
+    m_curOrigin.x += x;
+    m_curOrigin.y += y;
     m_originStack.emplace_back(x, y);
 }
 
 void SvgPainter::popOrigin()
 {
     assert(m_originStack.size() > 0);
-    m_curOrigin.first -= m_originStack.back().first;
-    m_curOrigin.second -= m_originStack.back().second;
+    m_curOrigin.x -= m_originStack.back().x;
+    m_curOrigin.y -= m_originStack.back().y;
     m_originStack.pop_back();
 }
 
@@ -62,21 +62,22 @@ void SvgPainter::draw(const RectangleData &d)
         m_svgHeight = d.y + d.height + m_topMargin + m_bottomMargin;
     }
 
-    m_shapes.emplace_back(new RectangleShape(d, m_curOrigin.first, m_curOrigin.second));
+    m_shapes.emplace_back(new RectangleShape(d, m_curOrigin.x, m_curOrigin.y));
 }
 
 void SvgPainter::draw(const TextData &d)
 {
-    m_shapes.emplace_back(new TextShape(d, m_curOrigin.first, m_curOrigin.second));
+    m_shapes.emplace_back(new TextShape(d, m_curOrigin.x, m_curOrigin.y));
 }
 
-string SvgPainter::generate() const
+std::string SvgPainter::generate() const
 {
     char buf[512];
     snprintf(buf, sizeof(buf), "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">\n",
              m_svgWidth, m_svgHeight);
-    static const std::string BEGIN = buf;
-    static const std::string END = "</svg>\n";
+
+    const std::string BEGIN = buf;
+    const std::string END = "</svg>\n";
 
     string result;
     result += BEGIN;
@@ -122,7 +123,7 @@ TextShape::TextShape(const TextData &text, int originX, int originY)
 
 }
 
-string TextShape::generate()
+std::string TextShape::generate()
 {
     char buf[512];
     snprintf(buf, sizeof(buf), "<text x=\"%d\" y=\"%d\" font-size=\"%d\" dominant-baseline=\"text-before-edge\">%s</text>",
