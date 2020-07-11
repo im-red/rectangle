@@ -20,6 +20,7 @@
 #include "util.h"
 #include "symbol.h"
 #include "typeinfo.h"
+#include "structinfo.h"
 
 #include <assert.h>
 
@@ -92,21 +93,21 @@ void SymbolTable::initGlobalScope()
     shared_ptr<TypeInfo> voidType = make_shared<TypeInfo>(TypeInfo::Category::Void);
 
     {
-        shared_ptr<TypeInfo> rectType(new CustomTypeInfo("rect"));
+        shared_ptr<TypeInfo> rectType(new CustomTypeInfo(builtin::rectInfo.name()));
         vector<shared_ptr<TypeInfo>> paramTypes(1, rectType);
         Symbol *drawRect = new FunctionSymbol("drawRect", voidType, paramTypes);
         define(drawRect);
     }
 
     {
-        shared_ptr<TypeInfo> ptType(new CustomTypeInfo("pt"));
+        shared_ptr<TypeInfo> ptType(new CustomTypeInfo(builtin::circleInfo.name()));
         vector<shared_ptr<TypeInfo>> paramTypes(1, ptType);
-        Symbol *drawPt = new FunctionSymbol("drawPt", voidType, paramTypes);
+        Symbol *drawPt = new FunctionSymbol("drawCircle", voidType, paramTypes);
         define(drawPt);
     }
 
     {
-        shared_ptr<TypeInfo> textType(new CustomTypeInfo("text"));
+        shared_ptr<TypeInfo> textType(new CustomTypeInfo(builtin::textInfo.name()));
         vector<shared_ptr<TypeInfo>> paramTypes(1, textType);
         Symbol *drawText = new FunctionSymbol("drawText", voidType, paramTypes);
         define(drawText);

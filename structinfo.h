@@ -39,7 +39,7 @@ struct FieldInfo
 class StructInfo
 {
 public:
-    StructInfo(const std::string &name, const std::map<std::string, TypeInfo::Category> &fields);
+    StructInfo(const std::string &name, const std::vector<std::pair<std::string, TypeInfo::Category>> &fields);
 
     int fieldIndex(const std::string &name) const;
     int fieldCount() const;
@@ -54,7 +54,7 @@ private:
 
 extern const StructInfo rectInfo;
 extern const StructInfo textInfo;
-extern const StructInfo ptInfo;
+extern const StructInfo circleInfo;
 
 extern std::vector<const StructInfo *> infoList;
 

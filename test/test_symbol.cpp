@@ -111,7 +111,7 @@ TEST(symbol, INSTANCE)
     option::showPropertyDep = true;
     option::showBindingDep = true;
 
-    vector<string> files = {"../rect/symbol_instance_defination.rect", "../rect/symbol_instance_instance.rect"};
+    vector<string> files = {"../../template/Rectangle.rect", "../../template/Text.rect", "../rect/symbol_instance_instance.rect"};
 
     AST ast;
     for (auto &file : files)

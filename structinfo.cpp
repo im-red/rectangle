@@ -26,7 +26,7 @@ using namespace std;
 namespace builtin
 {
 
-StructInfo::StructInfo(const std::string &name, const std::map<std::string, TypeInfo::Category> &fields)
+StructInfo::StructInfo(const std::string &name, const std::vector<std::pair<string, TypeInfo::Category> > &fields)
     : m_name(name)
 {
     int i = 0;
@@ -66,7 +66,7 @@ std::string StructInfo::name() const
     return m_name;
 }
 
-const StructInfo rectInfo = StructInfo("rect", {
+const StructInfo rectInfo = StructInfo("svg_rect", {
                                      { "x",                 TypeInfo::Category::Int },
                                      { "y",                 TypeInfo::Category::Int },
                                      { "width",             TypeInfo::Category::Int },
@@ -77,19 +77,19 @@ const StructInfo rectInfo = StructInfo("rect", {
                                      { "stroke_dasharray",  TypeInfo::Category::String },
                                  });
 
-const StructInfo textInfo = StructInfo("text", {
+const StructInfo textInfo = StructInfo("svg_text", {
                                      { "x",     TypeInfo::Category::Int },
                                      { "y",     TypeInfo::Category::Int },
                                      { "size",  TypeInfo::Category::Int },
                                      { "text",  TypeInfo::Category::String },
                                  });
-const StructInfo ptInfo = StructInfo("pt", {
+const StructInfo circleInfo = StructInfo("svg_circle", {
                                    { "x",           TypeInfo::Category::Int },
                                    { "y",           TypeInfo::Category::Int },
                                    { "radius",      TypeInfo::Category::Int },
                                    { "fill_color",  TypeInfo::Category::String },
                                });
 
-std::vector<const StructInfo *> infoList = {&rectInfo, &textInfo, &ptInfo};
+std::vector<const StructInfo *> infoList = {&rectInfo, &textInfo, &circleInfo};
 
 }

@@ -4,6 +4,27 @@ Rectangle {
     height: 800
     border_type: Rectangle.Dot
     Rectangle {
+        x: 100
+        y: 100
+        width: 500
+        height: 500
+        Rectangle {
+            x: 100
+            y: 100
+            width: 500
+            height: 500
+            Rectangle {
+                x: 100
+                y: 100
+                width: 500
+                height: 500
+                Text {
+                    text: "测试"
+                }
+            }
+        }
+    }
+    Rectangle {
         id: tl
         x: root.width / 2
         y: root.height / 2

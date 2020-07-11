@@ -12,13 +12,7 @@ def Rectangle {
     int border_type: Solid
     string fill_color: "#FFFFFF"
     void draw() {
-        rect r;
-
-        //int x = 0;
-        //int y = 0;
-        //int height = 100;
-        //string fill_color = "#FFFFFF";
-        //int border_type = Solid;
+        svg_rect r;
 
         r.x = x;
         r.y = y;

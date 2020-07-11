@@ -750,10 +750,16 @@ void AsmVisitor::visit(ComponentInstanceDecl *cid)
 
     m_asm.appendLine({"lload", to_string(instanceIndex)});
     m_asm.appendLine({"call", componentName + "::draw"});
+    m_asm.appendLine({"lload", to_string(instanceIndex)});
+    m_asm.appendLine({"fload", to_string(0)});  // x
+    m_asm.appendLine({"lload", to_string(instanceIndex)});
+    m_asm.appendLine({"fload", to_string(1)});  // y
+    m_asm.appendLine({"pushOrigin"});
     for (auto &child : cid->childrenList)
     {
         visit(child.get());
     }
+    m_asm.appendLine({"popOrigin"});
 }
 
 void AsmVisitor::genAsmForInitInstance(ComponentInstanceDecl *cid)

@@ -47,14 +47,19 @@ struct TextData
 class Shape
 {
 public:
+    Shape(int originX = 0, int originY = 0);
     virtual ~Shape();
     virtual std::string generate() = 0;
+
+protected:
+    int m_originX;
+    int m_originY;
 };
 
 class RectangleShape : public Shape
 {
 public:
-    explicit RectangleShape(const RectangleData &rect);
+    explicit RectangleShape(const RectangleData &rect, int originX, int originY);
     std::string generate() override;
 
 private:
@@ -64,7 +69,7 @@ private:
 class TextShape : public Shape
 {
 public:
-    explicit TextShape(const TextData &text);
+    explicit TextShape(const TextData &text, int originX, int originY);
     std::string generate() override;
 
 private:
@@ -78,6 +83,9 @@ public:
 
     void clear();
 
+    void pushOrigin(int x, int y);
+    void popOrigin();
+
     void draw(const RectangleData &d);
     void draw(const TextData &d);
 
@@ -85,6 +93,16 @@ public:
 
 private:
     std::vector<std::unique_ptr<Shape>> m_shapes;
+    std::vector<std::pair<int, int>> m_originStack;
+    std::pair<int, int> m_curOrigin;
+
+    int m_svgWidth = 0;
+    int m_svgHeight = 0;
+
+    int m_leftMargin = 10;
+    int m_rightMargin = 10;
+    int m_topMargin = 10;
+    int m_bottomMargin = 10;
 };
 
 }

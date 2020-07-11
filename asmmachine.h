@@ -53,6 +53,8 @@ private:
     void mainLoop();
     void interpret(instr::AsmInstruction instr, int op);
 
+    void pushOrigin(int x, int y);
+    void popOrigin();
     void drawRect(const Object &o);
     void drawText(const Object &o);
 

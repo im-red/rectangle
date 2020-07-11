@@ -384,6 +384,20 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         m_halt = true;
         break;
     }
+    case instr::PUSHORIGIN:
+    {
+        Object y = popOperand();
+        Object x = popOperand();
+        pushOrigin(x.intData(), y.intData());
+        printf("> pushOrigin (%d, %d)\n", x.intData(), y.intData());
+        break;
+    }
+    case instr::POPORIGIN:
+    {
+        popOrigin();
+        printf("> popOrigin\n");
+        break;
+    }
     case instr::DRAWRECT:
     {
         Object o = popOperand();
@@ -399,6 +413,16 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         break;
     }
     }
+}
+
+void AsmMachine::pushOrigin(int x, int y)
+{
+    m_painter.pushOrigin(x, y);
+}
+
+void AsmMachine::popOrigin()
+{
+    m_painter.popOrigin();
 }
 
 void AsmMachine::drawRect(const Object &o)

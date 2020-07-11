@@ -17,6 +17,8 @@
 
 #include "svgpainter.h"
 
+#include <assert.h>
+
 using namespace std;
 
 namespace draw
@@ -24,27 +26,56 @@ namespace draw
 
 SvgPainter::SvgPainter()
 {
-
+    clear();
 }
 
 void SvgPainter::clear()
 {
     m_shapes.clear();
+    m_originStack.clear();
+    m_curOrigin.first = m_leftMargin;
+    m_curOrigin.second = m_topMargin;
+    m_svgWidth = 0;
+    m_svgHeight = 0;
+}
+
+void SvgPainter::pushOrigin(int x, int y)
+{
+    m_curOrigin.first += x;
+    m_curOrigin.second += y;
+    m_originStack.emplace_back(x, y);
+}
+
+void SvgPainter::popOrigin()
+{
+    assert(m_originStack.size() > 0);
+    m_curOrigin.first -= m_originStack.back().first;
+    m_curOrigin.second -= m_originStack.back().second;
+    m_originStack.pop_back();
 }
 
 void SvgPainter::draw(const RectangleData &d)
 {
-    m_shapes.emplace_back(new RectangleShape(d));
+    if (m_shapes.size() == 0)
+    {
+        m_svgWidth = d.x + d.width + m_leftMargin + m_rightMargin;
+        m_svgHeight = d.y + d.height + m_topMargin + m_bottomMargin;
+    }
+
+    m_shapes.emplace_back(new RectangleShape(d, m_curOrigin.first, m_curOrigin.second));
 }
 
 void SvgPainter::draw(const TextData &d)
 {
-    m_shapes.emplace_back(new TextShape(d));
+    m_shapes.emplace_back(new TextShape(d, m_curOrigin.first, m_curOrigin.second));
 }
 
 string SvgPainter::generate() const
 {
-    static const std::string BEGIN = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n";
+    char buf[512];
+    snprintf(buf, sizeof(buf), "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"%d\" height=\"%d\">\n",
+             m_svgWidth, m_svgHeight);
+    static const std::string BEGIN = buf;
     static const std::string END = "</svg>\n";
 
     string result;
@@ -57,13 +88,21 @@ string SvgPainter::generate() const
     return result;
 }
 
+Shape::Shape(int originX, int originY)
+    : m_originX(originX)
+    , m_originY(originY)
+{
+
+}
+
 Shape::~Shape()
 {
 
 }
 
-RectangleShape::RectangleShape(const RectangleData &rect)
-    : m_data(rect)
+RectangleShape::RectangleShape(const RectangleData &rect, int originX, int originY)
+    : Shape(originX, originY)
+    , m_data(rect)
 {
 
 }
@@ -72,12 +111,13 @@ std::string RectangleShape::generate()
 {
     char buf[512];
     snprintf(buf, sizeof(buf), "<rect x=\"%d\" y=\"%d\" width=\"%d\" height=\"%d\" style=\"fill:%s; stroke-width:%d; stroke:%s; stroke-dasharray:%s\"/>",
-             m_data.x, m_data.y, m_data.width, m_data.height, m_data.fill_color.c_str(), m_data.stroke_width, m_data.stroke_color.c_str(), m_data.stroke_dasharray.c_str());
+             m_data.x + m_originX, m_data.y + m_originY, m_data.width, m_data.height, m_data.fill_color.c_str(), m_data.stroke_width, m_data.stroke_color.c_str(), m_data.stroke_dasharray.c_str());
     return string(buf);
 }
 
-TextShape::TextShape(const TextData &text)
-    : m_data(text)
+TextShape::TextShape(const TextData &text, int originX, int originY)
+    : Shape(originX, originY)
+    , m_data(text)
 {
 
 }
@@ -85,8 +125,8 @@ TextShape::TextShape(const TextData &text)
 string TextShape::generate()
 {
     char buf[512];
-    snprintf(buf, sizeof(buf), "<text x=\"%d\" y=\"%d\" font-size=\"%d\">%s</text>",
-             m_data.x, m_data.y, m_data.size, m_data.text.c_str());
+    snprintf(buf, sizeof(buf), "<text x=\"%d\" y=\"%d\" font-size=\"%d\" dominant-baseline=\"text-before-edge\">%s</text>",
+             m_data.x + m_originX, m_data.y + m_originY, m_data.size, m_data.text.c_str());
     return string(buf);
 }
 

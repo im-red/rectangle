@@ -1,7 +1,7 @@
 # Built-in struct
 
 ```cpp
-struct rect
+struct svg_rect
 {
     int x;
     int y;
@@ -12,7 +12,7 @@ struct rect
     string stroke_color;
     string stroke_dasharray;
 };
-struct text
+struct svg_text
 {
     int x;
     int y;

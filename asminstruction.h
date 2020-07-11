@@ -99,6 +99,9 @@ enum AsmInstruction : unsigned char
     PRINT,
     HALT,
 
+    PUSHORIGIN,
+    POPORIGIN,
+
     DRAWRECT,
     DRAWTEXT
 };
