@@ -298,7 +298,8 @@ void AsmVisitor::visit(CallExpr *ce)
             || functionName == "defineScene"
             || functionName == "drawRect"
             || functionName == "drawText"
-            || functionName == "drawEllipse")
+            || functionName == "drawEllipse"
+            || functionName == "drawPolygon")
     {
         m_asm.appendLine({functionName});
     }

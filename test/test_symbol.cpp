@@ -29,6 +29,7 @@ TEST(symbol, INSTANCE)
         "../../template/Rectangle.rect", 
         "../../template/Text.rect", 
         "../../template/Ellipse.rect", 
+        "../../template/Polygon.rect", 
         "../rect/symbol_instance_instance.rect"
     };
 

@@ -49,6 +49,7 @@ struct svg_polygon
     int y;
     list<list<int>> points;
     string fill_color;
+    string fill_rule;
     int stroke_width;
     string stroke_color;
     string stroke_dasharray;

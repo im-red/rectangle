@@ -428,6 +428,13 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         drawEllipse(o);
         break;
     }
+    case instr::DRAWPOLYGON:
+    {
+        Object o = popOperand();
+        util::condPrint(option::showSvgDraw, "svg: drawPolygon %s\n", o.toString().c_str());
+        drawPolygon(o);
+        break;
+    }
     }
 }
 
@@ -488,5 +495,29 @@ void AsmMachine::drawEllipse(const Object &o)
     d.stroke_width = o.field(builtin::ellipseInfo.fieldIndex("stroke_width")).intData();
     d.stroke_color = o.field(builtin::ellipseInfo.fieldIndex("stroke_color")).stringData();
     d.stroke_dasharray = o.field(builtin::ellipseInfo.fieldIndex("stroke_dasharray")).stringData();
+    m_painter.draw(d);
+}
+
+void AsmMachine::drawPolygon(const Object &o)
+{
+    draw::PolygonData d;
+    d.x = o.field(builtin::polygonInfo.fieldIndex("x")).intData();
+    d.y = o.field(builtin::polygonInfo.fieldIndex("y")).intData();
+    {
+        Object points = o.field(builtin::polygonInfo.fieldIndex("points"));
+        int pointCount = points.elementCount();
+        for (int i = 0; i < pointCount; i++)
+        {
+            Object point = points.element(i);
+            int x = point.element(0).intData();
+            int y = point.element(1).intData();
+            d.points.push_back({x, y});
+        }
+    }
+    d.fill_color = o.field(builtin::polygonInfo.fieldIndex("fill_color")).stringData();
+    d.fill_rule = o.field(builtin::polygonInfo.fieldIndex("fill_rule")).stringData();
+    d.stroke_width = o.field(builtin::polygonInfo.fieldIndex("stroke_width")).intData();
+    d.stroke_color = o.field(builtin::polygonInfo.fieldIndex("stroke_color")).stringData();
+    d.stroke_dasharray = o.field(builtin::polygonInfo.fieldIndex("stroke_dasharray")).stringData();
     m_painter.draw(d);
 }

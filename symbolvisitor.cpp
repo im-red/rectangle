@@ -610,7 +610,7 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
                                  + rightType->toString() + ")");
         }
         TypeInfo::Category cat = leftType->category();
-        if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float || cat == TypeInfo::Category::String)
+        if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float || cat == TypeInfo::Category::String || cat == TypeInfo::Category::List)
         {
             // good
         }

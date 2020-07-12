@@ -103,8 +103,25 @@ const StructInfo ellipseInfo = StructInfo("svg_ellipse", {
                                               { "stroke_color",     stringType },
                                               { "stroke_dasharray", stringType },
                                           });
+static const shared_ptr<TypeInfo> intList = make_shared<ListTypeInfo>(intType);
+static const shared_ptr<TypeInfo> listOfIntList = make_shared<ListTypeInfo>(intList);
+const StructInfo polygonInfo = StructInfo("svg_polygon", {
+                                              { "x",                intType },
+                                              { "y",                intType },
+                                              { "points",           listOfIntList },
+                                              { "fill_color",       stringType },
+                                              { "fill_rule",        stringType },
+                                              { "stroke_width",     intType },
+                                              { "stroke_color",     stringType },
+                                              { "stroke_dasharray", stringType },
                                           });
 
-std::vector<const StructInfo *> infoList = {&sceneInfo, &rectInfo, &textInfo, &ellipseInfo};
+std::vector<const StructInfo *> infoList = {
+    &sceneInfo,
+    &rectInfo,
+    &textInfo,
+    &ellipseInfo,
+    &polygonInfo
+};
 
 }

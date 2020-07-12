@@ -121,6 +121,13 @@ void SymbolTable::initGlobalScope()
     }
 
     {
+        shared_ptr<TypeInfo> polygonType(new CustomTypeInfo(builtin::polygonInfo.name()));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, polygonType);
+        Symbol *drawPolygon = new FunctionSymbol("drawPolygon", voidType, paramTypes);
+        define(drawPolygon);
+    }
+
+    {
         vector<shared_ptr<TypeInfo>> paramTypes(1, voidType);
         Symbol *len = new FunctionSymbol("len", make_shared<TypeInfo>(TypeInfo::Category::Int), paramTypes);
         define(len);

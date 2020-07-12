@@ -11,6 +11,7 @@ Scene {
         width: 800
         height: 800
         border_type: Rectangle.Dot
+
         Rectangle {
             x: 100
             y: 100
@@ -63,5 +64,8 @@ Scene {
             x_radius: 100
             y_radius: 888
         }
+    }
+    Polygon {
+        points: {{0, 0}, {0, 500}, {500, 0}}
     }
 }

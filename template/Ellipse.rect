@@ -1,6 +1,6 @@
 def Ellipse {
     enum LineType {
-        Invalid,
+        InvalidLineType,
         Solid,
         Dot,
         Dash
@@ -9,8 +9,8 @@ def Ellipse {
     int y: 0
     int x_radius: 100
     int y_radius: 100
-    int border_type: Invalid
-    string fill_color: "#FFFFFF"
+    int border_type: InvalidLineType
+    string fill_color: "transparent"
     int stroke_width: 1
     string stroke_color: "#000000"
     string stroke_dasharray: "1,0"
@@ -25,7 +25,7 @@ def Ellipse {
         e.fill_color = fill_color;
         e.stroke_width = stroke_width;
         e.stroke_color = stroke_color;
-        if (border_type != Invalid) {
+        if (border_type != InvalidLineType) {
             e.stroke_dasharray = getDasharray(border_type);
         } else {
             e.stroke_dasharray = stroke_dasharray;
@@ -35,11 +35,12 @@ def Ellipse {
     }
     string getDasharray(int type) {
         if (type == Solid) {
-            return "1,0";
+            return "1";
         } else if (type == Dot) {
             return "5,5";
-        } else {
+        } else if (type == Dash) {
             return "4,1";
         }
+        return "1";
     }
 }

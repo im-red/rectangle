@@ -84,6 +84,11 @@ void SvgPainter::draw(const EllipseData &d)
     m_shapes.emplace_back(new EllipseShape(d, m_curOrigin.x, m_curOrigin.y));
 }
 
+void SvgPainter::draw(const PolygonData &d)
+{
+    m_shapes.emplace_back(new PolygonShape(d, m_curOrigin.x, m_curOrigin.y));
+}
+
 std::string SvgPainter::generate() const
 {
     char buf[512];
@@ -177,6 +182,33 @@ string EllipseShape::generate()
              m_data.stroke_width,
              m_data.stroke_color.c_str(),
              m_data.stroke_dasharray.c_str());
+    return string(buf);
+}
+
+PolygonShape::PolygonShape(const PolygonData &polygon, int originX, int originY)
+    : Shape(originX, originY)
+    , m_data(polygon)
+{
+
+}
+
+string PolygonShape::generate()
+{
+    string points;
+    for (auto &point : m_data.points)
+    {
+        assert(point.size() == 2);
+        points += to_string(m_originX + m_data.x + point[0]) + "," + to_string(m_originY + m_data.y + point[1]) + " ";
+    }
+    char buf[4096];
+    snprintf(buf, sizeof(buf),
+             "<polygon points=\"%s\" style=\"fill:%s; stroke-width:%d; stroke:%s; stroke-dasharray:%s; fill-rule:%s\"/>",
+             points.c_str(),
+             m_data.fill_color.c_str(),
+             m_data.stroke_width,
+             m_data.stroke_color.c_str(),
+             m_data.stroke_dasharray.c_str(),
+             m_data.fill_rule.c_str());
     return string(buf);
 }
 

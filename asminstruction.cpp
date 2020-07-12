@@ -75,6 +75,7 @@ std::string getAsmName(unsigned char value)
         { DRAWRECT, "drawRect" },
         { DRAWTEXT, "drawText" },
         { DRAWELLIPSE, "drawEllipse" },
+        { DRAWPOLYGON, "drawPolygon" },
         { GLOAD, "gload" },
         { GSTORE, "gstore" },
         { LLOAD, "lload" },
@@ -143,6 +144,7 @@ unsigned char getAsmValue(const std::string &name)
         { "defineScene", DEFINESCENE },
         { "popOrigin", POPORIGIN },
         { "drawRect", DRAWRECT },
+        { "drawPolygon", DRAWPOLYGON },
         { "drawEllipse", DRAWELLIPSE },
         { "drawText", DRAWTEXT },
         { "gload", GLOAD },
@@ -214,7 +216,8 @@ bool is0OpInstr(unsigned char value)
         POPORIGIN,
         DRAWRECT,
         DRAWTEXT,
-        DRAWELLIPSE
+        DRAWELLIPSE,
+        DRAWPOLYGON
     };
 
     return s_instr0.find(value) != s_instr0.end();
