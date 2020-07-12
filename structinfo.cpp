@@ -66,39 +66,42 @@ std::string StructInfo::name() const
     return m_name;
 }
 
+static const shared_ptr<TypeInfo> intType = make_shared<TypeInfo>(TypeInfo::Category::Int);
+static const shared_ptr<TypeInfo> stringType = make_shared<TypeInfo>(TypeInfo::Category::String);
+
 const StructInfo sceneInfo = StructInfo("svg_scene", {
-                                            { "leftMargin",     make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                            { "topMargin",      make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                            { "rightMargin",    make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                            { "bottomMargin",   make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                            { "width",          make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                            { "height",         make_shared<TypeInfo>(TypeInfo::Category::Int) },
+                                            { "leftMargin",     intType },
+                                            { "topMargin",      intType },
+                                            { "rightMargin",    intType },
+                                            { "bottomMargin",   intType },
+                                            { "width",          intType },
+                                            { "height",         intType },
                                         });
 const StructInfo rectInfo = StructInfo("svg_rect", {
-                                           { "x",                   make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                           { "y",                   make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                           { "width",               make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                           { "height",              make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                           { "fill_color",          make_shared<TypeInfo>(TypeInfo::Category::String) },
-                                           { "stroke_width",        make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                           { "stroke_color",        make_shared<TypeInfo>(TypeInfo::Category::String) },
-                                           { "stroke_dasharray",    make_shared<TypeInfo>(TypeInfo::Category::String) },
+                                           { "x",                   intType },
+                                           { "y",                   intType },
+                                           { "width",               intType },
+                                           { "height",              intType },
+                                           { "fill_color",          stringType },
+                                           { "stroke_width",        intType },
+                                           { "stroke_color",        stringType },
+                                           { "stroke_dasharray",    stringType },
                                        });
 const StructInfo textInfo = StructInfo("svg_text", {
-                                           { "x",       make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                           { "y",       make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                           { "size",    make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                           { "text",    make_shared<TypeInfo>(TypeInfo::Category::String) },
+                                           { "x",       intType },
+                                           { "y",       intType },
+                                           { "size",    intType },
+                                           { "text",    stringType },
                                        });
 const StructInfo ellipseInfo = StructInfo("svg_ellipse", {
-                                              { "x",                make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                              { "y",                make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                              { "x_radius",         make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                              { "y_radius",         make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                              { "fill_color",       make_shared<TypeInfo>(TypeInfo::Category::String) },
-                                              { "stroke_width",     make_shared<TypeInfo>(TypeInfo::Category::Int) },
-                                              { "stroke_color",     make_shared<TypeInfo>(TypeInfo::Category::String) },
-                                              { "stroke_dasharray", make_shared<TypeInfo>(TypeInfo::Category::String) },
+                                              { "x",                intType },
+                                              { "y",                intType },
+                                              { "x_radius",         intType },
+                                              { "y_radius",         intType },
+                                              { "fill_color",       stringType },
+                                              { "stroke_width",     intType },
+                                              { "stroke_color",     stringType },
+                                              { "stroke_dasharray", stringType },
                                           });
                                           });
 
