@@ -1,0 +1,20 @@
+def Scene
+{
+    int leftMargin: 10
+    int topMargin: 10
+    int rightMargin: 10
+    int bottomMargin: 10
+    int width: 800
+    int height: 800
+    void draw() {
+        svg_scene s;
+        s.leftMargin = leftMargin;
+        s.topMargin = topMargin;
+        s.rightMargin = rightMargin;
+        s.bottomMargin = bottomMargin;
+        s.width = width;
+        s.height = height;
+
+        defineScene(s);
+    }
+}

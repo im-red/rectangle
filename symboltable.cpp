@@ -93,6 +93,13 @@ void SymbolTable::initGlobalScope()
     shared_ptr<TypeInfo> voidType = make_shared<TypeInfo>(TypeInfo::Category::Void);
 
     {
+        shared_ptr<TypeInfo> sceneType(new CustomTypeInfo(builtin::sceneInfo.name()));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, sceneType);
+        Symbol *defineScene = new FunctionSymbol("defineScene", voidType, paramTypes);
+        define(defineScene);
+    }
+
+    {
         shared_ptr<TypeInfo> rectType(new CustomTypeInfo(builtin::rectInfo.name()));
         vector<shared_ptr<TypeInfo>> paramTypes(1, rectType);
         Symbol *drawRect = new FunctionSymbol("drawRect", voidType, paramTypes);

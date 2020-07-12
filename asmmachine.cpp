@@ -400,6 +400,13 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         util::condPrint(option::showSvgDraw, "svg: popOrigin\n");
         break;
     }
+    case instr::DEFINESCENE:
+    {
+        Object o = popOperand();
+        util::condPrint(option::showSvgDraw, "svg: defineScene %s\n", o.toString().c_str());
+        defineScene(o);
+        break;
+    }
     case instr::DRAWRECT:
     {
         Object o = popOperand();
@@ -422,6 +429,18 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         break;
     }
     }
+}
+
+void AsmMachine::defineScene(const Object &o)
+{
+    draw::SceneData d;
+    d.leftMargin = o.field(builtin::sceneInfo.fieldIndex("leftMargin")).intData();
+    d.topMargin = o.field(builtin::sceneInfo.fieldIndex("topMargin")).intData();
+    d.rightMargin = o.field(builtin::sceneInfo.fieldIndex("rightMargin")).intData();
+    d.bottomMargin = o.field(builtin::sceneInfo.fieldIndex("bottomMargin")).intData();
+    d.width = o.field(builtin::sceneInfo.fieldIndex("width")).intData();
+    d.height = o.field(builtin::sceneInfo.fieldIndex("height")).intData();
+    m_painter.defineScene(d);
 }
 
 void AsmMachine::pushOrigin(int x, int y)

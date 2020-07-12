@@ -25,6 +25,7 @@ TEST(symbol, INSTANCE)
     option::verbose = true;
     vector<string> files = 
     {
+        "../../template/Scene.rect",
         "../../template/Rectangle.rect", 
         "../../template/Text.rect", 
         "../../template/Ellipse.rect", 

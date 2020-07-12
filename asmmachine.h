@@ -53,6 +53,7 @@ private:
     void mainLoop();
     void interpret(instr::AsmInstruction instr, int op);
 
+    void defineScene(const Object &o);
     void pushOrigin(int x, int y);
     void popOrigin();
     void drawRect(const Object &o);

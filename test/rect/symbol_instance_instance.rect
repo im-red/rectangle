@@ -1,13 +1,16 @@
-Rectangle {
-    id: root
-    width: 800
-    height: 800
-    border_type: Rectangle.Dot
+Scene {
+    leftMargin: 50
+    topMargin: 50
+    rightMargin: 50
+    bottomMargin: 50
+    width: 1000
+    height: 1000
+
     Rectangle {
-        x: 100
-        y: 100
-        width: 500
-        height: 500
+        id: root
+        width: 800
+        height: 800
+        border_type: Rectangle.Dot
         Rectangle {
             x: 100
             y: 100
@@ -18,41 +21,47 @@ Rectangle {
                 y: 100
                 width: 500
                 height: 500
-                Text {
-                    text: "测试"
+                Rectangle {
+                    x: 100
+                    y: 100
+                    width: 500
+                    height: 500
+                    Text {
+                        text: "测试"
+                    }
                 }
             }
         }
-    }
-    Rectangle {
-        id: tl
-        x: root.width / 2
-        y: root.height / 2
-        fill_color: "#FF0000"
-    }
-    Rectangle {
-        id: tr
-        x: tl.x + tl.width
-        fill_color: "#00FF00"
-    }
-    Rectangle {
-        id: bl
-        x: tl.x
-        y: tl.y + tl.height
-        fill_color: "#0000FF"
-    }
-    Rectangle {
-        x: tr.x
-        y: bl.y
-        border_type: bl.border_type
-        fill_color: "#000000"
-        border_type: Rectangle.Dash
-    }
-    Ellipse {
-        id: ellipse
-        x: 0
-        y: 0
-        x_radius: 100
-        y_radius: 888
+        Rectangle {
+            id: tl
+            x: root.width / 2
+            y: root.height / 2
+            fill_color: "#FF0000"
+        }
+        Rectangle {
+            id: tr
+            x: tl.x + tl.width
+            fill_color: "#00FF00"
+        }
+        Rectangle {
+            id: bl
+            x: tl.x
+            y: tl.y + tl.height
+            fill_color: "#0000FF"
+        }
+        Rectangle {
+            x: tr.x
+            y: bl.y
+            border_type: bl.border_type
+            fill_color: "#000000"
+            border_type: Rectangle.Dash
+        }
+        Ellipse {
+            id: ellipse
+            x: 0
+            y: 0
+            x_radius: 100
+            y_radius: 888
+        }
     }
 }

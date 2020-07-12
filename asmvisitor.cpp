@@ -295,6 +295,7 @@ void AsmVisitor::visit(CallExpr *ce)
 
     if (functionName == "len"
             || functionName == "print"
+            || functionName == "defineScene"
             || functionName == "drawRect"
             || functionName == "drawText"
             || functionName == "drawEllipse")

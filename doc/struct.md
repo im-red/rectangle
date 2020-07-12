@@ -1,6 +1,16 @@
 # Built-in struct
 
 ```cpp
+struct svg_scene
+{
+    int leftMargin;
+    int topMargin;
+    int rightMargin;
+    int bottomMargin;
+    int width;
+    int height;
+};
+
 struct svg_rect
 {
     int x;
@@ -12,13 +22,15 @@ struct svg_rect
     string stroke_color;
     string stroke_dasharray;
 };
+
 struct svg_text
 {
     int x;
     int y;
     int size;
     string text;
-}
+};
+
 struct svg_ellipse
 {
     int x;

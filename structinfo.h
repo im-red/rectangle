@@ -52,6 +52,7 @@ private:
     std::map<std::string, FieldInfo> m_name2field;
 };
 
+extern const StructInfo sceneInfo;
 extern const StructInfo rectInfo;
 extern const StructInfo textInfo;
 extern const StructInfo ellipseInfo;

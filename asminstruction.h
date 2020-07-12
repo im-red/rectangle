@@ -102,6 +102,8 @@ enum AsmInstruction : unsigned char
     PUSHORIGIN,
     POPORIGIN,
 
+    DEFINESCENE,
+
     DRAWRECT,
     DRAWTEXT,
     DRAWELLIPSE

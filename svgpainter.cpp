@@ -33,10 +33,25 @@ void SvgPainter::clear()
 {
     m_shapes.clear();
     m_originStack.clear();
-    m_curOrigin.x = m_leftMargin;
-    m_curOrigin.y = m_topMargin;
+    m_curOrigin.x = 0;
+    m_curOrigin.y = 0;
     m_svgWidth = 0;
     m_svgHeight = 0;
+    m_leftMargin = 0;
+    m_topMargin = 0;
+    m_rightMargin = 0;
+    m_bottomMargin = 0;
+}
+
+void SvgPainter::defineScene(const SceneData &d)
+{
+    m_leftMargin = d.leftMargin;
+    m_topMargin = d.topMargin;
+    m_rightMargin = d.rightMargin;
+    m_bottomMargin = d.bottomMargin;
+
+    m_svgWidth = m_leftMargin + m_rightMargin + d.width;
+    m_svgHeight = m_topMargin + m_bottomMargin + d.height;
 }
 
 void SvgPainter::pushOrigin(int x, int y)
@@ -56,12 +71,6 @@ void SvgPainter::popOrigin()
 
 void SvgPainter::draw(const RectangleData &d)
 {
-    if (m_shapes.size() == 0)
-    {
-        m_svgWidth = d.x + d.width + m_leftMargin + m_rightMargin;
-        m_svgHeight = d.y + d.height + m_topMargin + m_bottomMargin;
-    }
-
     m_shapes.emplace_back(new RectangleShape(d, m_curOrigin.x, m_curOrigin.y));
 }
 

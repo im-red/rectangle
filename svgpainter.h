@@ -31,6 +31,16 @@ struct Point
     int y;
 };
 
+struct SceneData
+{
+    int leftMargin;
+    int topMargin;
+    int rightMargin;
+    int bottomMargin;
+    int width;
+    int height;
+};
+
 struct RectangleData
 {
     int x;
@@ -111,6 +121,8 @@ public:
     SvgPainter();
 
     void clear();
+
+    void defineScene(const SceneData &d);
 
     void pushOrigin(int x, int y);
     void popOrigin();
