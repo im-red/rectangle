@@ -22,24 +22,25 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace builtin
 {
 
 struct FieldInfo
 {
-    FieldInfo(int index_, const std::string &name_, TypeInfo::Category type_)
+    FieldInfo(int index_, const std::string &name_, const std::shared_ptr<TypeInfo> &type_)
         : index(index_), name(name_), type(type_)
     {}
     int index;
     std::string name;
-    TypeInfo::Category type;
+    std::shared_ptr<TypeInfo> type;
 };
 
 class StructInfo
 {
 public:
-    StructInfo(const std::string &name, const std::vector<std::pair<std::string, TypeInfo::Category>> &fields);
+    StructInfo(const std::string &name, const std::vector<std::pair<std::string, std::shared_ptr<TypeInfo> > > &fields);
 
     int fieldIndex(const std::string &name) const;
     int fieldCount() const;

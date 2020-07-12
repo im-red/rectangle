@@ -42,4 +42,15 @@ struct svg_ellipse
     string stroke_color;
     string stroke_dasharray;
 };
+
+struct svg_polygon
+{
+    int x;
+    int y;
+    list<list<int>> points;
+    string fill_color;
+    int stroke_width;
+    string stroke_color;
+    string stroke_dasharray;
+};
 ```

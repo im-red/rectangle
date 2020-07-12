@@ -72,7 +72,7 @@ void AST::initBuiltinDocuments()
         for (int i = 0; i < fieldCount; i++)
         {
             builtin::FieldInfo field = pInfo->fieldAt(i);
-            sd->fieldList.emplace_back(new FieldDecl(field.name, make_shared<TypeInfo>(field.type)));
+            sd->fieldList.emplace_back(new FieldDecl(field.name, field.type));
         }
         m_builtinDocuments.push_back(move(sd));
     }
