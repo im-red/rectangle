@@ -85,6 +85,29 @@ struct PolygonData
     std::string stroke_dasharray;
 };
 
+struct LineData
+{
+    int x;
+    int y;
+    int dx1;
+    int dy1;
+    int dx2;
+    int dy2;
+    int stroke_width;
+    std::string stroke_color;
+    std::string stroke_dasharray;
+};
+
+struct PolylineData
+{
+    int x;
+    int y;
+    std::vector<std::vector<int>> points;
+    int stroke_width;
+    std::string stroke_color;
+    std::string stroke_dasharray;
+};
+
 class Shape
 {
 public:
@@ -137,6 +160,26 @@ private:
     PolygonData m_data;
 };
 
+class LineShape : public Shape
+{
+public:
+    explicit LineShape(const LineData &line, int originX, int originY);
+    std::string generate() override;
+
+private:
+    LineData m_data;
+};
+
+class PolylineShape : public Shape
+{
+public:
+    explicit PolylineShape(const PolylineData &polyline, int originX, int originY);
+    std::string generate() override;
+
+private:
+    PolylineData m_data;
+};
+
 class SvgPainter
 {
 public:
@@ -153,6 +196,8 @@ public:
     void draw(const TextData &d);
     void draw(const EllipseData &d);
     void draw(const PolygonData &d);
+    void draw(const LineData &d);
+    void draw(const PolylineData &d);
 
     std::string generate() const;
 

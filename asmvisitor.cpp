@@ -299,7 +299,9 @@ void AsmVisitor::visit(CallExpr *ce)
             || functionName == "drawRect"
             || functionName == "drawText"
             || functionName == "drawEllipse"
-            || functionName == "drawPolygon")
+            || functionName == "drawPolygon"
+            || functionName == "drawLine"
+            || functionName == "drawPolyline")
     {
         m_asm.appendLine({functionName});
     }

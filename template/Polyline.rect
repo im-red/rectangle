@@ -1,4 +1,4 @@
-def Rectangle {
+def Polyline {
     enum LineType {
         InvalidLineType,
         Solid,
@@ -8,31 +8,27 @@ def Rectangle {
 
     int x: 0
     int y: 0
-    int width: 100
-    int height: 100
+    list<list<int>> points: {}
     int border_type: InvalidLineType
-    string fill_color: "transparent"
     int stroke_width: 1
     string stroke_color: "#000000"
     string stroke_dasharray: "1,0"
 
     void draw() {
-        svg_rect r;
+        svg_polyline p;
 
-        r.x = x;
-        r.y = y;
-        r.width = width;
-        r.height = height;
-        r.fill_color = fill_color;
-        r.stroke_width = stroke_width;
-        r.stroke_color = stroke_color;
+        p.x = x;
+        p.y = y;
+        p.points = points;
+        p.stroke_width = stroke_width;
+        p.stroke_color = stroke_color;
         if (border_type != InvalidLineType) {
-            r.stroke_dasharray = getDasharray(border_type);
+            p.stroke_dasharray = getDasharray(border_type);
         } else {
-            r.stroke_dasharray = stroke_dasharray;
+            p.stroke_dasharray = stroke_dasharray;
         }
         
-        drawRect(r);
+        drawPolyline(p);
     }
     string getDasharray(int type) {
         if (type == Solid) {

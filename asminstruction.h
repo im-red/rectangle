@@ -108,6 +108,8 @@ enum AsmInstruction : unsigned char
     DRAWTEXT,
     DRAWELLIPSE,
     DRAWPOLYGON,
+    DRAWLINE,
+    DRAWPOLYLINE
 };
 
 std::string getAsmName(unsigned char value);

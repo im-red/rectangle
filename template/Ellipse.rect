@@ -5,6 +5,7 @@ def Ellipse {
         Dot,
         Dash
     }
+
     int x: 0
     int y: 0
     int x_radius: 100

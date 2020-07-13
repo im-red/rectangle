@@ -115,13 +115,34 @@ const StructInfo polygonInfo = StructInfo("svg_polygon", {
                                               { "stroke_color",     stringType },
                                               { "stroke_dasharray", stringType },
                                           });
+const StructInfo lineInfo = StructInfo("svg_line", {
+                                           { "x",                   intType },
+                                           { "y",                   intType },
+                                           { "dx1",                 intType },
+                                           { "dy1",                 intType },
+                                           { "dx2",                 intType },
+                                           { "dy2",                 intType },
+                                           { "stroke_width",        intType },
+                                           { "stroke_color",        stringType },
+                                           { "stroke_dasharray",    stringType },
+                                       });
+const StructInfo polylineInfo = StructInfo("svg_polyline", {
+                                               { "x",                intType },
+                                               { "y",                intType },
+                                               { "points",           listOfIntList },
+                                               { "stroke_width",     intType },
+                                               { "stroke_color",     stringType },
+                                               { "stroke_dasharray", stringType },
+                                           });
 
 std::vector<const StructInfo *> infoList = {
     &sceneInfo,
     &rectInfo,
     &textInfo,
     &ellipseInfo,
-    &polygonInfo
+    &polygonInfo,
+    &lineInfo,
+    &polylineInfo
 };
 
 }

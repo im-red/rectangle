@@ -30,6 +30,8 @@ TEST(symbol, INSTANCE)
         "../../template/Text.rect", 
         "../../template/Ellipse.rect", 
         "../../template/Polygon.rect", 
+        "../../template/Line.rect",
+        "../../template/Polyline.rect", 
         "../rect/symbol_instance_instance.rect"
     };
 

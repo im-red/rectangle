@@ -58,6 +58,8 @@ extern const StructInfo rectInfo;
 extern const StructInfo textInfo;
 extern const StructInfo ellipseInfo;
 extern const StructInfo polygonInfo;
+extern const StructInfo lineInfo;
+extern const StructInfo polylineInfo;
 
 extern std::vector<const StructInfo *> infoList;
 

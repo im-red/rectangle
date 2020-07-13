@@ -128,6 +128,20 @@ void SymbolTable::initGlobalScope()
     }
 
     {
+        shared_ptr<TypeInfo> lineType(new CustomTypeInfo(builtin::lineInfo.name()));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, lineType);
+        Symbol *drawLine = new FunctionSymbol("drawLine", voidType, paramTypes);
+        define(drawLine);
+    }
+
+    {
+        shared_ptr<TypeInfo> polylineType(new CustomTypeInfo(builtin::polylineInfo.name()));
+        vector<shared_ptr<TypeInfo>> paramTypes(1, polylineType);
+        Symbol *drawPolyline = new FunctionSymbol("drawPolyline", voidType, paramTypes);
+        define(drawPolyline);
+    }
+
+    {
         vector<shared_ptr<TypeInfo>> paramTypes(1, voidType);
         Symbol *len = new FunctionSymbol("len", make_shared<TypeInfo>(TypeInfo::Category::Int), paramTypes);
         define(len);

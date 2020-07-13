@@ -89,6 +89,16 @@ void SvgPainter::draw(const PolygonData &d)
     m_shapes.emplace_back(new PolygonShape(d, m_curOrigin.x, m_curOrigin.y));
 }
 
+void SvgPainter::draw(const LineData &d)
+{
+    m_shapes.emplace_back(new LineShape(d, m_curOrigin.x, m_curOrigin.y));
+}
+
+void SvgPainter::draw(const PolylineData &d)
+{
+    m_shapes.emplace_back(new PolylineShape(d, m_curOrigin.x, m_curOrigin.y));
+}
+
 std::string SvgPainter::generate() const
 {
     char buf[512];
@@ -209,6 +219,57 @@ string PolygonShape::generate()
              m_data.stroke_color.c_str(),
              m_data.stroke_dasharray.c_str(),
              m_data.fill_rule.c_str());
+    return string(buf);
+}
+
+LineShape::LineShape(const LineData &line, int originX, int originY)
+    : Shape(originX, originY)
+    , m_data(line)
+{
+
+}
+
+string LineShape::generate()
+{
+    char buf[512];
+    int x1 = m_originX + m_data.x + m_data.dx1;
+    int y1 = m_originX + m_data.y + m_data.dy1;
+    int x2 = m_originX + m_data.x + m_data.dx2;
+    int y2 = m_originX + m_data.y + m_data.dy2;
+    snprintf(buf, sizeof(buf),
+             "<line x1=\"%d\" y1=\"%d\" x2=\"%d\" y2=\"%d\" style=\"stroke-width:%d; stroke:%s; stroke-dasharray:%s\"/>",
+             x1,
+             y1,
+             x2,
+             y2,
+             m_data.stroke_width,
+             m_data.stroke_color.c_str(),
+             m_data.stroke_dasharray.c_str());
+    return string(buf);
+}
+
+PolylineShape::PolylineShape(const PolylineData &polyline, int originX, int originY)
+    : Shape(originX, originY)
+    , m_data(polyline)
+{
+
+}
+
+string PolylineShape::generate()
+{
+    string points;
+    for (auto &point : m_data.points)
+    {
+        assert(point.size() == 2);
+        points += to_string(m_originX + m_data.x + point[0]) + "," + to_string(m_originY + m_data.y + point[1]) + " ";
+    }
+    char buf[4096];
+    snprintf(buf, sizeof(buf),
+             "<polyline points=\"%s\" style=\"fill:none; stroke-width:%d; stroke:%s; stroke-dasharray:%s\"/>",
+             points.c_str(),
+             m_data.stroke_width,
+             m_data.stroke_color.c_str(),
+             m_data.stroke_dasharray.c_str());
     return string(buf);
 }
 

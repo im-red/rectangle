@@ -1,4 +1,4 @@
-def Rectangle {
+def Line {
     enum LineType {
         InvalidLineType,
         Solid,
@@ -8,31 +8,33 @@ def Rectangle {
 
     int x: 0
     int y: 0
-    int width: 100
-    int height: 100
+    int dx1: 100
+    int dy1: 0
+    int dx2: 0
+    int dy2: 100
     int border_type: InvalidLineType
-    string fill_color: "transparent"
     int stroke_width: 1
     string stroke_color: "#000000"
     string stroke_dasharray: "1,0"
 
     void draw() {
-        svg_rect r;
+        svg_line l;
 
-        r.x = x;
-        r.y = y;
-        r.width = width;
-        r.height = height;
-        r.fill_color = fill_color;
-        r.stroke_width = stroke_width;
-        r.stroke_color = stroke_color;
+        l.x = x;
+        l.y = y;
+        l.dx1 = dx1;
+        l.dy1 = dy1;
+        l.dx2 = dx2;
+        l.dy2 = dy2;
+        l.stroke_width = stroke_width;
+        l.stroke_color = stroke_color;
         if (border_type != InvalidLineType) {
-            r.stroke_dasharray = getDasharray(border_type);
+            l.stroke_dasharray = getDasharray(border_type);
         } else {
-            r.stroke_dasharray = stroke_dasharray;
+            l.stroke_dasharray = stroke_dasharray;
         }
         
-        drawRect(r);
+        drawLine(l);
     }
     string getDasharray(int type) {
         if (type == Solid) {

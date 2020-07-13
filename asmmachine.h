@@ -60,6 +60,8 @@ private:
     void drawText(const Object &o);
     void drawEllipse(const Object &o);
     void drawPolygon(const Object &o);
+    void drawLine(const Object &o);
+    void drawPolyline(const Object &o);
 
 private:
     int m_ip = 0;

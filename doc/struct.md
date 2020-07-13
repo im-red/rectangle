@@ -54,4 +54,27 @@ struct svg_polygon
     string stroke_color;
     string stroke_dasharray;
 };
+
+struct svg_line
+{
+    int x;
+    int y;
+    int dx1;
+    int dy1;
+    int dx2;
+    int dy2;
+    int stroke_width;
+    string stroke_color;
+    string stroke_dasharray;
+}
+
+struct svg_polyline
+{
+    int x;
+    int y;
+    list<list<int>> points;
+    int stroke_width;
+    string stroke_color;
+    string stroke_dasharray;
+}
 ```

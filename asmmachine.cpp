@@ -435,6 +435,20 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         drawPolygon(o);
         break;
     }
+    case instr::DRAWLINE:
+    {
+        Object o = popOperand();
+        util::condPrint(option::showSvgDraw, "svg: drawLine %s\n", o.toString().c_str());
+        drawLine(o);
+        break;
+    }
+    case instr::DRAWPOLYLINE:
+    {
+        Object o = popOperand();
+        util::condPrint(option::showSvgDraw, "svg: drawPolyline %s\n", o.toString().c_str());
+        drawPolyline(o);
+        break;
+    }
     }
 }
 
@@ -519,5 +533,42 @@ void AsmMachine::drawPolygon(const Object &o)
     d.stroke_width = o.field(builtin::polygonInfo.fieldIndex("stroke_width")).intData();
     d.stroke_color = o.field(builtin::polygonInfo.fieldIndex("stroke_color")).stringData();
     d.stroke_dasharray = o.field(builtin::polygonInfo.fieldIndex("stroke_dasharray")).stringData();
+    m_painter.draw(d);
+}
+
+void AsmMachine::drawLine(const Object &o)
+{
+    draw::LineData d;
+    d.x = o.field(builtin::lineInfo.fieldIndex("x")).intData();
+    d.y = o.field(builtin::lineInfo.fieldIndex("y")).intData();
+    d.dx1 = o.field(builtin::lineInfo.fieldIndex("dx1")).intData();
+    d.dy1 = o.field(builtin::lineInfo.fieldIndex("dy1")).intData();
+    d.dx2 = o.field(builtin::lineInfo.fieldIndex("dx2")).intData();
+    d.dy2 = o.field(builtin::lineInfo.fieldIndex("dy2")).intData();
+    d.stroke_width = o.field(builtin::lineInfo.fieldIndex("stroke_width")).intData();
+    d.stroke_color = o.field(builtin::lineInfo.fieldIndex("stroke_color")).stringData();
+    d.stroke_dasharray = o.field(builtin::lineInfo.fieldIndex("stroke_dasharray")).stringData();
+    m_painter.draw(d);
+}
+
+void AsmMachine::drawPolyline(const Object &o)
+{
+    draw::PolylineData d;
+    d.x = o.field(builtin::polylineInfo.fieldIndex("x")).intData();
+    d.y = o.field(builtin::polylineInfo.fieldIndex("y")).intData();
+    {
+        Object points = o.field(builtin::polylineInfo.fieldIndex("points"));
+        int pointCount = points.elementCount();
+        for (int i = 0; i < pointCount; i++)
+        {
+            Object point = points.element(i);
+            int x = point.element(0).intData();
+            int y = point.element(1).intData();
+            d.points.push_back({x, y});
+        }
+    }
+    d.stroke_width = o.field(builtin::polylineInfo.fieldIndex("stroke_width")).intData();
+    d.stroke_color = o.field(builtin::polylineInfo.fieldIndex("stroke_color")).stringData();
+    d.stroke_dasharray = o.field(builtin::polylineInfo.fieldIndex("stroke_dasharray")).stringData();
     m_painter.draw(d);
 }
