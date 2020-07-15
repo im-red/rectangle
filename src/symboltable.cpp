@@ -20,7 +20,7 @@
 #include "util.h"
 #include "symbol.h"
 #include "typeinfo.h"
-#include "structinfo.h"
+#include "builtinstruct.h"
 
 #include <assert.h>
 

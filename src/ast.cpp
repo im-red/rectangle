@@ -16,7 +16,7 @@
  ********************************************************************************/
 
 #include "ast.h"
-#include "structinfo.h"
+#include "builtinstruct.h"
 
 using namespace std;
 

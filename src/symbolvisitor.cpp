@@ -17,7 +17,7 @@
 
 #include "asmbin.h"
 #include "symbolvisitor.h"
-#include "structinfo.h"
+#include "builtinstruct.h"
 #include "symboltable.h"
 #include "typeinfo.h"
 

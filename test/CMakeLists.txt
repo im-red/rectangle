@@ -30,7 +30,7 @@ set(RECT_SRCS
     ../src/asmbin.cpp
     ../src/asminstruction.cpp
     ../src/asmmachine.cpp
-    ../src/structinfo.cpp
+    ../src/builtinstruct.cpp
     ../src/svgpainter.cpp
     ../src/visitor.cpp
     ../src/symboltable.cpp

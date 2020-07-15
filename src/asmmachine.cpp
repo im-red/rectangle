@@ -16,7 +16,7 @@
  ********************************************************************************/
 
 #include "asmmachine.h"
-#include "structinfo.h"
+#include "builtinstruct.h"
 #include "util.h"
 #include "option.h"
 
