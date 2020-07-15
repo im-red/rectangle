@@ -10,36 +10,35 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-g -Wall -Wextra")
 find_package(PkgConfig)
 pkg_check_modules(GTEST REQUIRED gtest_main)
 
-include_directories(.)
-include_directories(..)
+include_directories(../src)
 
 set(RECT_SRCS
-    ../lexer.cpp 
-    ../lexerkeyword.cpp 
-    ../lexertypestring.cpp
-    ../driver.cpp
-    ../parser.cpp
-    ../parsertypestring.cpp
-    ../ast.cpp
-    ../option.cpp
-    ../symbol.cpp
-    ../symbolvisitor.cpp
-    ../symboltypestring.cpp
-    ../util.cpp
-    ../object.cpp
-    ../asmtext.cpp
-    ../asmbin.cpp
-    ../asminstruction.cpp
-    ../asmmachine.cpp
-    ../structinfo.cpp
-    ../svgpainter.cpp
-    ../visitor.cpp
-    ../symboltable.cpp
-    ../astnode.cpp
-    ../asmvisitor.cpp
-    ../topologicalsorter.cpp
-    ../typeinfo.cpp
-    ../dumpvisitor.cpp
+    ../src/lexer.cpp 
+    ../src/lexerkeyword.cpp 
+    ../src/lexertypestring.cpp
+    ../src/driver.cpp
+    ../src/parser.cpp
+    ../src/parsertypestring.cpp
+    ../src/ast.cpp
+    ../src/option.cpp
+    ../src/symbol.cpp
+    ../src/symbolvisitor.cpp
+    ../src/symboltypestring.cpp
+    ../src/util.cpp
+    ../src/object.cpp
+    ../src/asmtext.cpp
+    ../src/asmbin.cpp
+    ../src/asminstruction.cpp
+    ../src/asmmachine.cpp
+    ../src/structinfo.cpp
+    ../src/svgpainter.cpp
+    ../src/visitor.cpp
+    ../src/symboltable.cpp
+    ../src/astnode.cpp
+    ../src/asmvisitor.cpp
+    ../src/topologicalsorter.cpp
+    ../src/typeinfo.cpp
+    ../src/dumpvisitor.cpp
 )
 
 add_library(common
