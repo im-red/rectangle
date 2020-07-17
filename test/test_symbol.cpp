@@ -42,8 +42,8 @@ TEST(symbol, INSTANCE)
 
         Parser p;
         Lexer l;
-        l.setCode(code);
-        unique_ptr<DocumentDecl> document = p.parse(l.tokens());
+        auto tokens = l.scan(code);
+        unique_ptr<DocumentDecl> document = p.parse(tokens);
         document->filename = file;
 
         ast.addDocument(move(document));

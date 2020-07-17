@@ -20,8 +20,8 @@ TEST(parser, PARSE_DEFINATION_RECT)
 
     Parser p;
     Lexer l;
-    l.setCode(code);
-    p.parse(l.tokens());
+    auto tokens = l.scan(code);
+    p.parse(tokens);
 }
 
 TEST(parser, PARSE_INSTANCE_RECT)
@@ -33,6 +33,6 @@ TEST(parser, PARSE_INSTANCE_RECT)
 
     Parser p;
     Lexer l;
-    l.setCode(code);
-    p.parse(l.tokens());
+    auto tokens = l.scan(code);
+    p.parse(tokens);
 }

@@ -22,30 +22,12 @@ Driver::Driver()
 
 }
 
-Driver::Stage Driver::compile(const std::string &code)
+Driver::Stage Driver::compile(const std::string &)
 {
     m_stage = Stage::Begin;
     m_svgResult.clear();
     m_errorString.clear();
     m_tokens.clear();
-
-    m_lexer.setCode(code, 1, 1);
-    while (true)
-    {
-        Token tok = m_lexer.nextToken();
-        m_tokens.push_back(tok);
-
-        if (tok.type == Lexer::T_ERROR)
-        {
-            m_errorString = m_lexer.errorString();
-            m_stage = Stage::Lex;
-            return m_stage;
-        }
-        else if (tok.type == Lexer::T_EOF)
-        {
-            break;
-        }
-    }
 
     m_stage = Stage::End;
     return m_stage;

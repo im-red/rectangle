@@ -16,6 +16,7 @@
  ********************************************************************************/
 
 #include "lexer.h"
+#include "exception.h"
 
 #include <assert.h>
 
@@ -26,39 +27,37 @@ Lexer::Lexer()
 
 }
 
-void Lexer::setCode(const string &code, int line, int column)
+void Lexer::setCode(const std::string &code)
 {
+    clear();
     m_code = code;
-    m_line = line;
-    m_column = column;
-    m_pos = 0;
-    m_char = '\n';
-    m_tokenString = "";
-    m_tokenLine = 0;
-    m_tokenColumn = 0;
-    m_tokenPos = 0;
-    m_error = NoError;
-    m_skipLineFeed = false;
 }
 
-std::vector<Token> Lexer::tokens()
+vector<Token> Lexer::scan(const string &code)
 {
+    setCode(code);
+
     vector<Token> result;
+
     while (true)
     {
         Token tok = nextToken();
-        if (tok.type != Lexer::T_COMMENT)
+        if (tok.type == T_ERROR)
         {
-            result.push_back(tok);
+            throw SyntaxError(errorTypeString(m_error), tok.line, tok.column, tok.str);
         }
 
-        if (tok.type == Lexer::T_ERROR)
+        if (tok.type == Lexer::T_COMMENT)
         {
-            break;
+            continue;
         }
-        else if (tok.type == Lexer::T_EOF)
+        else
         {
-            break;
+            result.push_back(tok);
+            if (tok.type == Lexer::T_EOF)
+            {
+                break;
+            }
         }
     }
     return result;
@@ -66,21 +65,6 @@ std::vector<Token> Lexer::tokens()
 
 Token Lexer::nextToken()
 {
-    if (m_tokenType == T_EOF)
-    {
-        fprintf(stderr, "lexer reached EOF\n");
-        assert(m_tokenType != T_EOF);
-    }
-    if (m_tokenType == T_ERROR)
-    {
-        fprintf(stderr, "lexer error(token: %s, line: %d, column: %d, type: %s\n",
-                m_tokenString.c_str(),
-                m_tokenLine,
-                m_tokenColumn,
-                errorString().c_str());
-        assert(m_tokenType != T_ERROR);
-    }
-
     m_tokenType = scanToken();
     Token token(m_tokenType, m_tokenString, m_tokenLine, m_tokenColumn);
     return token;
@@ -95,11 +79,11 @@ Lexer::TokenType Lexer::scanToken()
         nextChar();
     }
 
-    m_tokenPos = m_pos - 1;
+    m_tokenPos = m_nextPos - 1;
     m_tokenLine = m_line;
     m_tokenColumn = m_column;
 
-    if (static_cast<size_t>(m_pos) > m_code.size())
+    if (static_cast<size_t>(m_nextPos) > m_code.size())
     {
         return T_EOF;
     }
@@ -165,7 +149,7 @@ Lexer::TokenType Lexer::scanToken()
         if (m_char == '/')
         {
             m_tokenString = "/";
-            while (static_cast<size_t>(m_pos) <= m_code.size() && !isLineTerminator(m_char))
+            while (static_cast<size_t>(m_nextPos) <= m_code.size() && !isLineTerminator(m_char))
             {
                 m_tokenString += m_char;
                 nextChar();
@@ -223,7 +207,6 @@ Lexer::TokenType Lexer::scanToken()
     }
     default:
     {
-        m_tokenString = "";
         if (isIdentifierStart(c))
         {
             m_tokenString = c;
@@ -244,7 +227,7 @@ Lexer::TokenType Lexer::scanToken()
 
 Lexer::TokenType Lexer::scanString(char c)
 {
-    while (static_cast<size_t>(m_pos) <= m_code.size())
+    while (static_cast<size_t>(m_nextPos) <= m_code.size())
     {
         if (isLineTerminator(m_char))
         {
@@ -298,18 +281,18 @@ void Lexer::nextChar()
 {
     if (m_skipLineFeed)
     {
-        assert(m_code[static_cast<size_t>(m_pos)] == '\n');
-        m_pos++;
+        assert(m_code[static_cast<size_t>(m_nextPos)] == '\n');
+        m_nextPos++;
         m_skipLineFeed = false;
     }
-    m_char = m_code[static_cast<size_t>(m_pos)];
-    m_pos++;
+    m_char = m_code[static_cast<size_t>(m_nextPos)];
+    m_nextPos++;
     m_column++;
     if (isLineTerminator(m_char))
     {
         if (m_char == '\r')
         {
-            if (m_code[static_cast<size_t>(m_pos)] == '\n')
+            if (m_code[static_cast<size_t>(m_nextPos)] == '\n')
             {
                 m_skipLineFeed = true;
             }
@@ -350,37 +333,16 @@ bool Lexer::isIdentifierPart(char c)
             || (c == '_');
 }
 
-int Lexer::line() const
+void Lexer::clear()
 {
-    return m_line;
-}
-
-int Lexer::column() const
-{
-    return m_column;
-}
-
-std::string Lexer::tokenString() const
-{
-    return m_tokenString;
-}
-
-Lexer::ErrorType Lexer::error() const
-{
-    return m_error;
-}
-
-int Lexer::tokenLine() const
-{
-    return m_tokenLine;
-}
-
-int Lexer::tokenColumn() const
-{
-    return m_tokenColumn;
-}
-
-int Lexer::tokenPos() const
-{
-    return m_tokenPos;
+    m_line = 1;
+    m_column = 0;
+    m_nextPos = 0;
+    m_char = '\n';
+    m_tokenString = "";
+    m_tokenLine = 0;
+    m_tokenColumn = 0;
+    m_tokenPos = 0;
+    m_error = NoError;
+    m_skipLineFeed = false;
 }

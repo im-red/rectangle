@@ -28,7 +28,7 @@ using namespace std;
 
 string Lexer::tokenTypeString(int token)
 {
-    static const std::map<int, std::string> STRING_MAP =
+    static const map<int, string> STRING_MAP =
     {
         ENUM_ELEMENT(T_LIST),
         ENUM_ELEMENT(T_STRING),
@@ -88,17 +88,15 @@ string Lexer::tokenTypeString(int token)
 
 string Lexer::errorTypeString(Lexer::ErrorType error)
 {
-    static const std::map<int, std::string> STRING_MAP =
+    static const map<int, string> MAP =
     {
-        ENUM_ELEMENT(NoError),
-        ENUM_ELEMENT(IllegalSymbol),
-        ENUM_ELEMENT(IllegalCharacter),
-        ENUM_ELEMENT(UnclosedStringLiteral),
-        ENUM_ELEMENT(StrayNewlineInStringLiteral)
+        {IllegalSymbol, "Illegal symbol" },
+        {IllegalCharacter, "Illegal character" },
+        {UnclosedStringLiteral, "Unclosed string literal" },
+        {StrayNewlineInStringLiteral, "Stray new line in string literal" }
     };
 
-    assert(STRING_MAP.size() == ErrorCount);
-    assert(error >= 0 && error < ErrorCount);
+    assert(error > NoError && error < ErrorCount);
 
-    return STRING_MAP.at(error);
+    return MAP.at(error);
 }

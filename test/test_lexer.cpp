@@ -1,5 +1,3 @@
-#include "lexer.h"
-
 #include <gtest/gtest.h>
 
 #include <string>
@@ -8,13 +6,17 @@
 #include <sstream>
 #include <fstream>
 
+#define private public
+#include "lexer.h"
+#undef private
+
 using namespace testing;
 using namespace std;
 
 static void singleTokenHelper(const std::string &code, int type, const std::string &str)
 {
     Lexer l;
-    l.setCode(code, 1, 1);
+    l.setCode(code);
 
     Token tok = l.nextToken();
 
@@ -25,12 +27,12 @@ static void singleTokenHelper(const std::string &code, int type, const std::stri
 static void singleTokenErrorHelper(const std::string &code, int error)
 {
     Lexer l;
-    l.setCode(code, 1, 1);
+    l.setCode(code);
 
     Token tok = l.nextToken();
 
     EXPECT_EQ(tok.type, Lexer::T_ERROR);
-    EXPECT_EQ(l.error(), error);
+    EXPECT_EQ(l.m_error, error);
 }
 
 
@@ -45,7 +47,7 @@ TEST(lexer, KEYWORD)
     vector<int> actual;
 
     Lexer l;
-    l.setCode(code, 1, 1);
+    l.setCode(code);
     while (true)
     {
         Token tok = l.nextToken();
@@ -77,7 +79,7 @@ TEST(lexer, SYMBOL)
     vector<int> actual;
 
     Lexer l;
-    l.setCode(code, 1, 1);
+    l.setCode(code);
     while (true)
     {
         Token tok = l.nextToken();

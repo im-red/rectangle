@@ -37,7 +37,7 @@ struct Token
         return s.find(type) != s.end();
     }
 
-    std::string dump()
+    std::string toString()
     {
         char buf[512];
         snprintf(buf, sizeof(buf), "line %d column %d(%s)", line, column, str.c_str());
@@ -121,22 +121,14 @@ public:
     static std::string errorTypeString(ErrorType error);
 
     Lexer();
-    void setCode(const std::string &code, int line = 1, int column = 0);
-
-    std::vector<Token> tokens();
-    Token nextToken();
-
-    int line() const;
-    int column() const;
-    ErrorType error() const;
-    std::string errorString() const { return errorTypeString(error()); }
-
-    std::string tokenString() const;
-    int tokenLine() const;
-    int tokenColumn() const;
-    int tokenPos() const;
+    std::vector<Token> scan(const std::string &code);
 
 private:
+    static TokenType classify(const char *s, int n);
+
+    void setCode(const std::string &code);
+    Token nextToken();
+
     TokenType scanToken();
     TokenType scanString(char c);
     TokenType scanNumber(char c);
@@ -149,13 +141,13 @@ private:
     static bool isIdentifierStart(char c);
     static bool isIdentifierPart(char c);
 
-    static TokenType classify(const char *s, int n);
+    void clear();
 
 private:
     std::string m_code;
     int m_line = 0;
     int m_column = 0;
-    int m_pos = 0;
+    int m_nextPos = 0;
     char m_char = 0;
     TokenType m_tokenType = TokenCount;
     std::string m_tokenString;
