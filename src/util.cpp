@@ -60,5 +60,43 @@ string readFile(const string &filename)
     return result;
 }
 
+static bool isLineTerminator(char c)
+{
+    return c == '\n' || c == '\r';
+}
+
+vector<string> splitIntoLines(const string &s)
+{
+    vector<string> result;
+
+    string line;
+    bool skipLineFeed = false;
+
+    for (int i = 0; i < static_cast<int>(s.size()); i++)
+    {
+        char c = s[static_cast<size_t>(i)];
+        if (skipLineFeed)
+        {
+            skipLineFeed = false;
+            continue;
+        }
+        if (isLineTerminator(c))
+        {
+            char nextC = s[static_cast<size_t>(i + 1)];
+            if (c == '\r' && nextC == '\n')
+            {
+                skipLineFeed = true;
+            }
+            result.emplace_back(move(line));
+        }
+        else
+        {
+            line += c;
+        }
+    }
+    result.emplace_back(move(line));
+    return result;
+}
+
 }
 }
