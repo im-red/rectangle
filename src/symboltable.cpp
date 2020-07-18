@@ -26,6 +26,11 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace backend
+{
+
 SymbolTable::SymbolTable()
 {
     initGlobalScope();
@@ -148,4 +153,7 @@ void SymbolTable::initGlobalScope()
         Symbol *print = new FunctionSymbol("print", voidType, paramTypes);
         define(print);
     }
+}
+
+}
 }

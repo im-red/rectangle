@@ -23,6 +23,11 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace backend
+{
+
 TypeInfo::TypeInfo(TypeInfo::Category cat)
     : m_category(cat)
 {
@@ -106,4 +111,7 @@ CustomTypeInfo::CustomTypeInfo(const string &name)
 string CustomTypeInfo::toString() const
 {
     return m_name;
+}
+
+}
 }

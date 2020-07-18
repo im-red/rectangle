@@ -26,6 +26,12 @@
 #include <assert.h>
 
 using namespace std;
+using namespace rectangle::util;
+
+namespace rectangle
+{
+namespace backend
+{
 
 SymbolVisitor::SymbolVisitor()
 {
@@ -1341,4 +1347,7 @@ string SymbolVisitor::curInstanceId() const
     assert(m_instanceStack.size() != 0);
 
     return m_instanceStack.back()->instanceId;
+}
+
+}
 }

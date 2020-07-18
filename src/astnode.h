@@ -27,13 +27,22 @@
 #include <map>
 #include <set>
 
+namespace rectangle
+{
+
+namespace backend
+{
 class Scope;
+}
+
+class Token;
 
 struct ASTNode
 {
     virtual ~ASTNode();
 
-    Scope *scope = nullptr;
+    backend::Scope *scope = nullptr;
+    Token *tok = nullptr;
 };
 
 struct Expr : public ASTNode
@@ -57,7 +66,7 @@ struct Expr : public ASTNode
     virtual ~Expr();
 
     Category category = Category::Invalid;
-    std::shared_ptr<TypeInfo> typeInfo;
+    std::shared_ptr<backend::TypeInfo> typeInfo;
 };
 
 struct IntegerLiteral : public Expr
@@ -188,7 +197,7 @@ struct RefExpr : public Expr
 
 struct VarDecl : public ASTNode
 {
-    std::shared_ptr<TypeInfo> type;
+    std::shared_ptr<backend::TypeInfo> type;
     std::string name;
     std::unique_ptr<Expr> expr;
 
@@ -202,7 +211,7 @@ struct PropertyDecl : public ASTNode
     ~PropertyDecl() override;
 
     std::string name;
-    std::shared_ptr<TypeInfo> type;
+    std::shared_ptr<backend::TypeInfo> type;
     std::unique_ptr<Expr> expr;
 
     int fieldIndex = -1;
@@ -211,10 +220,10 @@ struct PropertyDecl : public ASTNode
 
 struct ParamDecl : public ASTNode
 {
-    ParamDecl(const std::string &n, const std::shared_ptr<TypeInfo> &t) : name(n), type(t) {}
+    ParamDecl(const std::string &n, const std::shared_ptr<backend::TypeInfo> &t) : name(n), type(t) {}
 
     std::string name;
-    std::shared_ptr<TypeInfo> type;
+    std::shared_ptr<backend::TypeInfo> type;
 
     int localIndex = -1;
 };
@@ -307,14 +316,14 @@ struct ComponentDefinationDecl;
 struct FunctionDecl : public ASTNode
 {
     FunctionDecl(const std::string &n,
-                 const std::shared_ptr<TypeInfo> &rt,
+                 const std::shared_ptr<backend::TypeInfo> &rt,
                  std::vector<std::unique_ptr<ParamDecl>> &&pl,
                  std::unique_ptr<CompoundStmt> &&b)
         : name(n), returnType(move(rt)), paramList(move(pl)), body(move(b))
     {}
 
     std::string name;
-    std::shared_ptr<TypeInfo> returnType;
+    std::shared_ptr<backend::TypeInfo> returnType;
     std::vector<std::unique_ptr<ParamDecl>> paramList;
     std::unique_ptr<CompoundStmt> body;
     ComponentDefinationDecl *component = nullptr;
@@ -362,11 +371,11 @@ struct ComponentDefinationDecl : public DocumentDecl
 
 struct FieldDecl : public ASTNode
 {
-    FieldDecl(const std::string &_name, const std::shared_ptr<TypeInfo> &_type)
+    FieldDecl(const std::string &_name, const std::shared_ptr<backend::TypeInfo> &_type)
         : type(_type), name(_name)
     {}
 
-    std::shared_ptr<TypeInfo> type;
+    std::shared_ptr<backend::TypeInfo> type;
     std::string name;
 
     int fieldIndex = -1;
@@ -421,3 +430,5 @@ struct ComponentInstanceDecl : public DocumentDecl
 
     std::vector<std::pair<ComponentInstanceDecl *, ASTNode *>> orderedMemberInitList;
 };
+
+}

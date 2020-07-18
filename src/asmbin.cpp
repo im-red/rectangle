@@ -24,6 +24,13 @@
 #include <set>
 
 using namespace std;
+using namespace rectangle;
+using namespace rectangle::runtime;
+
+namespace rectangle
+{
+namespace backend
+{
 
 AsmBin::AsmBin(const AsmText &t)
 {
@@ -397,4 +404,7 @@ AsmBin::FunctionItem AsmBin::getFunction(const string &funcName) const
         }
     }
     return FunctionItem("(invalid)");
+}
+
+}
 }

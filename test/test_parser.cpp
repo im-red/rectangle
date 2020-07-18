@@ -11,6 +11,10 @@
 using namespace testing;
 using namespace std;
 
+using namespace rectangle;
+using namespace rectangle::util;
+using namespace rectangle::frontend;
+
 TEST(parser, PARSE_DEFINATION_RECT)
 {
     std::ifstream t("../rect/defination.rect");

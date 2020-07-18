@@ -20,6 +20,11 @@
 #include <string>
 #include <vector>
 
+namespace rectangle
+{
+namespace backend
+{
+
 class AsmText
 {
     friend bool operator==(const AsmText &lhs, const AsmText &rhs);
@@ -40,5 +45,9 @@ public:
 private:
     std::vector<std::vector<std::string>> m_text;
 };
+}
+}
 
-bool operator==(const AsmText &lhs, const AsmText &rhs);
+bool operator==(const rectangle::backend::AsmText &lhs, const rectangle::backend::AsmText &rhs);
+
+

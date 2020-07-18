@@ -22,6 +22,11 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace frontend
+{
+
 Lexer::Lexer()
 {
 
@@ -44,7 +49,7 @@ vector<Token> Lexer::scan(const string &code)
         Token tok = nextToken();
         if (tok.type == T_ERROR)
         {
-            throw SyntaxError(errorTypeString(m_error), tok.line, tok.column, tok.str);
+            throw diag::SyntaxError(errorTypeString(m_error), tok.line, tok.column, tok.str);
         }
 
         if (tok.type == Lexer::T_COMMENT)
@@ -345,4 +350,7 @@ void Lexer::clear()
     m_tokenPos = 0;
     m_error = NoError;
     m_skipLineFeed = false;
+}
+
+}
 }

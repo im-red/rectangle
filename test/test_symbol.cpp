@@ -20,6 +20,12 @@
 using namespace testing;
 using namespace std;
 
+using namespace rectangle;
+using namespace rectangle::util;
+using namespace rectangle::frontend;
+using namespace rectangle::backend;
+using namespace rectangle::runtime;
+
 TEST(symbol, INSTANCE)
 {
     option::verbose = true;

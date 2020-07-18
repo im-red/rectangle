@@ -22,6 +22,11 @@
 #include "symbol.h"
 #include "topologicalsorter.h"
 
+namespace rectangle
+{
+namespace backend
+{
+
 class SymbolVisitor : public Visitor
 {
 public:
@@ -113,3 +118,5 @@ private:
     ComponentInstanceDecl *m_topLevelInstance = nullptr;
 };
 
+}
+}

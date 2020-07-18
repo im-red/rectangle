@@ -21,6 +21,11 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace backend
+{
+
 AsmText::AsmText()
 {
 
@@ -94,4 +99,7 @@ void AsmText::clear()
 bool operator==(const AsmText &lhs, const AsmText &rhs)
 {
     return lhs.m_text == rhs.m_text;
+}
+
+}
 }

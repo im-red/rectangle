@@ -24,6 +24,12 @@
 #include <vector>
 #include <stdexcept>
 
+namespace rectangle
+{
+
+namespace frontend
+{
+
 class ParseException : public std::runtime_error
 {
 public:
@@ -111,9 +117,9 @@ private:
     bool tryMemberItemAlt1();
     bool tryMemberItemAlt2();
     std::unique_ptr<PropertyDecl> parsePropertyDefination();
-    std::shared_ptr<TypeInfo> parsePropertyType();
-    std::shared_ptr<TypeInfo> parseType();
-    std::shared_ptr<TypeInfo> parseListType();
+    std::shared_ptr<backend::TypeInfo> parsePropertyType();
+    std::shared_ptr<backend::TypeInfo> parseType();
+    std::shared_ptr<backend::TypeInfo> parseListType();
     std::unique_ptr<Expr> parseLiteral();
     std::unique_ptr<FunctionDecl> parseFunctionDefination();
     void parseParamList(std::vector<std::unique_ptr<ParamDecl> > &paramList);
@@ -157,3 +163,5 @@ private:
     std::unique_ptr<DocumentDecl> m_document;
 };
 
+}
+}

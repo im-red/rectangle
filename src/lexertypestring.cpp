@@ -26,6 +26,11 @@ using namespace std;
 
 #define ENUM_ELEMENT(x) { x, #x }
 
+namespace rectangle
+{
+namespace frontend
+{
+
 string Lexer::tokenTypeString(int token)
 {
     static const map<int, string> STRING_MAP =
@@ -99,4 +104,7 @@ string Lexer::errorTypeString(Lexer::ErrorType error)
     assert(error > NoError && error < ErrorCount);
 
     return MAP.at(error);
+}
+
+}
 }

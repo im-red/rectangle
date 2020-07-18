@@ -22,6 +22,11 @@
 
 #pragma once
 
+namespace rectangle
+{
+namespace backend
+{
+
 class AsmBin
 {
 public:
@@ -53,7 +58,7 @@ public:
 
     unsigned char getByte(int addr) const;
     int getInt(int addr) const;
-    Object getConstant(int index) const;
+    runtime::Object getConstant(int index) const;
     FunctionItem getFunction(int index) const;
     FunctionItem getFunction(const std::string &funcName) const;
 
@@ -82,10 +87,12 @@ private:
 
     int m_offset = 0;
     std::vector<unsigned char> m_code;
-    std::vector<Object> m_constants;
+    std::vector<runtime::Object> m_constants;
     std::vector<FunctionItem> m_functions;
     std::vector<LabelItem> m_labels;
 
     std::vector<int> m_labelIndexAddr;
 };
 
+}
+}

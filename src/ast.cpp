@@ -19,6 +19,10 @@
 #include "builtinstruct.h"
 
 using namespace std;
+using namespace rectangle::backend;
+
+namespace rectangle
+{
 
 AST::AST()
 {
@@ -76,4 +80,6 @@ void AST::initBuiltinDocuments()
         }
         m_builtinDocuments.push_back(move(sd));
     }
+}
+
 }

@@ -17,6 +17,8 @@
 
 #include "option.h"
 
+namespace rectangle
+{
 namespace option
 {
 
@@ -33,4 +35,5 @@ bool showAssemble = false;
 bool showBindingDep = false;
 bool showSvgDraw = false;
 
+}
 }

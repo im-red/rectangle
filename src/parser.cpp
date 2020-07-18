@@ -23,6 +23,12 @@
 #include <assert.h>
 
 using namespace std;
+using namespace rectangle::backend;
+
+namespace rectangle
+{
+namespace frontend
+{
 
 Parser::Parser()
 {
@@ -1675,4 +1681,7 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
             instanceDecl->bindingList.back()->componentInstance = instanceDecl.get();
         }
     }
+}
+
+}
 }

@@ -22,6 +22,12 @@
 #include <assert.h>
 
 using namespace std;
+using namespace rectangle;
+
+namespace rectangle
+{
+namespace backend
+{
 
 AsmVisitor::AsmVisitor()
 {
@@ -890,4 +896,7 @@ void AsmVisitor::clear()
 {
     setVisitingMethod(false);
     setVisitingInstance(false);
+}
+
+}
 }

@@ -21,6 +21,11 @@
 
 #include <vector>
 
+namespace rectangle
+{
+namespace driver
+{
+
 class Driver
 {
 public:
@@ -46,7 +51,9 @@ private:
     std::string m_svgResult;
     std::string m_errorString;
 
-    Lexer m_lexer;
-    std::vector<Token> m_tokens;
+    frontend::Lexer m_lexer;
+    std::vector<frontend::Token> m_tokens;
 };
 
+}
+}

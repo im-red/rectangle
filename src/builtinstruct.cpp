@@ -23,6 +23,10 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace backend
+{
 namespace builtin
 {
 
@@ -145,4 +149,6 @@ std::vector<const StructInfo *> infoList = {
     &polylineInfo
 };
 
+}
+}
 }

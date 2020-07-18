@@ -19,6 +19,10 @@
 
 #include <string>
 
+namespace rectangle
+{
+namespace backend
+{
 namespace instr
 {
 
@@ -122,4 +126,5 @@ bool isBranchInstr(unsigned char value);
 bool isCallInstr(unsigned char value);
 
 }
-
+}
+}

@@ -21,6 +21,8 @@
 #include <vector>
 #include <memory>
 
+namespace rectangle
+{
 namespace draw
 {
 
@@ -215,4 +217,5 @@ private:
     int m_bottomMargin = 10;
 };
 
+}
 }

@@ -13,6 +13,9 @@
 using namespace testing;
 using namespace std;
 
+using namespace rectangle;
+using namespace rectangle::frontend;
+
 static void singleTokenHelper(const std::string &code, int type, const std::string &str)
 {
     Lexer l;

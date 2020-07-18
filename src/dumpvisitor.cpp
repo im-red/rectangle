@@ -21,6 +21,11 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace frontend
+{
+
 DumpVisitor::DumpVisitor()
 {
 
@@ -317,4 +322,7 @@ void DumpVisitor::printIndent()
 {
     std::string space(static_cast<size_t>(m_indent), ' ');
     printf("%s", space.c_str());
+}
+
+}
 }

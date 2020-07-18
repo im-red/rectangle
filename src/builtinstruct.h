@@ -24,6 +24,10 @@
 #include <vector>
 #include <memory>
 
+namespace rectangle
+{
+namespace backend
+{
 namespace builtin
 {
 
@@ -64,4 +68,5 @@ extern const StructInfo polylineInfo;
 extern std::vector<const StructInfo *> infoList;
 
 }
-
+}
+}

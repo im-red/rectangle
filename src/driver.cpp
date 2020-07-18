@@ -17,6 +17,11 @@
 
 #include "driver.h"
 
+namespace rectangle
+{
+namespace driver
+{
+
 Driver::Driver()
 {
 
@@ -31,4 +36,7 @@ Driver::Stage Driver::compile(const std::string &)
 
     m_stage = Stage::End;
     return m_stage;
+}
+
+}
 }

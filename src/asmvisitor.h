@@ -20,6 +20,11 @@
 #include "visitor.h"
 #include "asmtext.h"
 
+namespace rectangle
+{
+namespace backend
+{
+
 class AsmVisitor : public Visitor
 {
 public:
@@ -109,3 +114,5 @@ private:
     bool m_visitingMethod = false;
 };
 
+}
+}

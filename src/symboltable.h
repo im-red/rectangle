@@ -21,6 +21,11 @@
 
 #include <set>
 
+namespace rectangle
+{
+namespace backend
+{
+
 class SymbolTable
 {
 public:
@@ -45,3 +50,5 @@ private:
     Scope *m_curScope = nullptr;
 };
 
+}
+}

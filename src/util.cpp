@@ -25,6 +25,8 @@
 
 using namespace std;
 
+namespace rectangle
+{
 namespace util
 {
 
@@ -58,4 +60,5 @@ string readFile(const string &filename)
     return result;
 }
 
+}
 }

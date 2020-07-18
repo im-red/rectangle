@@ -17,6 +17,11 @@
 
 #include "lexer.h"
 
+namespace rectangle
+{
+namespace frontend
+{
+
 static inline Lexer::TokenType classify2(const char *s)
 {
     if (s[0] == 'i')
@@ -246,4 +251,7 @@ Lexer::TokenType Lexer::classify(const char *s, int n)
     case 8: return classify8(s);
     default: return T_IDENTIFIER;
     }
+}
+
+}
 }

@@ -23,6 +23,9 @@
 #include <vector>
 #include <memory>
 
+namespace rectangle
+{
+
 class AST
 {
 public:
@@ -33,7 +36,7 @@ public:
     void addDocument(std::unique_ptr<DocumentDecl> &&document);
 
     std::vector<DocumentDecl *> documents() const;
-    SymbolTable *symbolTable();
+    backend::SymbolTable *symbolTable();
 
 private:
     void initBuiltinDocuments();
@@ -41,5 +44,7 @@ private:
 private:
     std::vector<std::unique_ptr<DocumentDecl>> m_documents;
     std::vector<std::unique_ptr<DocumentDecl>> m_builtinDocuments;
-    std::unique_ptr<SymbolTable> m_symbolTable = nullptr;
+    std::unique_ptr<backend::SymbolTable> m_symbolTable = nullptr;
 };
+
+}

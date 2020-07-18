@@ -6,8 +6,10 @@ def Scene
     int bottomMargin: 10
     int width: 800
     int height: 800
+
     void draw() {
         svg_scene s;
+
         s.leftMargin = leftMargin;
         s.topMargin = topMargin;
         s.rightMargin = rightMargin;

@@ -21,25 +21,30 @@
 #include "asminstruction.h"
 #include "svgpainter.h"
 
+namespace rectangle
+{
+namespace runtime
+{
+
 class AsmMachine
 {
 public:
     AsmMachine();
 
-    std::string run(const AsmBin &bin, const std::string &funcName);
-    std::string run(const AsmBin &bin, const int addr);
+    std::string run(const backend::AsmBin &bin, const std::string &funcName);
+    std::string run(const backend::AsmBin &bin, const int addr);
 
 private:
     struct StackFrame
     {
-        StackFrame(const AsmBin::FunctionItem &func_, int returnAddr_)
+        StackFrame(const backend::AsmBin::FunctionItem &func_, int returnAddr_)
             : func(func_), returnAddr(returnAddr_)
         {
             assert(func.isValid());
             int localsCount = func.args + func.locals;
             locals.resize(static_cast<size_t>(localsCount));
         }
-        AsmBin::FunctionItem func;
+        backend::AsmBin::FunctionItem func;
         int returnAddr;
         std::vector<Object> locals;
     };
@@ -51,7 +56,7 @@ private:
     ObjectPointer popOperand();
 
     void mainLoop();
-    void interpret(instr::AsmInstruction instr, int op);
+    void interpret(backend::instr::AsmInstruction instr, int op);
 
     void defineScene(const Object &o);
     void pushOrigin(int x, int y);
@@ -69,7 +74,9 @@ private:
     std::vector<StackFrame> m_frames;
     std::vector<ObjectPointer> m_operands;
 
-    AsmBin m_asm;
+    backend::AsmBin m_asm;
     draw::SvgPainter m_painter;
 };
 
+}
+}

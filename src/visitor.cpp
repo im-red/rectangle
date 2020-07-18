@@ -23,6 +23,9 @@
 
 #include <assert.h>
 
+namespace rectangle
+{
+
 Visitor::~Visitor()
 {
 
@@ -179,4 +182,6 @@ void Visitor::visit(DocumentDecl *dd)
         StructDecl *sd = dynamic_cast<StructDecl *>(dd);
         visit(sd);
     }
+}
+
 }

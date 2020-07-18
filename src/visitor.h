@@ -20,6 +20,9 @@
 #include "ast.h"
 #include "astnode.h"
 
+namespace rectangle
+{
+
 class VisitException : public std::runtime_error
 {
 public:
@@ -72,3 +75,4 @@ protected:
     virtual void visit(ComponentInstanceDecl *) = 0;
 };
 
+}

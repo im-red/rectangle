@@ -23,7 +23,15 @@
 #include <map>
 #include <vector>
 
+namespace rectangle
+{
+
 struct ASTNode;
+
+namespace backend
+{
+
+class TypeInfo;
 
 class SymbolException : public std::runtime_error
 {
@@ -179,3 +187,6 @@ public:
                 Scope::Category scopeCat, Scope *parent,
                 const std::shared_ptr<TypeInfo> &ti = std::shared_ptr<TypeInfo>());
 };
+
+}
+}

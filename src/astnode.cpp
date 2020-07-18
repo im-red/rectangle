@@ -24,6 +24,9 @@
 
 using namespace std;
 
+namespace rectangle
+{
+
 Expr::~Expr()
 {
 
@@ -155,4 +158,6 @@ std::vector<int> ComponentInstanceDecl::unboundProperty() const
         }
     }
     return result;
+}
+
 }

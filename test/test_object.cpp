@@ -11,6 +11,9 @@
 using namespace testing;
 using namespace std;
 
+using namespace rectangle;
+using namespace rectangle::runtime;
+
 TEST(object, CONSTRUCT)
 {
     {

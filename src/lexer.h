@@ -23,6 +23,11 @@
 
 #include <stdio.h>
 
+namespace rectangle
+{
+namespace frontend
+{
+
 struct Token
 {
     Token(int t, const std::string &s, int l, int col)
@@ -158,3 +163,5 @@ private:
     bool m_skipLineFeed = false;
 };
 
+}
+}

@@ -27,6 +27,11 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace backend
+{
+
 Symbol::Symbol(Category cat, const string &n, std::shared_ptr<TypeInfo> ti, ASTNode *ast)
     : m_category(cat)
     , m_name(n)
@@ -176,4 +181,7 @@ ScopeSymbol::ScopeSymbol(Symbol::Category symCat, const string &name, Scope::Cat
     , Scope(scopeCat, parent)
 {
     setScopeName(name);
+}
+
+}
 }

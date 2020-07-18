@@ -21,6 +21,8 @@
 
 using namespace std;
 
+namespace rectangle
+{
 namespace draw
 {
 
@@ -273,4 +275,5 @@ string PolylineShape::generate()
     return string(buf);
 }
 
+}
 }

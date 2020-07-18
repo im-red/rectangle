@@ -21,6 +21,11 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace util
+{
+
 TopologicalSorter::TopologicalSorter(int n)
     : m_n(n)
 {
@@ -114,4 +119,7 @@ TopologicalSorter::SortResult TopologicalSorter::sort(std::vector<int> &sorted)
     }
 
     return SortResult::Success;
+}
+
+}
 }

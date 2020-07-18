@@ -19,6 +19,11 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace runtime
+{
+
 Object::~Object()
 {
 }
@@ -140,6 +145,11 @@ std::string Object::toString() const
     }
     return result;
 }
+
+}
+}
+
+using namespace rectangle::runtime;
 
 Object operator+(const Object &lhs, const Object &rhs)
 {

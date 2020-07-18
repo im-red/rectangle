@@ -24,6 +24,10 @@
 
 using namespace std;
 
+namespace rectangle
+{
+namespace backend
+{
 namespace instr
 {
 
@@ -274,4 +278,6 @@ bool isCallInstr(unsigned char value)
     return s_instrCall.find(value) != s_instrCall.end();
 }
 
+}
+}
 }

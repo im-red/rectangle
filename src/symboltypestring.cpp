@@ -19,6 +19,11 @@
 
 #define ENUM_ELEMENT(x) { x, #x }
 
+namespace rectangle
+{
+namespace backend
+{
+
 std::string Symbol::symbolCategoryString(Category category)
 {
     static const std::map<Category, std::string> MAP =
@@ -56,4 +61,7 @@ std::string Scope::scopeCategoryString(Category category)
     };
 
     return MAP.at(category);
+}
+
+}
 }

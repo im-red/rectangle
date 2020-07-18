@@ -23,23 +23,36 @@
 
 #include <assert.h>
 
+namespace rectangle
+{
+namespace runtime
+{
+
 class Object;
 
-Object operator+(const Object &lhs, const Object &rhs);
-Object operator-(const Object &lhs, const Object &rhs);
-Object operator*(const Object &lhs, const Object &rhs);
-Object operator/(const Object &lhs, const Object &rhs);
-Object operator%(const Object &lhs, const Object &rhs);
-bool operator==(const Object &lhs, const Object &rhs);
-bool operator!=(const Object &lhs, const Object &rhs);
-bool operator>(const Object &lhs, const Object &rhs);
-bool operator<(const Object &lhs, const Object &rhs);
-bool operator>=(const Object &lhs, const Object &rhs);
-bool operator<=(const Object &lhs, const Object &rhs);
-bool operator&&(const Object &lhs, const Object &rhs);
-bool operator||(const Object &lhs, const Object &rhs);
-Object operator!(const Object &o);
-Object operator-(const Object &o);
+}
+}
+
+rectangle::runtime::Object operator+(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+rectangle::runtime::Object operator-(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+rectangle::runtime::Object operator*(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+rectangle::runtime::Object operator/(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+rectangle::runtime::Object operator%(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+bool operator==(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+bool operator!=(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+bool operator>(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+bool operator<(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+bool operator>=(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+bool operator<=(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+bool operator&&(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+bool operator||(const rectangle::runtime::Object &lhs, const rectangle::runtime::Object &rhs);
+rectangle::runtime::Object operator!(const rectangle::runtime::Object &o);
+rectangle::runtime::Object operator-(const rectangle::runtime::Object &o);
+
+namespace rectangle
+{
+namespace runtime
+{
 
 class Object
 {
@@ -173,3 +186,6 @@ private:
     Object *m_object;
     bool m_tmp;
 };
+
+}
+}

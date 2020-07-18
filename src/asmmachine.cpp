@@ -21,6 +21,13 @@
 #include "option.h"
 
 using namespace std;
+using namespace rectangle;
+using namespace rectangle::backend;
+
+namespace rectangle
+{
+namespace runtime
+{
 
 AsmMachine::AsmMachine()
     : m_asm(AsmText())
@@ -571,4 +578,7 @@ void AsmMachine::drawPolyline(const Object &o)
     d.stroke_color = o.field(builtin::polylineInfo.fieldIndex("stroke_color")).stringData();
     d.stroke_dasharray = o.field(builtin::polylineInfo.fieldIndex("stroke_dasharray")).stringData();
     m_painter.draw(d);
+}
+
+}
 }

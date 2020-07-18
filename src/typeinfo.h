@@ -20,6 +20,11 @@
 #include <string>
 #include <memory>
 
+namespace rectangle
+{
+namespace backend
+{
+
 class TypeInfo
 {
 public:
@@ -78,3 +83,6 @@ public:
 private:
     std::string m_name;
 };
+
+}
+}

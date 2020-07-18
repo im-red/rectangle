@@ -17,6 +17,8 @@
 
 #pragma once
 
+namespace rectangle
+{
 namespace option
 {
 
@@ -35,4 +37,4 @@ extern bool showBindingDep;
 extern bool showSvgDraw;
 
 }
-
+}

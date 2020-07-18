@@ -19,6 +19,11 @@
 
 #include "visitor.h"
 
+namespace rectangle
+{
+namespace frontend
+{
+
 class DumpVisitor : public Visitor
 {
 public:
@@ -83,3 +88,5 @@ private:
     int m_indent = 0;
 };
 
+}
+}

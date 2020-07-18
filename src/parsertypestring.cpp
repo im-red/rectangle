@@ -23,6 +23,11 @@ using namespace std;
 
 #define ENUM_ELEMENT(x) { x, #x }
 
+namespace rectangle
+{
+namespace frontend
+{
+
 std::string Parser::parserRuleString(ParserRule rule)
 {
     static const std::map<int, std::string> STRING_MAP =
@@ -74,4 +79,7 @@ std::string Parser::parserRuleString(ParserRule rule)
     assert(rule >= 0 && rule < RuleCount);
 
     return STRING_MAP.at(rule);
+}
+
+}
 }

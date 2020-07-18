@@ -20,6 +20,11 @@
 #include <stdexcept>
 #include <string>
 
+namespace rectangle
+{
+namespace diag
+{
+
 class SyntaxError : public std::runtime_error
 {
 public:
@@ -61,3 +66,6 @@ private:
     int m_column;
     std::string m_token;
 };
+
+}
+}

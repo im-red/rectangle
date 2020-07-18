@@ -21,6 +21,11 @@
 #include <utility>
 #include <set>
 
+namespace rectangle
+{
+namespace util
+{
+
 class TopologicalSorter
 {
 public:
@@ -46,3 +51,5 @@ private:
     std::vector<std::set<int>> m_node2ins;
 };
 
+}
+}
