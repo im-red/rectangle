@@ -50,6 +50,7 @@ using namespace rectangle::diag;
 
 TEST(symbol, INSTANCE)
 {
+    option::showLLTry = true;
     vector<string> files = 
     {
         "../../template/Scene.rect",
@@ -78,7 +79,15 @@ TEST(symbol, INSTANCE)
             printSyntaxError(sc, e);
         }
 
-        unique_ptr<DocumentDecl> document = Parser().parse(tokens);
+        unique_ptr<DocumentDecl> document;
+        try
+        {
+            document = Parser().parse(tokens);
+        }
+        catch (SyntaxError &e)
+        {
+            printSyntaxError(sc, e);
+        }
         document->filename = file;
 
         ast.addDocument(move(document));

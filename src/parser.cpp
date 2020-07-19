@@ -19,11 +19,13 @@
 #include "option.h"
 #include "util.h"
 #include "typeinfo.h"
+#include "exception.h"
 
 #include <assert.h>
 
 using namespace std;
 using namespace rectangle::backend;
+using namespace rectangle::diag;
 
 namespace rectangle
 {
@@ -46,17 +48,9 @@ void Parser::clear()
 std::unique_ptr<DocumentDecl> Parser::parse(const std::vector<Token> &tokens)
 {
     clear();
-    m_tokens = tokens;
 
-    try
-    {
-        m_document = parseDocument();
-    }
-    catch (ParseException &e)
-    {
-        m_document.reset();
-        fprintf(stderr, "%s\n", e.what());
-    }
+    m_tokens = tokens;
+    m_document = parseDocument();
 
     return move(m_document);
 }
@@ -89,11 +83,10 @@ void Parser::match(int tokenType)
     else
     {
         char buf[512];
-        snprintf(buf, sizeof(buf), "expect %s but actual %s at line %d column %d(%s)",
+        snprintf(buf, sizeof(buf), "Expect a %s but actual a %s",
                  Lexer::tokenTypeString(tokenType).c_str(),
-                 Lexer::tokenTypeString(curTokenType()).c_str(),
-                 curToken().line, curToken().column, curToken().str.c_str());
-        throw ParseException(buf);
+                 Lexer::tokenTypeString(curTokenType()).c_str());
+        throw SyntaxError(buf, curToken());
     }
 }
 
@@ -126,11 +119,8 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
     }
     default:
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect 'def'/Identifier at line %d column %d",
-                 tok.line, tok.column);
-        throw ParseException(buf);
+        const char *msg = "Expect a 'def' / Identifier";
+        throw SyntaxError(msg, curToken());
     }
     }
     match(Lexer::T_EOF);
@@ -246,11 +236,8 @@ void Parser::parseMemberItem(unique_ptr<ComponentDefinationDecl> &defination)
     }
     else
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "(MemberItem)expect enumDefination/propertyDefination/functionDefination at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect a enumDefination / propertyDefination / functionDefination";
+        throw SyntaxError(msg, curToken());
     }
 
     if (!trying())
@@ -285,7 +272,7 @@ bool Parser::tryMemberItemAlt1()
     {
         parsePropertyDefination();
     }
-    catch (ParseException &e)
+    catch (exception &e)
     {
         util::condPrint(option::showLLTry, "tryMemberItemAlt1 fail: %s\n", e.what());
         result = false;
@@ -307,10 +294,11 @@ bool Parser::tryMemberItemAlt2()
     {
         parseFunctionDefination();
     }
-    catch (ParseException &e)
+    catch (exception &e)
     {
         util::condPrint(option::showLLTry, "tryMemberItemAlt2 fail: %s\n", e.what());
         result = false;
+        throw;
     }
 
     decTrying();
@@ -376,11 +364,8 @@ std::shared_ptr<TypeInfo> Parser::parsePropertyType()
     }
     default:
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a type token at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect a type token";
+        throw SyntaxError(msg, curToken());
     }
     }
 
@@ -435,11 +420,8 @@ std::shared_ptr<TypeInfo> Parser::parseType()
     }
     default:
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a type token at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect a type token";
+        throw SyntaxError(msg, curToken());
     }
     }
 
@@ -500,11 +482,8 @@ std::unique_ptr<Expr> Parser::parseLiteral()
     }
     default:
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a literal token at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect a literal token";
+        throw SyntaxError(msg, curToken());
     }
     }
 
@@ -656,22 +635,18 @@ void Parser::parseBlockItemList(std::vector<std::unique_ptr<Stmt>> &stmts)
 void Parser::parseBlockItem(std::vector<std::unique_ptr<Stmt>> &stmts)
 {
     unique_ptr<Stmt> stmt;
-    if (tryBlockItemAlt1())
-    {
-        stmt = parseDeclaration();
-    }
-    else if (tryBlockItemAlt2())
+    if (tryBlockItemAlt2())
     {
         stmt = parseStatement();
     }
+    else if (tryBlockItemAlt1())
+    {
+        stmt = parseDeclaration();
+    }
     else
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf),
-                 "expect a delcaration/statement for blockItem at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect a delcaration / statement";
+        throw SyntaxError(msg, curToken());
     }
 
     if (!trying())
@@ -690,10 +665,11 @@ bool Parser::tryBlockItemAlt1()
     {
         parseDeclaration();
     }
-    catch (ParseException &e)
+    catch (exception &e)
     {
         util::condPrint(option::showLLTry, "tryBlockItemAlt1 fail: %s\n", e.what());
         result = false;
+        throw;
     }
 
     decTrying();
@@ -712,7 +688,7 @@ bool Parser::tryBlockItemAlt2()
     {
         parseStatement();
     }
-    catch (ParseException &e)
+    catch (exception &e)
     {
         util::condPrint(option::showLLTry, "tryBlockItemAlt2 fail: %s\n", e.what());
         result = false;
@@ -793,11 +769,8 @@ std::unique_ptr<Expr> Parser::parseInitializer()
     }
     else
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a initializer at line %d column %d",
-                 tok.line, tok.column);
-        throw ParseException(buf);
+        const char *msg = "Expect a initializer";
+        throw SyntaxError(msg, curToken());
     }
 
     return expr;
@@ -1142,11 +1115,8 @@ std::unique_ptr<Expr> Parser::parseUnaryExpression()
     }
     else
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a unaryExpression at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect an unaryExpression";
+        throw SyntaxError(msg, curToken());
     }
 
     return expr;
@@ -1165,11 +1135,8 @@ void Parser::parseUnaryOperator()
     }
     default:
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect '+'/'-'/'!' at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect a '+' / '-' / '!'";
+        throw SyntaxError(msg, curToken());
     }
     }
 }
@@ -1304,11 +1271,8 @@ std::unique_ptr<Expr> Parser::parsePrimaryExpression()
     }
     default:
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect Identifier/literal/'(' at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect a Identifier / literal / '('";
+        throw SyntaxError(msg, curToken());
     }
     }
 
@@ -1379,11 +1343,8 @@ std::unique_ptr<Stmt> Parser::parseStatement()
         }
         else
         {
-            char buf[512];
-            Token tok = curToken();
-            snprintf(buf, sizeof(buf), "expect a statement at line %d column %d(%s)",
-                     tok.line, tok.column, tok.str.c_str());
-            throw ParseException(buf);
+            const char *msg = "Expect a statement";
+            throw SyntaxError(msg, curToken());
         }
     }
     }
@@ -1421,11 +1382,8 @@ std::unique_ptr<Stmt> Parser::parseSelectionStatement()
         }
         else
         {
-            char buf[512];
-            Token tok = curToken();
-            snprintf(buf, sizeof(buf), "expect a 'if'/compoundStatement at line %d column %d(%s)",
-                     tok.line, tok.column, tok.str.c_str());
-            throw ParseException(buf);
+            const char *msg = "Expect a 'if' / compoundStatement";
+            throw SyntaxError(msg, curToken());
         }
     }
 
@@ -1495,11 +1453,8 @@ std::unique_ptr<Stmt> Parser::parseJumpStatement()
     }
     default:
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a 'continue'/'break'/'return' at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect a 'continue' / 'break' / 'return'";
+        throw SyntaxError(msg, curToken());
     }
     }
 
@@ -1657,11 +1612,8 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
     }
     default:
     {
-        char buf[512];
-        Token tok = curToken();
-        snprintf(buf, sizeof(buf), "expect a ':'/'{' after Identifier at line %d column %d(%s)",
-                 tok.line, tok.column, tok.str.c_str());
-        throw ParseException(buf);
+        const char *msg = "Expect a ':' / '{'";
+        throw SyntaxError(msg, curToken());
     }
     }
 

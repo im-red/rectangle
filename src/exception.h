@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "lexer.h"
+
 #include <stdexcept>
 #include <string>
 
@@ -30,17 +32,21 @@ class SyntaxError : public std::runtime_error
 public:
     SyntaxError(const std::string &msg, int line, int column, const std::string &token)
         : std::runtime_error(msg
-                             + " \""
-                             + token
-                             + "\""
                              + " at line "
                              + std::to_string(line)
                              + " column "
-                             + std::to_string(column))
+                             + std::to_string(column)
+                             + " (\""
+                             + token
+                             + "\")")
         , m_msg(msg)
         , m_line(line)
         , m_column(column)
         , m_token(token)
+    {
+    }
+    SyntaxError(const std::string &msg, const frontend::Token &tok)
+        : SyntaxError(msg, tok.line, tok.column, tok.str)
     {
     }
     std::string msg() const
