@@ -193,6 +193,7 @@ Lexer::TokenType Lexer::scanToken()
     case '\'':
     case '"':
     {
+        m_tokenColumn += 1;
         m_tokenString = "";
         return scanString(c);
     }

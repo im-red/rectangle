@@ -35,7 +35,7 @@ namespace backend
 class Scope;
 }
 
-class Token;
+struct Token;
 
 struct ASTNode
 {

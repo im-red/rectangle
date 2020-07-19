@@ -25,6 +25,10 @@
 #include "asmvisitor.h"
 #include "asmmachine.h"
 #include "dumpvisitor.h"
+#include "sourcefile.h"
+#include "exception.h"
+#include "errorprinter.h"
+#include "lexer.h"
 
 #include <gtest/gtest.h>
 
@@ -42,10 +46,10 @@ using namespace rectangle::util;
 using namespace rectangle::frontend;
 using namespace rectangle::backend;
 using namespace rectangle::runtime;
+using namespace rectangle::diag;
 
 TEST(symbol, INSTANCE)
 {
-    option::verbose = true;
     vector<string> files = 
     {
         "../../template/Scene.rect",
@@ -61,26 +65,34 @@ TEST(symbol, INSTANCE)
     AST ast;
     for (auto &file : files)
     {
-        string code = util::readFile(file);
+        SourceFile sc(file);
+        string code = sc.source();
 
-        Parser p;
-        Lexer l;
-        auto tokens = l.scan(code);
-        unique_ptr<DocumentDecl> document = p.parse(tokens);
+        vector<rectangle::frontend::Token> tokens;
+        try
+        {
+            tokens = Lexer().scan(code);
+        }
+        catch (SyntaxError &e)
+        {
+            printSyntaxError(sc, e);
+        }
+
+        unique_ptr<DocumentDecl> document = Parser().parse(tokens);
         document->filename = file;
 
         ast.addDocument(move(document));
     }
 
     DumpVisitor dv;
-    dv.visit(&ast);
+    //dv.visit(&ast);
 
     SymbolVisitor sv;
     sv.visit(&ast);
 
     AsmVisitor av;
     AsmText txt = av.visit(&ast);
-    txt.dump();
+    //txt.dump();
 
     AsmBin bin(txt);
     //bin.dump();

@@ -39,6 +39,8 @@ set(RECT_SRCS
     ../src/topologicalsorter.cpp
     ../src/typeinfo.cpp
     ../src/dumpvisitor.cpp
+    ../src/sourcefile.cpp
+    ../src/errorprinter.cpp
 )
 
 add_library(common
