@@ -29,10 +29,11 @@
 
 namespace rectangle
 {
-
 namespace backend
 {
+
 class Scope;
+
 }
 
 struct Token;
@@ -71,36 +72,21 @@ struct Expr : public ASTNode
 
 struct IntegerLiteral : public Expr
 {
-    explicit IntegerLiteral(int i)
-        : Expr(Category::Integer)
-        , value(i)
-    {
-
-    }
+    explicit IntegerLiteral(int i) : Expr(Category::Integer), value(i) {}
 
     int value;
 };
 
 struct FloatLiteral : public Expr
 {
-    explicit FloatLiteral(float f)
-        : Expr(Category::Float)
-        , value(f)
-    {
-
-    }
+    explicit FloatLiteral(float f) : Expr(Category::Float), value(f) {}
 
     float value;
 };
 
 struct StringLiteral : public Expr
 {
-    explicit StringLiteral(const std::string &s)
-        : Expr(Category::String)
-        , value(s)
-    {
-
-    }
+    explicit StringLiteral(const std::string &s) : Expr(Category::String), value(s) {}
 
     std::string value;
 };
@@ -371,8 +357,8 @@ struct ComponentDefinationDecl : public DocumentDecl
 
 struct FieldDecl : public ASTNode
 {
-    FieldDecl(const std::string &_name, const std::shared_ptr<backend::TypeInfo> &_type)
-        : type(_type), name(_name)
+    FieldDecl(const std::string &name_, const std::shared_ptr<backend::TypeInfo> &type_)
+        : type(type_), name(name_)
     {}
 
     std::shared_ptr<backend::TypeInfo> type;
@@ -399,7 +385,6 @@ struct BindingDecl : public ASTNode
     ~BindingDecl() override;
 
     bool isId() const { return name == "id"; }
-
     std::string bindingId() const;
     int fieldIndex() const;
     int instanceIndex() const;

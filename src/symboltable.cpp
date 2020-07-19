@@ -83,10 +83,7 @@ void SymbolTable::popScope()
 
 void SymbolTable::define(Symbol *symbol)
 {
-    if (m_curScope == nullptr)
-    {
-        throw SymbolException("def", "cur scope is nullptr");
-    }
+    assert(m_curScope != nullptr);
     m_curScope->define(symbol);
 }
 
