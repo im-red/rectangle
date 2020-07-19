@@ -170,7 +170,7 @@ void AsmVisitor::visit(BinaryOperatorExpr *boe)
         case TypeInfo::Category::Int:       prefix = "i"; break;
         case TypeInfo::Category::Float:     prefix = "f"; break;
         case TypeInfo::Category::String:    prefix = "s"; break;
-        default:                            throw VisitException("BinaryOperatorExpr", "Binary operator is only valid for int/float/string");
+        default:                            assert(false);
         }
 
         string op;
@@ -215,7 +215,7 @@ void AsmVisitor::visit(UnaryOperatorExpr *uoe)
         case TypeInfo::Category::Int:       prefix = "i"; break;
         case TypeInfo::Category::Float:     prefix = "f"; break;
         case TypeInfo::Category::String:
-        default:                            throw VisitException("UnaryOperatorExpr", "Unary operator is only valid for int/float");
+        default:                            assert(false);
         }
 
         string op;

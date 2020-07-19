@@ -51,7 +51,7 @@ using namespace rectangle::diag;
 TEST(symbol, INSTANCE)
 {
     option::showLLTry = true;
-    vector<string> files = 
+    vector<string> paths = 
     {
         "../../template/Scene.rect",
         "../../template/Rectangle.rect", 
@@ -63,10 +63,16 @@ TEST(symbol, INSTANCE)
         "../rect/symbol_instance_instance.rect"
     };
 
-    AST ast;
-    for (auto &file : files)
+    map<string, SourceFile> path2file;
+    for (auto &path : paths)
     {
-        SourceFile sc(file);
+        path2file[path] = SourceFile(path);
+    }
+
+    AST ast;
+    for (auto &pair : path2file)
+    {
+        SourceFile &sc = pair.second;
         string code = sc.source();
 
         vector<rectangle::frontend::Token> tokens;
@@ -88,16 +94,31 @@ TEST(symbol, INSTANCE)
         {
             printSyntaxError(sc, e);
         }
-        document->filename = file;
+        document->filepath = sc.path();
 
         ast.addDocument(move(document));
     }
 
     DumpVisitor dv;
-    //dv.visit(&ast);
+    dv.visit(&ast);
 
     SymbolVisitor sv;
-    sv.visit(&ast);
+    try
+    {
+        sv.visit(&ast);
+    }
+    catch (SyntaxError &e)
+    {
+        auto iter = path2file.find(e.path());
+        if (iter == path2file.end())
+        {
+            fprintf(stderr, "Internal error: %s\n", e.what());
+        }
+        else
+        {
+            printSyntaxError(iter->second, e);
+        }
+    }
 
     AsmVisitor av;
     AsmText txt = av.visit(&ast);

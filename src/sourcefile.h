@@ -28,7 +28,7 @@ namespace frontend
 class SourceFile
 {
 public:
-    SourceFile(const std::string &path);
+    SourceFile(const std::string &path = "");
 
     std::string path() const;
     std::string source() const;

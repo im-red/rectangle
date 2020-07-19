@@ -20,6 +20,7 @@
 #include "builtinstruct.h"
 #include "symboltable.h"
 #include "typeinfo.h"
+#include "exception.h"
 
 #include <list>
 
@@ -27,6 +28,7 @@
 
 using namespace std;
 using namespace rectangle::util;
+using namespace rectangle::diag;
 
 namespace rectangle
 {
@@ -64,10 +66,12 @@ void SymbolVisitor::visit(AST *ast)
 
     for (auto doc : structs)
     {
+        m_curFilePath = doc->filepath;
         visit(doc);
     }
     for (auto doc : definations)
     {
+        m_curFilePath = doc->filepath;
         visit(doc);
     }
 
@@ -79,6 +83,8 @@ void SymbolVisitor::visit(AST *ast)
     Scope *mainScope = new Scope(Scope::Category::Function, m_ast->symbolTable()->curScope());
     mainScope->setScopeName("main");
     m_ast->symbolTable()->pushScope(mainScope);
+
+    m_curFilePath = cid->filepath;
 
     visitInstanceIndex(cid);
     visitInstanceId(cid);
@@ -162,8 +168,8 @@ void SymbolVisitor::visit(ComponentInstanceDecl *cid)
     Symbol *componentSymbol = m_ast->symbolTable()->curScope()->resolve(cid->componentName);
     if (!componentSymbol)
     {
-        throw SymbolException("ComponentInstanceDecl",
-                              "No component named \"" + cid->componentName + "\"");
+        string msg = "No component named \"" + cid->componentName + "\"";
+        throw SyntaxError(msg, cid->token(), m_curFilePath);
     }
     Scope *componentScope = dynamic_cast<Scope *>(componentSymbol);
     assert(componentScope != nullptr);
@@ -345,9 +351,8 @@ void SymbolVisitor::visit(BindingDecl *bd)
     Symbol *propertySymbol = componentScope->resolve(bd->name);
     if (!propertySymbol)
     {
-        throw SymbolException("BindingDecl",
-                              "Component \"" + componentSymbol->name() + "\"" +
-                              " has no property named \"" + bd->name + "\"");
+        string msg = "Component \"" + componentSymbol->name() + "\" has no property named \"" + bd->name + "\"";
+        throw SyntaxError(msg, bd->token(), m_curFilePath);
     }
     ASTNode *astNode = propertySymbol->astNode();
     assert(astNode != nullptr);
@@ -389,7 +394,8 @@ static std::string getId(ComponentInstanceDecl *cid)
             RefExpr *re = dynamic_cast<RefExpr *>(b->expr.get());
             if (!re)
             {
-                throw SymbolException("ComponentInstanceDecl", "Instance id should be a valid identifier");
+                string msg = "Instance id should be a valid identifier";
+                throw SyntaxError(msg, b->token(), cid->filepath);
             }
             id = re->name;
             break;
@@ -466,8 +472,8 @@ void SymbolVisitor::visit(InitListExpr *ile)
         {
             if (*eType != *(ile->exprList[i]->typeInfo))
             {
-                throw VisitException("InitListExpr",
-                                     "Elements of InitListExpr must have same type");
+                const string msg = "Elements of InitListExpr should have the same type";
+                throw SyntaxError(msg, ile->exprList[i]->token(), m_curFilePath);
             }
         }
     }
@@ -490,10 +496,13 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     case BinaryOperatorExpr::Op::LogicalAnd:
     case BinaryOperatorExpr::Op::LogicalOr:
     {
-        if (!(leftType->category() == TypeInfo::Category::Int && rightType->category() == TypeInfo::Category::Int))
+        if (leftType->category() != TypeInfo::Category::Int)
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'&&'/'||' operator require int operand");
+            throw SyntaxError("'&&' / '||' operator require int operand", b->left->token(), m_curFilePath);
+        }
+        if (rightType->category() != TypeInfo::Category::Int)
+        {
+            throw SyntaxError("'&&' / '||' operator require int operand", b->right->token(), m_curFilePath);
         }
         b->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
         break;
@@ -505,8 +514,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'<'/'>'/'<='/'>=' operator requires type of operands is same");
+            const string msg = "'<' / '>' / '<=' / '>=' operator require type of operands is the same";
+            throw SyntaxError(msg, b->right->token(), m_curFilePath);
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float)
@@ -515,8 +524,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'<'/'>'/'<='/'>=' operator requires type of operands is int/float");
+            const string msg = "'<' / '>' / '<=' / '>=' operator require type of operands is int / float";
+            throw SyntaxError(msg, b->left->token(), m_curFilePath);
         }
         b->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
         break;
@@ -526,10 +535,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'=='/'!=' operator requires type of operands is same("
-                                 + leftType->toString() + ", "
-                                 + rightType->toString() + ")");
+            const string msg = "'==' / '!=' operator require type of operands is the same";
+            throw SyntaxError(msg, b->right->token(), m_curFilePath);
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float || cat == TypeInfo::Category::String)
@@ -538,8 +545,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'=='/'!=' operator requires type of operands is int/float/string");
+            const string msg = "'==' / '!=' operator require type of operands is int / float / string";
+            throw SyntaxError(msg, b->left->token(), m_curFilePath);
         }
         b->typeInfo = shared_ptr<TypeInfo>(new TypeInfo(TypeInfo::Category::Int));
         break;
@@ -548,8 +555,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'+' operator requires type of operands is same");
+            const string msg = "'+' operator require type of operands is the same";
+            throw SyntaxError(msg, b->right->token(), m_curFilePath);
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float || cat == TypeInfo::Category::String)
@@ -558,8 +565,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'+' operator requires type of operands is int/float/string");
+            const string msg = "'+' operator require type of operands is int / float / string";
+            throw SyntaxError(msg, b->left->token(), m_curFilePath);
         }
         b->typeInfo = leftType;
         break;
@@ -570,8 +577,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'-'/'*'/'/' operator requires type of operands is same");
+            const string msg = "'-' / '*' / '/' operator require type of operands is the same";
+            throw SyntaxError(msg, b->right->token(), m_curFilePath);
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float)
@@ -580,8 +587,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'-'/'*'/'/' operator requires type of operands is int/float");
+            const string msg = "'-' / '*' / '/' operator require type of operands is int / float";
+            throw SyntaxError(msg, b->left->token(), m_curFilePath);
         }
         b->typeInfo = leftType;
         break;
@@ -590,8 +597,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'%' operator requires type of operands is same");
+            const string msg = "'%' operator require type of operands is the same";
+            throw SyntaxError(msg, b->right->token(), m_curFilePath);
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int)
@@ -600,8 +607,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'%' operator requires type of operands is int");
+            const string msg = "'%' operator require type of operands is int";
+            throw SyntaxError(msg, b->left->token(), m_curFilePath);
         }
         b->typeInfo = leftType;
         break;
@@ -610,10 +617,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
     {
         if (*leftType != *rightType)
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'=' operator requires type of operands is same("
-                                 + leftType->toString() + ", "
-                                 + rightType->toString() + ")");
+            const string msg = "'=' operator require type of operands is the same";
+            throw SyntaxError(msg, b->right->token(), m_curFilePath);
         }
         TypeInfo::Category cat = leftType->category();
         if (cat == TypeInfo::Category::Int || cat == TypeInfo::Category::Float || cat == TypeInfo::Category::String || cat == TypeInfo::Category::List)
@@ -622,8 +627,8 @@ void SymbolVisitor::visit(BinaryOperatorExpr *b)
         }
         else
         {
-            throw VisitException("BinaryOperatorExpr",
-                                 "'=' operator requires type of operands is int/float/string");
+            const string msg = "'=' operator require type of operands is int / float / string";
+            throw SyntaxError(msg, b->left->token(), m_curFilePath);
         }
         b->typeInfo = leftType;
         break;
@@ -654,8 +659,8 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
         }
         else
         {
-            throw VisitException("UnaryOperatorExpr",
-                                 "Unary operator '-'/'+' can only used for int/float expr");
+            const string msg = "Unary operator '-' / '+' require type of operand is int / float";
+            throw SyntaxError(msg, u->expr->token(), m_curFilePath);
         }
         break;
     }
@@ -667,8 +672,8 @@ void SymbolVisitor::visit(UnaryOperatorExpr *u)
         }
         else
         {
-            throw VisitException("UnaryOperatorExpr",
-                                 "Unary operator '!' can only used for int expr");
+            const string msg = "Unary operator '!' require type of operand is int";
+            throw SyntaxError(msg, u->expr->token(), m_curFilePath);
         }
         break;
     }
@@ -688,8 +693,8 @@ void SymbolVisitor::visit(CallExpr *e)
 
     if (m_ast->symbolTable()->curScope()->category() != Scope::Category::Local)
     {
-        throw VisitException("CallExpr",
-                             "CallExpr can only be used in LocalScope");
+        const string msg = "CallExpr can only be used in a function";
+        throw SyntaxError(msg, e->token(), m_curFilePath);
     }
 
     string functionName;
@@ -704,7 +709,8 @@ void SymbolVisitor::visit(CallExpr *e)
         Symbol *func = m_ast->symbolTable()->curScope()->resolve(r->name);
         if (!func)
         {
-            throw VisitException("CallExpr", "No symbol: " + r->name);
+            const string msg = "No function named \"" + r->name + "\"";
+            throw SyntaxError(msg, e->token(), m_curFilePath);
         }
 
         if (func->category() == Symbol::Category::Function)
@@ -723,10 +729,8 @@ void SymbolVisitor::visit(CallExpr *e)
         }
         else
         {
-            throw VisitException("CallExpr",
-                                 r->name
-                                 + " is a "
-                                 + Symbol::symbolCategoryString(func->category()));
+            const string msg = "\"" + r->name + "\" is not a function";
+            throw SyntaxError(msg, e->token(), m_curFilePath);
         }
 
         util::condPrint(option::showSymbolRef, "ref: %s\n", func->symbolString().c_str());
@@ -740,23 +744,29 @@ void SymbolVisitor::visit(CallExpr *e)
         visit(m->instanceExpr.get());
         shared_ptr<TypeInfo> instanceType = m->instanceExpr->typeInfo;
         string typeName = instanceType->toString();
+        if (instanceType->category() != TypeInfo::Category::Custom)
+        {
+            const string msg = "Type \"" + typeName + "\" has no method";
+            throw SyntaxError(msg, m->instanceExpr->token(), m_curFilePath);
+        }
 
         Symbol *instanceTypeSymbol = m_ast->symbolTable()->curScope()->resolve(typeName);
         if (!instanceTypeSymbol)
         {
-            throw VisitException("CallExpr", "No symbol for typeName: " + typeName);
+            const string msg = "No type named \"" + typeName + "\"";
+            throw SyntaxError(msg, m->instanceExpr->token(), m_curFilePath);
         }
         ScopeSymbol *scopeSym = dynamic_cast<ScopeSymbol *>(instanceTypeSymbol);
         if (!scopeSym)
         {
-            throw VisitException("CallExpr", typeName + " is a "
-                                 + Symbol::symbolCategoryString(instanceTypeSymbol->category())
-                                 + ", doesn't contains method");
+            const string msg = "\"" + typeName + "\" is a " + Symbol::symbolCategoryString(instanceTypeSymbol->category()) + ", has no method";
+            throw SyntaxError(msg, m->instanceExpr->token(), m_curFilePath);
         }
         Symbol *method = scopeSym->resolve(m->name);
         if (!method)
         {
-            throw VisitException("CallExpr", typeName + " doesn't contains method named " + m->name);
+            const string msg = "Type \"" + typeName + "\" has no method named \"" + m->name + "\"";
+            throw SyntaxError(msg, m->token(), m_curFilePath);
         }
 
         if (method->category() == Symbol::Category::Method)
@@ -768,10 +778,8 @@ void SymbolVisitor::visit(CallExpr *e)
         }
         else
         {
-            throw VisitException("CallExpr",
-                                 m->name
-                                 + " is a "
-                                 + Symbol::symbolCategoryString(method->category()));
+            const string msg = "\"" + m->name + "\" is a " + Symbol::symbolCategoryString(method->category());
+            throw SyntaxError(msg, m->token(), m_curFilePath);
         }
 
         util::condPrint(option::showSymbolRef, "ref: %s\n", method->symbolString().c_str());
@@ -779,7 +787,8 @@ void SymbolVisitor::visit(CallExpr *e)
     }
     else
     {
-        throw VisitException("CallExpr", "Only f(...) and obj.f(...) is valid");
+        const string msg = "Only f(...) and obj.f(...) is valid";
+        throw SyntaxError(msg, e->token(), m_curFilePath);
     }
 
     for (auto &p : e->paramList)
@@ -790,34 +799,29 @@ void SymbolVisitor::visit(CallExpr *e)
     if (paramTypes.size() != e->paramList.size())
     {
         char buf[512];
-        snprintf(buf, sizeof(buf), "%s requires %d parameters but is passed %d parameters",
+        snprintf(buf, sizeof(buf), "Function \"%s\" requires %d parameters but is passed %d",
                  functionName.c_str(),
                  static_cast<int>(paramTypes.size()),
                  static_cast<int>(e->paramList.size()));
-        throw VisitException("CallExpr", string(buf));
+        throw SyntaxError(buf, e->token(), m_curFilePath);
     }
 
-    if (functionName == "len"
-            || functionName == "print"
-            || functionName == "drawRect"
-            || functionName == "drawText"
-            || functionName == "drawPt")
+    for (size_t i = 0; i < paramTypes.size(); i++)
     {
-    }
-    else
-    {
-        for (size_t i = 0; i < paramTypes.size(); i++)
+        if (paramTypes[i]->category() == TypeInfo::Category::Void)
         {
-            if (*paramTypes[i] != *(e->paramList[i]->typeInfo))
-            {
-                char buf[512];
-                snprintf(buf, sizeof(buf), "%s requires %s in %dth parameters but is passed %s",
-                         functionName.c_str(),
-                         paramTypes[i]->toString().c_str(),
-                         static_cast<int>(i),
-                         e->paramList[i]->typeInfo->toString().c_str());
-                throw VisitException("CallExpr", string(buf));
-            }
+            // void means wildcard
+            continue;
+        }
+        if (*paramTypes[i] != *(e->paramList[i]->typeInfo))
+        {
+            char buf[512];
+            snprintf(buf, sizeof(buf), "Function %s requires type \"%s\" in %dth parameter but is passed \"%s\"",
+                     functionName.c_str(),
+                     paramTypes[i]->toString().c_str(),
+                     static_cast<int>(i),
+                     e->paramList[i]->typeInfo->toString().c_str());
+            throw SyntaxError(buf, e->paramList[i]->token(), m_curFilePath);
         }
     }
 
@@ -831,13 +835,13 @@ void SymbolVisitor::visit(ListSubscriptExpr *e)
     visit(e->listExpr.get());
     if (e->listExpr->typeInfo->category() != TypeInfo::Category::List)
     {
-        throw VisitException("ListSubscriptExpr", "Type of listExpr is " + e->listExpr->typeInfo->toString());
+        throw SyntaxError("Not a list", e->listExpr->token(), m_curFilePath);
     }
 
     visit(e->indexExpr.get());
     if (e->indexExpr->typeInfo->category() != TypeInfo::Category::Int)
     {
-        throw VisitException("ListSubscriptExpr", "Type of indexExpr is " + e->indexExpr->typeInfo->toString());
+        throw SyntaxError("Type of list index should be int", e->indexExpr->token(), m_curFilePath);
     }
 
     shared_ptr<TypeInfo> ti = e->listExpr->typeInfo;
@@ -864,26 +868,28 @@ void SymbolVisitor::visit(MemberExpr *e)
         instanceTypeSymbol = m_ast->symbolTable()->curScope()->resolve(typeString);
         if (!instanceTypeSymbol)
         {
-            throw VisitException("MemberExpr", "No symbol for type " + typeString);
+            const string msg = "No type named \"" + typeString + "\"";
+            throw SyntaxError(msg, e->instanceExpr->token(), m_curFilePath);
         }
     }
     else
     {
-        throw VisitException("MemberExpr", instanceTypeInfo->toString() + " doesn't contains member");
+        const string msg = "Type \"" + instanceTypeInfo->toString() + "\" has no member";
+        throw SyntaxError(msg, e->instanceExpr->token(), m_curFilePath);
     }
 
     ScopeSymbol *scopeSym = dynamic_cast<ScopeSymbol *>(instanceTypeSymbol);
     if (!scopeSym)
     {
-        throw VisitException("MemberExpr", typeString + " is a "
-                             + Symbol::symbolCategoryString(instanceTypeSymbol->category())
-                             + ", doesn't contains member");
+        const string msg = "\"" + typeString + "\" is a " + Symbol::symbolCategoryString(instanceTypeSymbol->category()) + ", has no member";
+        throw SyntaxError(msg, e->instanceExpr->token(), m_curFilePath);
     }
 
     Symbol *memberSymbol = scopeSym->resolve(e->name);
     if (!memberSymbol)
     {
-        throw VisitException("MemberExpr", typeString + " doesn't contains member named " + e->name);
+        const string msg = "Type \"" + typeString + "\" has no member named \"" + e->name + "\"";
+        throw SyntaxError(msg, e->token(), m_curFilePath);
     }
 
     util::condPrint(option::showSymbolRef, "ref: %s\n", memberSymbol->symbolString().c_str());
@@ -928,7 +934,8 @@ void SymbolVisitor::visit(RefExpr *e)
     Symbol *sym = m_ast->symbolTable()->curScope()->resolve(e->name);
     if (!sym)
     {
-        throw VisitException("RefExpr", "No symbol named " + e->name);
+        const string msg = "No symbol named \"" + e->name + "\"";
+        throw SyntaxError(msg, e->token(), m_curFilePath);
     }
 
     util::condPrint(option::showSymbolRef, "ref: %s\n", sym->symbolString().c_str());
@@ -986,18 +993,21 @@ void SymbolVisitor::visit(VarDecl *vd)
         Symbol *typeSymbol = m_ast->symbolTable()->curScope()->resolve(vd->type->toString());
         if (!typeSymbol)
         {
-            throw SymbolException("VarDecl", "No such type \"" + vd->type->toString() + "\"");
+            // FIXME
+            const string msg = "No type named \"" + vd->type->toString() + "\"";
+            throw SyntaxError(msg, vd->token(), m_curFilePath);
         }
         switch (typeSymbol->category())
         {
         case Symbol::Category::Struct:
             break;
         case Symbol::Category::Enum:
-            throw SymbolException("VarDecl", "Please use int type instead of enum type");
+            throw SyntaxError("Please use int type instead of enum type", vd->token(), m_curFilePath);
         case Symbol::Category::Component:
-            throw SymbolException("VarDecl", "Define variable with component type is illegal");
+            throw SyntaxError("Define variable with component type is illegal", vd->token(), m_curFilePath);
         default:
-            throw SymbolException("VarDecl", "\"" + typeSymbol->name() + "\" is a " + Symbol::symbolCategoryString(typeSymbol->category()));
+            throw SyntaxError("\"" + typeSymbol->name() + "\" is a " + Symbol::symbolCategoryString(typeSymbol->category()) + ", not a type",
+                              vd->token(), m_curFilePath);
         }
     }
 
@@ -1013,11 +1023,12 @@ void SymbolVisitor::visit(VarDecl *vd)
         visit(vd->expr.get());
         if (!(*vd->type == *vd->expr->typeInfo) && !vd->type->assignCompatible(vd->expr->typeInfo))
         {
-            throw VisitException("VarDecl", "Type doesn't match("
-                                 + vd->type->toString()
-                                 + ", "
-                                 + vd->expr->typeInfo->toString()
-                                 + ")");
+            throw SyntaxError("Initializer type doesn't match("
+                              + vd->type->toString()
+                              + ", "
+                              + vd->expr->typeInfo->toString()
+                              + ")",
+                              vd->expr->token(), m_curFilePath);
         }
     }
 }
@@ -1090,8 +1101,7 @@ void SymbolVisitor::visit(IfStmt *is)
     visit(is->condition.get());
     if (is->condition->typeInfo->category() != TypeInfo::Category::Int)
     {
-        throw VisitException("IfStmt", "if statement requires type of condition expression is int, but actually "
-                             + is->condition->typeInfo->toString());
+        throw SyntaxError("If statment requires type of condition expression is int", is->condition->token(), m_curFilePath);
     }
     visit(is->thenStmt.get());
     if (is->elseStmt)
@@ -1219,12 +1229,12 @@ void SymbolVisitor::visit(EnumDecl *ed)
 
 void SymbolVisitor::visit(FunctionDecl *)
 {
-    throw VisitException("FunctionDecl", "Not implement");
+    assert(false);
 }
 
 void SymbolVisitor::visit(PropertyDecl *)
 {
-    throw VisitException("PropertyDecl", "Not implement");
+    assert(false);
 }
 
 void SymbolVisitor::clear()
@@ -1237,6 +1247,7 @@ void SymbolVisitor::clear()
     m_propertyIndexAnalyzing = -1;
     m_propertyAnalyzing = nullptr;
     m_bindingAnalyzing = nullptr;
+    m_curFilePath = "invalid";
 }
 
 void SymbolVisitor::setAnalyzingPropertyDep(bool analyzing, PropertyDecl *pd)

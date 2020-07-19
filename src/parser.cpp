@@ -157,6 +157,7 @@ std::unique_ptr<ComponentDefinationDecl> Parser::parseComponentDefination()
 
     match(Token::T_DEF);
     match(Token::T_IDENTIFIER);
+    Token tok = token(m_index - 1);
     typeName = token(m_index - 1).str;
 
     match(Token::T_L_BRACE);
@@ -166,6 +167,7 @@ std::unique_ptr<ComponentDefinationDecl> Parser::parseComponentDefination()
     if (!trying())
     {
         defination->name = typeName;
+        defination->tok = tok;
     }
 
     return defination;
@@ -315,6 +317,7 @@ std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
 
     ti = parsePropertyType();
     match(Token::T_IDENTIFIER);
+    Token tok = token(m_index - 1);
     name = token(m_index - 1).str;
 
     match(Token::T_COLON);
@@ -328,6 +331,7 @@ std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
         propertyDecl->name = name;
         propertyDecl->type = move(ti);
         propertyDecl->expr = move(initExpr);
+        propertyDecl->tok = tok;
     }
 
     return propertyDecl;
@@ -462,6 +466,7 @@ std::unique_ptr<Expr> Parser::parseLiteral()
         match(curTokenType());
         string s = token(m_index - 1).str;
         stringExpr.reset(new StringLiteral(s));
+        stringExpr->tok = token(m_index - 1);
         break;
     }
     case Token::T_NUMBER_LITERAL:
@@ -472,11 +477,13 @@ std::unique_ptr<Expr> Parser::parseLiteral()
         {
             int i = stoi(s);
             intExpr.reset(new IntegerLiteral(i));
+            intExpr->tok = token(m_index - 1);
         }
         else
         {
             float f = stof(s);
             floatExpr.reset(new FloatLiteral(f));
+            floatExpr->tok = token(m_index - 1);
         }
         break;
     }
@@ -522,6 +529,7 @@ std::unique_ptr<FunctionDecl> Parser::parseFunctionDefination()
 
     ti = parseType();
     match(Token::T_IDENTIFIER);
+    Token tok = token(m_index - 1);
     name = token(m_index - 1).str;
     match(Token::T_L_PAREN);
     if (curToken().isIn(paramListFirst))
@@ -544,6 +552,7 @@ std::unique_ptr<FunctionDecl> Parser::parseFunctionDefination()
                                     move(ti),
                                     move(paramList),
                                     unique_ptr<CompoundStmt>(dynamic_cast<CompoundStmt *>(body.release()))));
+        decl->tok = tok;
     }
     return decl;
 }
@@ -572,12 +581,14 @@ std::unique_ptr<ParamDecl> Parser::parseParamItem()
 
     ti = parseType();
     match(Token::T_IDENTIFIER);
-    name = token(m_index - 1).str;
+    Token tok = token(m_index - 1);
+    name = tok.str;
 
     unique_ptr<ParamDecl> decl;
     if (!trying())
     {
         decl.reset(new ParamDecl(name, move(ti)));
+        decl->tok = tok;
     }
 
     return decl;
@@ -704,9 +715,12 @@ std::unique_ptr<Stmt> Parser::parseDeclaration()
 {
     unique_ptr<VarDecl> decl(new VarDecl);
 
+    decl->typeTok = curToken();
     decl->type = parseType();
     match(Token::T_IDENTIFIER);
-    decl->name = token(m_index - 1).str;
+    Token tok = token(m_index - 1);
+    decl->tok = tok;
+    decl->name = tok.str;
     if (curToken().is(Token::T_ASSIGN))
     {
         match(Token::T_ASSIGN);
@@ -1155,6 +1169,7 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
     vector<unique_ptr<Expr>> subExprs;
     vector<int> types;
 
+    Token tok = curToken();
     subExprs.push_back(parsePrimaryExpression());
     while (curToken().isIn({Token::T_L_BRACKET, Token::T_L_PAREN, Token::T_DOT}))
     {
@@ -1165,6 +1180,7 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
 
             unique_ptr<ListSubscriptExpr> lse(new ListSubscriptExpr);
             lse->indexExpr = parseExpression();
+            lse->tok = tok;
 
             subExprs.push_back(unique_ptr<Expr>(lse.release()));
             types.push_back(Subscript);
@@ -1175,6 +1191,7 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
         {
             match(Token::T_L_PAREN);
             unique_ptr<CallExpr> callExpr(new CallExpr);
+            callExpr->tok = tok;
             if (curToken().isIn(argumentExpressionListFirst))
             {
                 parseArgumentExpressionList(callExpr);
@@ -1190,6 +1207,7 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
 
             unique_ptr<MemberExpr> memberExpr(new MemberExpr);
             memberExpr->name = token(m_index - 1).str;
+            memberExpr->tok = token(m_index - 1);
 
             subExprs.push_back(unique_ptr<Expr>(memberExpr.release()));
             types.push_back(Member);
@@ -1251,8 +1269,10 @@ std::unique_ptr<Expr> Parser::parsePrimaryExpression()
     case Token::T_IDENTIFIER:
     {
         match(Token::T_IDENTIFIER);
+        Token tok = token(m_index - 1);
         string idName = token(m_index - 1).str;
         refExpr.reset(new RefExpr);
+        refExpr->tok = tok;
         dynamic_cast<RefExpr *>(refExpr.get())->name = idName;
         break;
     }
@@ -1420,6 +1440,7 @@ std::unique_ptr<Stmt> Parser::parseJumpStatement()
 {
     unique_ptr<Stmt> s;
 
+    Token tok = curToken();
     switch (curTokenType())
     {
     case Token::T_CONTINUE:
@@ -1463,6 +1484,7 @@ std::unique_ptr<Stmt> Parser::parseJumpStatement()
     {
         assert(s);
         stmt = move(s);
+        stmt->tok = tok;
     }
 
     return stmt;
@@ -1512,6 +1534,7 @@ std::unique_ptr<EnumDecl> Parser::parseEnumDefination()
 
     match(Token::T_ENUM);
     match(Token::T_IDENTIFIER);
+    Token tok = token(m_index - 1);
     enumName = token(m_index - 1).str;
 
     match(Token::T_L_BRACE);
@@ -1521,6 +1544,7 @@ std::unique_ptr<EnumDecl> Parser::parseEnumDefination()
     if (!trying())
     {
         enumDecl->name = enumName;
+        enumDecl->tok = tok;
     }
 
     return enumDecl;
@@ -1544,6 +1568,7 @@ void Parser::parseEnumConstant(std::unique_ptr<EnumDecl> &enumDecl)
     if (!trying())
     {
         ecd.reset(new EnumConstantDecl);
+        ecd->tok = curToken();
     }
 
     match(Token::T_IDENTIFIER);
@@ -1564,6 +1589,7 @@ std::unique_ptr<ComponentInstanceDecl> Parser::parseComponentInstance()
     if (!trying())
     {
         instanceDecl.reset(new ComponentInstanceDecl);
+        instanceDecl->tok = curToken();
     }
 
     match(Token::T_IDENTIFIER);
@@ -1593,6 +1619,8 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
     string name;
     unique_ptr<Expr> expr;
     unique_ptr<ComponentInstanceDecl> child;
+
+    Token tok = curToken();
 
     match(Token::T_IDENTIFIER);
     name = token(m_index - 1).str;
@@ -1631,6 +1659,7 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
 
             instanceDecl->bindingList.emplace_back(new BindingDecl(name, move(expr)));
             instanceDecl->bindingList.back()->componentInstance = instanceDecl.get();
+            instanceDecl->bindingList.back()->tok = tok;
         }
     }
 }

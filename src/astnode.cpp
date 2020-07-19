@@ -78,6 +78,11 @@ ASTNode::~ASTNode()
 
 }
 
+frontend::Token ASTNode::token() const
+{
+    return tok;
+}
+
 #define ENUM_ELEMENT(x) { x, #x }
 std::string BinaryOperatorExpr::typeString(BinaryOperatorExpr::Op type)
 {

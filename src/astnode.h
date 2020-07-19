@@ -20,6 +20,7 @@
 #include "util.h"
 #include "option.h"
 #include "typeinfo.h"
+#include "token.h"
 
 #include <string>
 #include <memory>
@@ -36,14 +37,13 @@ class Scope;
 
 }
 
-struct Token;
-
 struct ASTNode
 {
     virtual ~ASTNode();
+    virtual frontend::Token token() const;
 
     backend::Scope *scope = nullptr;
-    Token *tok = nullptr;
+    frontend::Token tok;
 };
 
 struct Expr : public ASTNode
@@ -128,6 +128,11 @@ struct BinaryOperatorExpr : public Expr
     {}
     static std::string typeString(Op op);
 
+    frontend::Token token() const override
+    {
+        return left->token();
+    }
+
     Op op = Op::Invalid;
     std::unique_ptr<Expr> left;
     std::unique_ptr<Expr> right;
@@ -145,6 +150,11 @@ struct UnaryOperatorExpr : public Expr
 
     UnaryOperatorExpr() : Expr(Category::UnaryOperator) {}
     static std::string typeString(Op op);
+
+    frontend::Token token() const override
+    {
+        return expr->token();
+    }
 
     Op op = Op::Invalid;
     std::unique_ptr<Expr> expr;
@@ -186,6 +196,8 @@ struct VarDecl : public ASTNode
     std::shared_ptr<backend::TypeInfo> type;
     std::string name;
     std::unique_ptr<Expr> expr;
+
+    frontend::Token typeTok;
 
     int localIndex = -1;
 };
@@ -340,7 +352,7 @@ struct DocumentDecl : public ASTNode
     explicit DocumentDecl(Type type_) : type(type_) {}
 
     Type type;
-    std::string filename;
+    std::string filepath;
 };
 
 struct ComponentDefinationDecl : public DocumentDecl

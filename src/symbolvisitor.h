@@ -116,6 +116,7 @@ private:
     int m_nextInstanceIndex = -1;
 
     ComponentInstanceDecl *m_topLevelInstance = nullptr;
+    std::string m_curFilePath;
 };
 
 }

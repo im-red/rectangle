@@ -30,7 +30,7 @@ namespace diag
 class SyntaxError : public std::runtime_error
 {
 public:
-    SyntaxError(const std::string &msg, int line, int column, const std::string &token)
+    SyntaxError(const std::string &msg, int line, int column, const std::string &token, const std::string &path = "")
         : std::runtime_error(msg
                              + " at line "
                              + std::to_string(line)
@@ -43,10 +43,11 @@ public:
         , m_line(line)
         , m_column(column)
         , m_token(token)
+        , m_path(path)
     {
     }
-    SyntaxError(const std::string &msg, const frontend::Token &tok)
-        : SyntaxError(msg, tok.line, tok.column, tok.str)
+    SyntaxError(const std::string &msg, const frontend::Token &tok, const std::string &path = "")
+        : SyntaxError(msg, tok.line, tok.column, tok.str, path)
     {
     }
     std::string msg() const
@@ -65,12 +66,17 @@ public:
     {
         return m_token;
     }
+    std::string path() const
+    {
+        return m_path;
+    }
 
 private:
     std::string m_msg;
     int m_line;
     int m_column;
     std::string m_token;
+    std::string m_path;
 };
 
 }

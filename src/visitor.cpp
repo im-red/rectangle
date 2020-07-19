@@ -99,7 +99,7 @@ void Visitor::visit(Expr *e)
     }
     case Expr::Category::Invalid:
     {
-        throw VisitException("Expr", "Invalid expr category");
+        assert(false);
     }
     }
 }
@@ -158,7 +158,7 @@ void Visitor::visit(Stmt *s)
     }
     default:
     {
-        throw VisitException("Stmt", "Invalid statement category");
+        assert(false);
     }
     }
 }

@@ -71,7 +71,7 @@ void AST::initBuiltinDocuments()
     {
         unique_ptr<StructDecl> sd(new StructDecl);
         sd->name = pInfo->name();
-        sd->filename = "(builtin)";
+        sd->filepath = "(builtin)";
         int fieldCount = pInfo->fieldCount();
         for (int i = 0; i < fieldCount; i++)
         {

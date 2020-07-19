@@ -81,8 +81,8 @@ struct Token
         TokenCount
     };
 
-    Token(TokenType t, const std::string &s, int l, int col)
-        : type(t), str(s), line(l), column(col)
+    Token(TokenType type_ = T_ERROR, const std::string &s = "", int line_ = -1, int column_ = -1)
+        : type(type_), str(s), line(line_), column(column_)
     {
     }
 

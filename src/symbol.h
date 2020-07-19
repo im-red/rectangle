@@ -33,17 +33,6 @@ namespace backend
 
 class TypeInfo;
 
-class SymbolException : public std::runtime_error
-{
-public:
-    explicit SymbolException(const std::string &s)
-        : std::runtime_error(s)
-    {}
-    SymbolException(const std::string &type, const std::string &s)
-        : SymbolException(type + " symbol exception: " + s)
-    {}
-};
-
 class Symbol
 {
 public:
