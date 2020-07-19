@@ -47,19 +47,19 @@ vector<Token> Lexer::scan(const string &code)
     while (true)
     {
         Token tok = nextToken();
-        if (tok.type == T_ERROR)
+        if (tok.type == Token::T_ERROR)
         {
             throw diag::SyntaxError(errorTypeString(m_error), tok.line, tok.column, tok.str);
         }
 
-        if (tok.type == Lexer::T_COMMENT)
+        if (tok.type == Token::T_COMMENT)
         {
             continue;
         }
         else
         {
             result.push_back(tok);
-            if (tok.type == Lexer::T_EOF)
+            if (tok.type == Token::T_EOF)
             {
                 break;
             }
@@ -75,7 +75,7 @@ Token Lexer::nextToken()
     return token;
 }
 
-Lexer::TokenType Lexer::scanToken()
+Token::TokenType Lexer::scanToken()
 {
     m_tokenString = "";
 
@@ -90,7 +90,7 @@ Lexer::TokenType Lexer::scanToken()
 
     if (static_cast<size_t>(m_nextPos) > m_code.size())
     {
-        return T_EOF;
+        return Token::T_EOF;
     }
 
     const char c = m_char;
@@ -100,22 +100,22 @@ Lexer::TokenType Lexer::scanToken()
 
     switch (c)
     {
-    case '{': return T_L_BRACE;
-    case '}': return T_R_BRACE;
-    case '[': return T_L_BRACKET;
-    case ']': return T_R_BRACKET;
-    case '(': return T_L_PAREN;
-    case ')': return T_R_PAREN;
+    case '{': return Token::T_L_BRACE;
+    case '}': return Token::T_R_BRACE;
+    case '[': return Token::T_L_BRACKET;
+    case ']': return Token::T_R_BRACKET;
+    case '(': return Token::T_L_PAREN;
+    case ')': return Token::T_R_PAREN;
     case '|':
     {
         if (m_char == '|')
         {
             nextChar();
             m_tokenString = "||";
-            return T_OR_OR;
+            return Token::T_OR_OR;
         }
         m_error = IllegalSymbol;
-        return T_ERROR;
+        return Token::T_ERROR;
     }
     case '>':
     {
@@ -123,9 +123,9 @@ Lexer::TokenType Lexer::scanToken()
         {
             nextChar();
             m_tokenString = ">=";
-            return T_GE;
+            return Token::T_GE;
         }
-        return T_GT;
+        return Token::T_GT;
     }
     case '=':
     {
@@ -133,9 +133,9 @@ Lexer::TokenType Lexer::scanToken()
         {
             nextChar();
             m_tokenString = "==";
-            return T_EQUAL;
+            return Token::T_EQUAL;
         }
-        return T_ASSIGN;
+        return Token::T_ASSIGN;
     }
     case '<':
     {
@@ -143,12 +143,12 @@ Lexer::TokenType Lexer::scanToken()
         {
             nextChar();
             m_tokenString = "<=";
-            return T_LE;
+            return Token::T_LE;
         }
-        return T_LT;
+        return Token::T_LT;
     }
-    case ';': return T_SEMICOLON;
-    case ':': return T_COLON;
+    case ';': return Token::T_SEMICOLON;
+    case ':': return Token::T_COLON;
     case '/':
     {
         if (m_char == '/')
@@ -159,36 +159,36 @@ Lexer::TokenType Lexer::scanToken()
                 m_tokenString += m_char;
                 nextChar();
             }
-            return T_COMMENT;
+            return Token::T_COMMENT;
         }
-        return T_SLASH;
+        return Token::T_SLASH;
     }
-    case '.': return T_DOT;
-    case '-': return T_MINUS;
-    case '+': return T_PLUS;
-    case ',': return T_COMMA;
-    case '*': return T_STAR;
+    case '.': return Token::T_DOT;
+    case '-': return Token::T_MINUS;
+    case '+': return Token::T_PLUS;
+    case ',': return Token::T_COMMA;
+    case '*': return Token::T_STAR;
     case '&':
     {
         if (m_char == '&')
         {
             nextChar();
             m_tokenString = "&&";
-            return T_AND_AND;
+            return Token::T_AND_AND;
         }
         m_error = IllegalSymbol;
-        return T_ERROR;
+        return Token::T_ERROR;
     }
-    case '%': return T_REMAINDER;
+    case '%': return Token::T_REMAINDER;
     case '!':
     {
         if (m_char == '=')
         {
             nextChar();
             m_tokenString = "!=";
-            return T_NOT_EQUAL;
+            return Token::T_NOT_EQUAL;
         }
-        return T_NOT;
+        return Token::T_NOT;
     }
     case '\'':
     case '"':
@@ -228,22 +228,22 @@ Lexer::TokenType Lexer::scanToken()
     }
 
     m_error = IllegalCharacter;
-    return T_ERROR;
+    return Token::T_ERROR;
 }
 
-Lexer::TokenType Lexer::scanString(char c)
+Token::TokenType Lexer::scanString(char c)
 {
     while (static_cast<size_t>(m_nextPos) <= m_code.size())
     {
         if (isLineTerminator(m_char))
         {
             m_error = StrayNewlineInStringLiteral;
-            return T_ERROR;
+            return Token::T_ERROR;
         }
         else if (m_char == c)
         {
             nextChar();
-            return T_STRING_LITERAL;
+            return Token::T_STRING_LITERAL;
         }
         else
         {
@@ -252,10 +252,10 @@ Lexer::TokenType Lexer::scanString(char c)
         nextChar();
     }
     m_error = UnclosedStringLiteral;
-    return T_ERROR;
+    return Token::T_ERROR;
 }
 
-Lexer::TokenType Lexer::scanNumber(char c)
+Token::TokenType Lexer::scanNumber(char c)
 {
     m_tokenString += c;
     while (isDigit(m_char))
@@ -271,7 +271,7 @@ Lexer::TokenType Lexer::scanNumber(char c)
     }
     else
     {
-        return T_NUMBER_LITERAL;
+        return Token::T_NUMBER_LITERAL;
     }
 
     while (isDigit(m_char))
@@ -280,7 +280,7 @@ Lexer::TokenType Lexer::scanNumber(char c)
         nextChar();
     }
 
-    return T_NUMBER_LITERAL;
+    return Token::T_NUMBER_LITERAL;
 }
 
 void Lexer::nextChar()

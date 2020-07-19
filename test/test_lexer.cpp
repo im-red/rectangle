@@ -51,7 +51,7 @@ static void singleTokenErrorHelper(const std::string &code, int error)
 
     Token tok = l.nextToken();
 
-    EXPECT_EQ(tok.type, Lexer::T_ERROR);
+    EXPECT_EQ(tok.type, Token::T_ERROR);
     EXPECT_EQ(l.m_error, error);
 }
 
@@ -60,10 +60,10 @@ TEST(lexer, KEYWORD)
 {
     string code = "if\ndef\nint\nelse\nenum\nlist\nvoid\nbreak\nfloat\n" \
         "while\nreturn\nstring\ncontinue";
-    vector<int> expect = { Lexer::T_IF, Lexer::T_DEF, Lexer::T_INT, Lexer::T_ELSE, 
-        Lexer::T_ENUM, Lexer::T_LIST, Lexer::T_VOID, Lexer::T_BREAK, 
-        Lexer::T_FLOAT, Lexer::T_WHILE, Lexer::T_RETURN, 
-        Lexer::T_STRING, Lexer::T_CONTINUE, Lexer::T_EOF };
+    vector<int> expect = { Token::T_IF, Token::T_DEF, Token::T_INT, Token::T_ELSE, 
+        Token::T_ENUM, Token::T_LIST, Token::T_VOID, Token::T_BREAK, 
+        Token::T_FLOAT, Token::T_WHILE, Token::T_RETURN, 
+        Token::T_STRING, Token::T_CONTINUE, Token::T_EOF };
     vector<int> actual;
 
     Lexer l;
@@ -72,7 +72,7 @@ TEST(lexer, KEYWORD)
     {
         Token tok = l.nextToken();
         actual.push_back(tok.type);
-        if (tok.type == Lexer::T_EOF)
+        if (tok.type == Token::T_EOF)
         {
             break;
         }
@@ -83,19 +83,19 @@ TEST(lexer, KEYWORD)
 TEST(lexer, COMMENT)
 {
     string code = "//abcde";
-    singleTokenHelper(code, Lexer::T_COMMENT, code);
+    singleTokenHelper(code, Token::T_COMMENT, code);
 }
 
 TEST(lexer, SYMBOL)
 {
     string code = "{}[](),:&&||!+-*/%. >= <= > < == != =;";
-    vector<int> expect = { Lexer::T_L_BRACE, Lexer::T_R_BRACE, Lexer::T_L_BRACKET, Lexer::T_R_BRACKET, 
-        Lexer::T_L_PAREN, Lexer::T_R_PAREN, Lexer::T_COMMA, Lexer::T_COLON, 
-        Lexer::T_AND_AND, Lexer::T_OR_OR, 
-        Lexer::T_NOT, Lexer::T_PLUS, Lexer::T_MINUS,  Lexer::T_STAR,
-        Lexer::T_SLASH, Lexer::T_REMAINDER, Lexer::T_DOT, Lexer::T_GE,
-        Lexer::T_LE, Lexer::T_GT, Lexer::T_LT, Lexer::T_EQUAL,
-        Lexer::T_NOT_EQUAL, Lexer::T_ASSIGN, Lexer::T_SEMICOLON, Lexer::T_EOF };
+    vector<int> expect = { Token::T_L_BRACE, Token::T_R_BRACE, Token::T_L_BRACKET, Token::T_R_BRACKET, 
+        Token::T_L_PAREN, Token::T_R_PAREN, Token::T_COMMA, Token::T_COLON, 
+        Token::T_AND_AND, Token::T_OR_OR, 
+        Token::T_NOT, Token::T_PLUS, Token::T_MINUS,  Token::T_STAR,
+        Token::T_SLASH, Token::T_REMAINDER, Token::T_DOT, Token::T_GE,
+        Token::T_LE, Token::T_GT, Token::T_LT, Token::T_EQUAL,
+        Token::T_NOT_EQUAL, Token::T_ASSIGN, Token::T_SEMICOLON, Token::T_EOF };
     vector<int> actual;
 
     Lexer l;
@@ -104,7 +104,7 @@ TEST(lexer, SYMBOL)
     {
         Token tok = l.nextToken();
         actual.push_back(tok.type);
-        if (tok.type == Lexer::T_EOF)
+        if (tok.type == Token::T_EOF)
         {
             break;
         }
@@ -127,7 +127,7 @@ TEST(lexer, SYMBOL_ERROR)
 TEST(lexer, STRING_LITERAL)
 {
     string code = "   abcde   ";
-    singleTokenHelper('"' + code + '"', Lexer::T_STRING_LITERAL, code);
+    singleTokenHelper('"' + code + '"', Token::T_STRING_LITERAL, code);
 }
 
 TEST(lexer, STRING_LITERAL_ERROR)
@@ -146,11 +146,11 @@ TEST(lexer, NUMBER_LITERAL)
 {
     {
         string code = "12345";
-        singleTokenHelper(code, Lexer::T_NUMBER_LITERAL, code);
+        singleTokenHelper(code, Token::T_NUMBER_LITERAL, code);
     }
     {
         string code = "123.45";
-        singleTokenHelper(code, Lexer::T_NUMBER_LITERAL, code);
+        singleTokenHelper(code, Token::T_NUMBER_LITERAL, code);
     }
 }
 

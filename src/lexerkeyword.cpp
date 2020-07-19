@@ -22,19 +22,19 @@ namespace rectangle
 namespace frontend
 {
 
-static inline Lexer::TokenType classify2(const char *s)
+static inline Token::TokenType classify2(const char *s)
 {
     if (s[0] == 'i')
     {
         if (s[1] == 'f')
         {
-            return Lexer::T_IF;
+            return Token::T_IF;
         }
     }
-    return Lexer::T_IDENTIFIER;
+    return Token::T_IDENTIFIER;
 }
 
-static inline Lexer::TokenType classify3(const char *s)
+static inline Token::TokenType classify3(const char *s)
 {
     if (s[0] == 'd')
     {
@@ -42,7 +42,7 @@ static inline Lexer::TokenType classify3(const char *s)
         {
             if (s[2] == 'f')
             {
-                return Lexer::T_DEF;
+                return Token::T_DEF;
             }
         }
     }
@@ -52,14 +52,14 @@ static inline Lexer::TokenType classify3(const char *s)
         {
             if (s[2] == 't')
             {
-                return Lexer::T_INT;
+                return Token::T_INT;
             }
         }
     }
-    return Lexer::T_IDENTIFIER;
+    return Token::T_IDENTIFIER;
 }
 
-static inline Lexer::TokenType classify4(const char *s)
+static inline Token::TokenType classify4(const char *s)
 {
     if (s[0] == 'e')
     {
@@ -69,7 +69,7 @@ static inline Lexer::TokenType classify4(const char *s)
             {
                 if (s[3] == 'e')
                 {
-                    return Lexer::T_ELSE;
+                    return Token::T_ELSE;
                 }
             }
         }
@@ -79,7 +79,7 @@ static inline Lexer::TokenType classify4(const char *s)
             {
                 if (s[3] == 'm')
                 {
-                    return Lexer::T_ENUM;
+                    return Token::T_ENUM;
                 }
             }
         }
@@ -92,7 +92,7 @@ static inline Lexer::TokenType classify4(const char *s)
             {
                 if (s[3] == 't')
                 {
-                    return Lexer::T_LIST;
+                    return Token::T_LIST;
                 }
             }
         }
@@ -105,15 +105,15 @@ static inline Lexer::TokenType classify4(const char *s)
             {
                 if (s[3] == 'd')
                 {
-                    return Lexer::T_VOID;
+                    return Token::T_VOID;
                 }
             }
         }
     }
-    return Lexer::T_IDENTIFIER;
+    return Token::T_IDENTIFIER;
 }
 
-static inline Lexer::TokenType classify5(const char *s)
+static inline Token::TokenType classify5(const char *s)
 {
     if (s[0] == 'b')
     {
@@ -125,7 +125,7 @@ static inline Lexer::TokenType classify5(const char *s)
                 {
                     if (s[4] == 'k')
                     {
-                        return Lexer::T_BREAK;
+                        return Token::T_BREAK;
                     }
                 }
             }
@@ -141,7 +141,7 @@ static inline Lexer::TokenType classify5(const char *s)
                 {
                     if (s[4] == 't')
                     {
-                        return Lexer::T_FLOAT;
+                        return Token::T_FLOAT;
                     }
                 }
             }
@@ -157,16 +157,16 @@ static inline Lexer::TokenType classify5(const char *s)
                 {
                     if (s[4] == 'e')
                     {
-                        return Lexer::T_WHILE;
+                        return Token::T_WHILE;
                     }
                 }
             }
         }
     }
-    return Lexer::T_IDENTIFIER;
+    return Token::T_IDENTIFIER;
 }
 
-static inline Lexer::TokenType classify6(const char *s)
+static inline Token::TokenType classify6(const char *s)
 {
     if (s[0] == 'r')
     {
@@ -180,7 +180,7 @@ static inline Lexer::TokenType classify6(const char *s)
                     {
                         if (s[5] == 'n')
                         {
-                            return Lexer::T_RETURN;
+                            return Token::T_RETURN;
                         }
                     }
                 }
@@ -199,17 +199,17 @@ static inline Lexer::TokenType classify6(const char *s)
                     {
                         if (s[5] == 'g')
                         {
-                            return Lexer::T_STRING;
+                            return Token::T_STRING;
                         }
                     }
                 }
             }
         }
     }
-    return Lexer::T_IDENTIFIER;
+    return Token::T_IDENTIFIER;
 }
 
-static inline Lexer::TokenType classify8(const char *s)
+static inline Token::TokenType classify8(const char *s)
 {
     if (s[0] == 'c')
     {
@@ -227,7 +227,7 @@ static inline Lexer::TokenType classify8(const char *s)
                             {
                                 if (s[7] == 'e')
                                 {
-                                    return Lexer::T_CONTINUE;
+                                    return Token::T_CONTINUE;
                                 }
                             }
                         }
@@ -236,10 +236,10 @@ static inline Lexer::TokenType classify8(const char *s)
             }
         }
     }
-    return Lexer::T_IDENTIFIER;
+    return Token::T_IDENTIFIER;
 }
 
-Lexer::TokenType Lexer::classify(const char *s, int n)
+Token::TokenType Lexer::classify(const char *s, int n)
 {
     switch (n)
     {
@@ -249,7 +249,7 @@ Lexer::TokenType Lexer::classify(const char *s, int n)
     case 5: return classify5(s);
     case 6: return classify6(s);
     case 8: return classify8(s);
-    default: return T_IDENTIFIER;
+    default: return Token::T_IDENTIFIER;
     }
 }
 

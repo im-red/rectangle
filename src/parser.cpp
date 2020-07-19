@@ -55,7 +55,7 @@ std::unique_ptr<DocumentDecl> Parser::parse(const std::vector<Token> &tokens)
     return move(m_document);
 }
 
-int Parser::tokenType(int i) const
+Token::TokenType Parser::tokenType(int i) const
 {
     return token(i).type;
 }
@@ -74,7 +74,7 @@ void Parser::consume()
     }
 }
 
-void Parser::match(int tokenType)
+void Parser::match(Token::TokenType tokenType)
 {
     if (tokenType == curTokenType())
     {
@@ -84,8 +84,8 @@ void Parser::match(int tokenType)
     {
         char buf[512];
         snprintf(buf, sizeof(buf), "Expect a %s but actual a %s",
-                 Lexer::tokenTypeString(tokenType).c_str(),
-                 Lexer::tokenTypeString(curTokenType()).c_str());
+                 Token::tokenTypeString(tokenType).c_str(),
+                 Token::tokenTypeString(curTokenType()).c_str());
         throw SyntaxError(buf, curToken());
     }
 }
@@ -107,12 +107,12 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
 
     switch(curTokenType())
     {
-    case Lexer::T_DEF:
+    case Token::T_DEF:
     {
         def = parseComponentDefination();
         break;
     }
-    case Lexer::T_IDENTIFIER:
+    case Token::T_IDENTIFIER:
     {
         instance = parseComponentInstance();
         break;
@@ -123,7 +123,7 @@ std::unique_ptr<DocumentDecl> Parser::parseDocument()
         throw SyntaxError(msg, curToken());
     }
     }
-    match(Lexer::T_EOF);
+    match(Token::T_EOF);
 
     unique_ptr<DocumentDecl> doc;
     if (!trying())
@@ -155,13 +155,13 @@ std::unique_ptr<ComponentDefinationDecl> Parser::parseComponentDefination()
         defination.reset(new ComponentDefinationDecl);
     }
 
-    match(Lexer::T_DEF);
-    match(Lexer::T_IDENTIFIER);
+    match(Token::T_DEF);
+    match(Token::T_IDENTIFIER);
     typeName = token(m_index - 1).str;
 
-    match(Lexer::T_L_BRACE);
+    match(Token::T_L_BRACE);
     parseMemberItemList(defination);
-    match(Lexer::T_R_BRACE);
+    match(Token::T_R_BRACE);
 
     if (!trying())
     {
@@ -173,13 +173,13 @@ std::unique_ptr<ComponentDefinationDecl> Parser::parseComponentDefination()
 
 static const set<int> memberItemFirst =
 {
-    Lexer::T_INT,
-    Lexer::T_VOID,
-    Lexer::T_FLOAT,
-    Lexer::T_STRING,
-    Lexer::T_LIST,
-    Lexer::T_ENUM,
-    Lexer::T_IDENTIFIER
+    Token::T_INT,
+    Token::T_VOID,
+    Token::T_FLOAT,
+    Token::T_STRING,
+    Token::T_LIST,
+    Token::T_ENUM,
+    Token::T_IDENTIFIER
 };
 
 void Parser::parseMemberItemList(unique_ptr<ComponentDefinationDecl> &defination)
@@ -192,21 +192,21 @@ void Parser::parseMemberItemList(unique_ptr<ComponentDefinationDecl> &defination
 
 static const set<int> propertyTypeFirst =
 {
-    Lexer::T_INT,
-    Lexer::T_FLOAT,
-    Lexer::T_STRING,
-    Lexer::T_LIST
+    Token::T_INT,
+    Token::T_FLOAT,
+    Token::T_STRING,
+    Token::T_LIST
 };
 static const set<int> propertyDefinationFirst = propertyTypeFirst;
 
 static const set<int> typeFirst =
 {
-    Lexer::T_INT,
-    Lexer::T_FLOAT,
-    Lexer::T_STRING,
-    Lexer::T_LIST,
-    Lexer::T_VOID,
-    Lexer::T_IDENTIFIER
+    Token::T_INT,
+    Token::T_FLOAT,
+    Token::T_STRING,
+    Token::T_LIST,
+    Token::T_VOID,
+    Token::T_IDENTIFIER
 };
 
 //memberItem  // Int | Void | Float | String | List | Enum | Identifier
@@ -221,7 +221,7 @@ void Parser::parseMemberItem(unique_ptr<ComponentDefinationDecl> &defination)
     unique_ptr<PropertyDecl> propertyDecl;
     unique_ptr<FunctionDecl> functionDecl;
 
-    if (curToken().is(Lexer::T_ENUM))
+    if (curToken().is(Token::T_ENUM))
     {
         enumDecl = parseEnumDefination();
     }
@@ -314,10 +314,10 @@ std::unique_ptr<PropertyDecl> Parser::parsePropertyDefination()
     unique_ptr<Expr> initExpr;
 
     ti = parsePropertyType();
-    match(Lexer::T_IDENTIFIER);
+    match(Token::T_IDENTIFIER);
     name = token(m_index - 1).str;
 
-    match(Lexer::T_COLON);
+    match(Token::T_COLON);
     initExpr = parseInitializer();
 
     unique_ptr<PropertyDecl> propertyDecl;
@@ -339,25 +339,25 @@ std::shared_ptr<TypeInfo> Parser::parsePropertyType()
 
     switch(curTokenType())
     {
-    case Lexer::T_INT:
+    case Token::T_INT:
     {
         result.reset(new TypeInfo(TypeInfo::Category::Int));
         match(curTokenType());
         break;
     }
-    case Lexer::T_FLOAT:
+    case Token::T_FLOAT:
     {
         result.reset(new TypeInfo(TypeInfo::Category::Float));
         match(curTokenType());
         break;
     }
-    case Lexer::T_STRING:
+    case Token::T_STRING:
     {
         result.reset(new TypeInfo(TypeInfo::Category::String));
         match(curTokenType());
         break;
     }
-    case Lexer::T_LIST:
+    case Token::T_LIST:
     {
         result = parseListType();
         break;
@@ -383,37 +383,37 @@ std::shared_ptr<TypeInfo> Parser::parseType()
 
     switch(curTokenType())
     {
-    case Lexer::T_INT:
+    case Token::T_INT:
     {
         result.reset(new TypeInfo(TypeInfo::Category::Int));
         match(curTokenType());
         break;
     }
-    case Lexer::T_VOID:
+    case Token::T_VOID:
     {
         result.reset(new TypeInfo(TypeInfo::Category::Void));
         match(curTokenType());
         break;
     }
-    case Lexer::T_FLOAT:
+    case Token::T_FLOAT:
     {
         result.reset(new TypeInfo(TypeInfo::Category::Float));
         match(curTokenType());
         break;
     }
-    case Lexer::T_STRING:
+    case Token::T_STRING:
     {
         result.reset(new TypeInfo(TypeInfo::Category::String));
         match(curTokenType());
         break;
     }
-    case Lexer::T_IDENTIFIER:
+    case Token::T_IDENTIFIER:
     {
         result.reset(new CustomTypeInfo(curToken().str));
         match(curTokenType());
         break;
     }
-    case Lexer::T_LIST:
+    case Token::T_LIST:
     {
         result = parseListType();
         break;
@@ -435,10 +435,10 @@ std::shared_ptr<TypeInfo> Parser::parseType()
 
 std::shared_ptr<TypeInfo> Parser::parseListType()
 {
-    match(Lexer::T_LIST);
-    match(Lexer::T_LT);
+    match(Token::T_LIST);
+    match(Token::T_LT);
     shared_ptr<TypeInfo> ele = parsePropertyType();
-    match(Lexer::T_GT);
+    match(Token::T_GT);
 
     shared_ptr<TypeInfo> result;
     if (!trying())
@@ -457,14 +457,14 @@ std::unique_ptr<Expr> Parser::parseLiteral()
 
     switch(curTokenType())
     {
-    case Lexer::T_STRING_LITERAL:
+    case Token::T_STRING_LITERAL:
     {
         match(curTokenType());
         string s = token(m_index - 1).str;
         stringExpr.reset(new StringLiteral(s));
         break;
     }
-    case Lexer::T_NUMBER_LITERAL:
+    case Token::T_NUMBER_LITERAL:
     {
         match(curTokenType());
         string s = token(m_index - 1).str;
@@ -521,14 +521,14 @@ std::unique_ptr<FunctionDecl> Parser::parseFunctionDefination()
     unique_ptr<Stmt> body;
 
     ti = parseType();
-    match(Lexer::T_IDENTIFIER);
+    match(Token::T_IDENTIFIER);
     name = token(m_index - 1).str;
-    match(Lexer::T_L_PAREN);
+    match(Token::T_L_PAREN);
     if (curToken().isIn(paramListFirst))
     {
         parseParamList(paramList);
     }
-    match(Lexer::T_R_PAREN);
+    match(Token::T_R_PAREN);
     body = parseCompoundStatement();
 
     unique_ptr<FunctionDecl> decl;
@@ -553,9 +553,9 @@ void Parser::parseParamList(std::vector<std::unique_ptr<ParamDecl>> &paramList)
     vector<unique_ptr<ParamDecl>> pl;
 
     pl.push_back(parseParamItem());
-    while (curToken().is(Lexer::T_COMMA))
+    while (curToken().is(Token::T_COMMA))
     {
-        match(Lexer::T_COMMA);
+        match(Token::T_COMMA);
         pl.push_back(parseParamItem());
     }
 
@@ -571,7 +571,7 @@ std::unique_ptr<ParamDecl> Parser::parseParamItem()
     string name;
 
     ti = parseType();
-    match(Lexer::T_IDENTIFIER);
+    match(Token::T_IDENTIFIER);
     name = token(m_index - 1).str;
 
     unique_ptr<ParamDecl> decl;
@@ -587,9 +587,9 @@ std::unique_ptr<Stmt> Parser::parseCompoundStatement()
 {
     vector<unique_ptr<Stmt>> stmts;
 
-    match(Lexer::T_L_BRACE);
+    match(Token::T_L_BRACE);
     parseBlockItemList(stmts);
-    match(Lexer::T_R_BRACE);
+    match(Token::T_R_BRACE);
 
     unique_ptr<Stmt> stmt;
     if (!trying())
@@ -602,21 +602,21 @@ std::unique_ptr<Stmt> Parser::parseCompoundStatement()
 
 static const set<int> blockItemFirst =
 {
-    Lexer::T_INT,
-    Lexer::T_VOID,
-    Lexer::T_FLOAT,
-    Lexer::T_STRING,
-    Lexer::T_LIST,
-    Lexer::T_IDENTIFIER,
-    Lexer::T_L_BRACE,
-    Lexer::T_IF,
-    Lexer::T_WHILE,
-    Lexer::T_CONTINUE,
-    Lexer::T_BREAK,
-    Lexer::T_RETURN,
-    Lexer::T_STRING_LITERAL,
-    Lexer::T_NUMBER_LITERAL,
-    Lexer::T_L_PAREN
+    Token::T_INT,
+    Token::T_VOID,
+    Token::T_FLOAT,
+    Token::T_STRING,
+    Token::T_LIST,
+    Token::T_IDENTIFIER,
+    Token::T_L_BRACE,
+    Token::T_IF,
+    Token::T_WHILE,
+    Token::T_CONTINUE,
+    Token::T_BREAK,
+    Token::T_RETURN,
+    Token::T_STRING_LITERAL,
+    Token::T_NUMBER_LITERAL,
+    Token::T_L_PAREN
 };
 
 void Parser::parseBlockItemList(std::vector<std::unique_ptr<Stmt>> &stmts)
@@ -705,14 +705,14 @@ std::unique_ptr<Stmt> Parser::parseDeclaration()
     unique_ptr<VarDecl> decl(new VarDecl);
 
     decl->type = parseType();
-    match(Lexer::T_IDENTIFIER);
+    match(Token::T_IDENTIFIER);
     decl->name = token(m_index - 1).str;
-    if (curToken().is(Lexer::T_ASSIGN))
+    if (curToken().is(Token::T_ASSIGN))
     {
-        match(Lexer::T_ASSIGN);
+        match(Token::T_ASSIGN);
         decl->expr = parseInitializer();
     }
-    match(Lexer::T_SEMICOLON);
+    match(Token::T_SEMICOLON);
 
     unique_ptr<Stmt> stmt;
     if (!trying())
@@ -725,25 +725,25 @@ std::unique_ptr<Stmt> Parser::parseDeclaration()
 
 static const set<int> expressionFirst =
 {
-    Lexer::T_IDENTIFIER,
-    Lexer::T_STRING_LITERAL,
-    Lexer::T_NUMBER_LITERAL,
-    Lexer::T_L_PAREN,
-    Lexer::T_PLUS,
-    Lexer::T_MINUS,
-    Lexer::T_NOT
+    Token::T_IDENTIFIER,
+    Token::T_STRING_LITERAL,
+    Token::T_NUMBER_LITERAL,
+    Token::T_L_PAREN,
+    Token::T_PLUS,
+    Token::T_MINUS,
+    Token::T_NOT
 };
 
 static const set<int> initializerListFirst =
 {
-    Lexer::T_IDENTIFIER,
-    Lexer::T_STRING_LITERAL,
-    Lexer::T_NUMBER_LITERAL,
-    Lexer::T_L_PAREN,
-    Lexer::T_PLUS,
-    Lexer::T_MINUS,
-    Lexer::T_NOT,
-    Lexer::T_L_BRACE
+    Token::T_IDENTIFIER,
+    Token::T_STRING_LITERAL,
+    Token::T_NUMBER_LITERAL,
+    Token::T_L_PAREN,
+    Token::T_PLUS,
+    Token::T_MINUS,
+    Token::T_NOT,
+    Token::T_L_BRACE
 };
 
 std::unique_ptr<Expr> Parser::parseInitializer()
@@ -754,9 +754,9 @@ std::unique_ptr<Expr> Parser::parseInitializer()
     {
         expr = parseExpression();
     }
-    else if (curToken().is(Lexer::T_L_BRACE))
+    else if (curToken().is(Token::T_L_BRACE))
     {
-        match(Lexer::T_L_BRACE);
+        match(Token::T_L_BRACE);
         if (curToken().isIn(initializerListFirst))
         {
             expr = parseInitializerList();
@@ -765,7 +765,7 @@ std::unique_ptr<Expr> Parser::parseInitializer()
         {
             expr.reset(new InitListExpr({}));
         }
-        match(Lexer::T_R_BRACE);
+        match(Token::T_R_BRACE);
     }
     else
     {
@@ -781,9 +781,9 @@ std::unique_ptr<Expr> Parser::parseInitializerList()
     vector<unique_ptr<Expr>> exprs;
 
     exprs.push_back(parseInitializer());
-    while (curToken().is(Lexer::T_COMMA))
+    while (curToken().is(Token::T_COMMA))
     {
-        match(Lexer::T_COMMA);
+        match(Token::T_COMMA);
         exprs.push_back(parseInitializer());
     }
 
@@ -814,9 +814,9 @@ std::unique_ptr<Expr> Parser::parseLogicalOrExpression()
     vector<unique_ptr<Expr>> andExprs;
 
     andExprs.push_back(parseLogicalAndExpression());
-    while (curToken().is(Lexer::T_OR_OR))
+    while (curToken().is(Token::T_OR_OR))
     {
-        match(Lexer::T_OR_OR);
+        match(Token::T_OR_OR);
         andExprs.push_back(parseLogicalAndExpression());
     }
 
@@ -851,9 +851,9 @@ std::unique_ptr<Expr> Parser::parseLogicalAndExpression()
     vector<unique_ptr<Expr>> eqExprs;
 
     eqExprs.push_back(parseEqualityExpression());
-    while (curToken().is(Lexer::T_AND_AND))
+    while (curToken().is(Token::T_AND_AND))
     {
-        match(Lexer::T_AND_AND);
+        match(Token::T_AND_AND);
         eqExprs.push_back(parseEqualityExpression());
     }
 
@@ -887,19 +887,19 @@ static BinaryOperatorExpr::Op tokenTypeToBinaryOpType(int tokenType)
 {
     static const map<int, BinaryOperatorExpr::Op> MAP =
     {
-        { Lexer::T_AND_AND,     BinaryOperatorExpr::Op::LogicalAnd },
-        { Lexer::T_OR_OR,       BinaryOperatorExpr::Op::LogicalOr },
-        { Lexer::T_EQUAL,       BinaryOperatorExpr::Op::Equal },
-        { Lexer::T_NOT_EQUAL,   BinaryOperatorExpr::Op::NotEqual },
-        { Lexer::T_LT,          BinaryOperatorExpr::Op::LessThan },
-        { Lexer::T_GT,          BinaryOperatorExpr::Op::GreaterThan },
-        { Lexer::T_LE,          BinaryOperatorExpr::Op::LessEqual },
-        { Lexer::T_GE,          BinaryOperatorExpr::Op::GreaterEqual },
-        { Lexer::T_PLUS,        BinaryOperatorExpr::Op::Plus },
-        { Lexer::T_MINUS,       BinaryOperatorExpr::Op::Minus },
-        { Lexer::T_STAR,        BinaryOperatorExpr::Op::Multiply },
-        { Lexer::T_SLASH,       BinaryOperatorExpr::Op::Divide },
-        { Lexer::T_REMAINDER,   BinaryOperatorExpr::Op::Remainder}
+        { Token::T_AND_AND,     BinaryOperatorExpr::Op::LogicalAnd },
+        { Token::T_OR_OR,       BinaryOperatorExpr::Op::LogicalOr },
+        { Token::T_EQUAL,       BinaryOperatorExpr::Op::Equal },
+        { Token::T_NOT_EQUAL,   BinaryOperatorExpr::Op::NotEqual },
+        { Token::T_LT,          BinaryOperatorExpr::Op::LessThan },
+        { Token::T_GT,          BinaryOperatorExpr::Op::GreaterThan },
+        { Token::T_LE,          BinaryOperatorExpr::Op::LessEqual },
+        { Token::T_GE,          BinaryOperatorExpr::Op::GreaterEqual },
+        { Token::T_PLUS,        BinaryOperatorExpr::Op::Plus },
+        { Token::T_MINUS,       BinaryOperatorExpr::Op::Minus },
+        { Token::T_STAR,        BinaryOperatorExpr::Op::Multiply },
+        { Token::T_SLASH,       BinaryOperatorExpr::Op::Divide },
+        { Token::T_REMAINDER,   BinaryOperatorExpr::Op::Remainder}
     };
 
     auto iter = MAP.find(tokenType);
@@ -914,7 +914,7 @@ std::unique_ptr<Expr> Parser::parseEqualityExpression()
     vector<int> tokens;
 
     relExprs.push_back(parseRelationalExpression());
-    while (curToken().isIn({Lexer::T_EQUAL, Lexer::T_NOT_EQUAL}))
+    while (curToken().isIn({Token::T_EQUAL, Token::T_NOT_EQUAL}))
     {
         match(curTokenType());
         tokens.push_back(token(m_index - 1).type);
@@ -956,7 +956,7 @@ std::unique_ptr<Expr> Parser::parseRelationalExpression()
     vector<int> tokens;
 
     subExprs.push_back(parseAdditiveExpression());
-    while (curToken().isIn({Lexer::T_LT, Lexer::T_GT, Lexer::T_LE, Lexer::T_GE}))
+    while (curToken().isIn({Token::T_LT, Token::T_GT, Token::T_LE, Token::T_GE}))
     {
         match(curTokenType());
         tokens.push_back(token(m_index - 1).type);
@@ -996,7 +996,7 @@ std::unique_ptr<Expr> Parser::parseAdditiveExpression()
     vector<int> tokens;
 
     subExprs.push_back(parseMultiplicativeExpression());
-    while (curToken().isIn({Lexer::T_PLUS, Lexer::T_MINUS}))
+    while (curToken().isIn({Token::T_PLUS, Token::T_MINUS}))
     {
         match(curTokenType());
         tokens.push_back(token(m_index - 1).type);
@@ -1036,7 +1036,7 @@ std::unique_ptr<Expr> Parser::parseMultiplicativeExpression()
     vector<int> tokens;
 
     subExprs.push_back(parseUnaryExpression());
-    while (curToken().isIn({Lexer::T_STAR, Lexer::T_SLASH, Lexer::T_REMAINDER}))
+    while (curToken().isIn({Token::T_STAR, Token::T_SLASH, Token::T_REMAINDER}))
     {
         match(curTokenType());
         tokens.push_back(token(m_index - 1).type);
@@ -1071,26 +1071,26 @@ std::unique_ptr<Expr> Parser::parseMultiplicativeExpression()
 
 static const set<int> postfixExpressionFirst =
 {
-    Lexer::T_IDENTIFIER,
-    Lexer::T_STRING_LITERAL,
-    Lexer::T_NUMBER_LITERAL,
-    Lexer::T_L_PAREN
+    Token::T_IDENTIFIER,
+    Token::T_STRING_LITERAL,
+    Token::T_NUMBER_LITERAL,
+    Token::T_L_PAREN
 };
 
 static const set<int> unaryOperatorFirst =
 {
-    Lexer::T_PLUS,
-    Lexer::T_MINUS,
-    Lexer::T_NOT
+    Token::T_PLUS,
+    Token::T_MINUS,
+    Token::T_NOT
 };
 
 static UnaryOperatorExpr::Op tokenTypeToUnaryOpType(int tokenType)
 {
     static const map<int, UnaryOperatorExpr::Op> MAP =
     {
-        { Lexer::T_PLUS,    UnaryOperatorExpr::Op::Positive },
-        { Lexer::T_MINUS,   UnaryOperatorExpr::Op::Negative },
-        { Lexer::T_NOT,     UnaryOperatorExpr::Op::Not }
+        { Token::T_PLUS,    UnaryOperatorExpr::Op::Positive },
+        { Token::T_MINUS,   UnaryOperatorExpr::Op::Negative },
+        { Token::T_NOT,     UnaryOperatorExpr::Op::Not }
     };
 
     auto iter = MAP.find(tokenType);
@@ -1126,9 +1126,9 @@ void Parser::parseUnaryOperator()
 {
     switch (curTokenType())
     {
-    case Lexer::T_PLUS:
-    case Lexer::T_MINUS:
-    case Lexer::T_NOT:
+    case Token::T_PLUS:
+    case Token::T_MINUS:
+    case Token::T_NOT:
     {
         match(curTokenType());
         break;
@@ -1156,12 +1156,12 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
     vector<int> types;
 
     subExprs.push_back(parsePrimaryExpression());
-    while (curToken().isIn({Lexer::T_L_BRACKET, Lexer::T_L_PAREN, Lexer::T_DOT}))
+    while (curToken().isIn({Token::T_L_BRACKET, Token::T_L_PAREN, Token::T_DOT}))
     {
         int type = curTokenType();
-        if (type == Lexer::T_L_BRACKET)
+        if (type == Token::T_L_BRACKET)
         {
-            match(Lexer::T_L_BRACKET);
+            match(Token::T_L_BRACKET);
 
             unique_ptr<ListSubscriptExpr> lse(new ListSubscriptExpr);
             lse->indexExpr = parseExpression();
@@ -1169,11 +1169,11 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
             subExprs.push_back(unique_ptr<Expr>(lse.release()));
             types.push_back(Subscript);
 
-            match(Lexer::T_R_BRACKET);
+            match(Token::T_R_BRACKET);
         }
-        else if (type == Lexer::T_L_PAREN)
+        else if (type == Token::T_L_PAREN)
         {
-            match(Lexer::T_L_PAREN);
+            match(Token::T_L_PAREN);
             unique_ptr<CallExpr> callExpr(new CallExpr);
             if (curToken().isIn(argumentExpressionListFirst))
             {
@@ -1181,12 +1181,12 @@ std::unique_ptr<Expr> Parser::parsePostfixExpression()
             }
             subExprs.push_back(unique_ptr<Expr>(callExpr.release()));
             types.push_back(Call);
-            match(Lexer::T_R_PAREN);
+            match(Token::T_R_PAREN);
         }
         else
         {
-            match(Lexer::T_DOT);
-            match(Lexer::T_IDENTIFIER);
+            match(Token::T_DOT);
+            match(Token::T_IDENTIFIER);
 
             unique_ptr<MemberExpr> memberExpr(new MemberExpr);
             memberExpr->name = token(m_index - 1).str;
@@ -1248,25 +1248,25 @@ std::unique_ptr<Expr> Parser::parsePrimaryExpression()
 
     switch (curTokenType())
     {
-    case Lexer::T_IDENTIFIER:
+    case Token::T_IDENTIFIER:
     {
-        match(Lexer::T_IDENTIFIER);
+        match(Token::T_IDENTIFIER);
         string idName = token(m_index - 1).str;
         refExpr.reset(new RefExpr);
         dynamic_cast<RefExpr *>(refExpr.get())->name = idName;
         break;
     }
-    case Lexer::T_STRING_LITERAL:
-    case Lexer::T_NUMBER_LITERAL:
+    case Token::T_STRING_LITERAL:
+    case Token::T_NUMBER_LITERAL:
     {
         literalExpr = parseLiteral();
         break;
     }
-    case Lexer::T_L_PAREN:
+    case Token::T_L_PAREN:
     {
-        match(Lexer::T_L_PAREN);
+        match(Token::T_L_PAREN);
         parenExpr = parseExpression();
-        match(Lexer::T_R_PAREN);
+        match(Token::T_R_PAREN);
         break;
     }
     default:
@@ -1300,9 +1300,9 @@ void Parser::parseArgumentExpressionList(std::unique_ptr<CallExpr> &callExpr)
     vector<unique_ptr<Expr>> exprs;
 
     exprs.push_back(parseExpression());
-    while (curToken().is(Lexer::T_COMMA))
+    while (curToken().is(Token::T_COMMA))
     {
-        match(Lexer::T_COMMA);
+        match(Token::T_COMMA);
         exprs.push_back(parseExpression());
     }
 
@@ -1317,10 +1317,10 @@ void Parser::parseArgumentExpressionList(std::unique_ptr<CallExpr> &callExpr)
 
 static const set<int> assignStatementFirst =
 {
-    Lexer::T_IDENTIFIER,
-    Lexer::T_STRING_LITERAL,
-    Lexer::T_NUMBER_LITERAL,
-    Lexer::T_L_PAREN
+    Token::T_IDENTIFIER,
+    Token::T_STRING_LITERAL,
+    Token::T_NUMBER_LITERAL,
+    Token::T_L_PAREN
 };
 
 std::unique_ptr<Stmt> Parser::parseStatement()
@@ -1329,12 +1329,12 @@ std::unique_ptr<Stmt> Parser::parseStatement()
 
     switch (curTokenType())
     {
-    case Lexer::T_L_BRACE:  s = parseCompoundStatement();   break;
-    case Lexer::T_IF:       s = parseSelectionStatement();  break;
-    case Lexer::T_WHILE:    s = parseIterationStatement();  break;
-    case Lexer::T_CONTINUE:
-    case Lexer::T_BREAK:
-    case Lexer::T_RETURN:   s = parseJumpStatement();       break;
+    case Token::T_L_BRACE:  s = parseCompoundStatement();   break;
+    case Token::T_IF:       s = parseSelectionStatement();  break;
+    case Token::T_WHILE:    s = parseIterationStatement();  break;
+    case Token::T_CONTINUE:
+    case Token::T_BREAK:
+    case Token::T_RETURN:   s = parseJumpStatement();       break;
     default:
     {
         if (curToken().isIn(assignStatementFirst))
@@ -1364,19 +1364,19 @@ std::unique_ptr<Stmt> Parser::parseSelectionStatement()
     unique_ptr<Stmt> thenStmt;
     unique_ptr<Stmt> elseStmt;
 
-    match(Lexer::T_IF);
-    match(Lexer::T_L_PAREN);
+    match(Token::T_IF);
+    match(Token::T_L_PAREN);
     condition = parseExpression();
-    match(Lexer::T_R_PAREN);
+    match(Token::T_R_PAREN);
     thenStmt = parseCompoundStatement();
-    if (curToken().is(Lexer::T_ELSE))
+    if (curToken().is(Token::T_ELSE))
     {
-        match(Lexer::T_ELSE);
-        if (curToken().is(Lexer::T_L_BRACE))
+        match(Token::T_ELSE);
+        if (curToken().is(Token::T_L_BRACE))
         {
             elseStmt = parseCompoundStatement();
         }
-        else if (curToken().is(Lexer::T_IF))
+        else if (curToken().is(Token::T_IF))
         {
             elseStmt = parseSelectionStatement();
         }
@@ -1401,10 +1401,10 @@ std::unique_ptr<Stmt> Parser::parseIterationStatement()
     unique_ptr<Expr> condition;
     unique_ptr<Stmt> bodyStmt;
 
-    match(Lexer::T_WHILE);
-    match(Lexer::T_L_PAREN);
+    match(Token::T_WHILE);
+    match(Token::T_L_PAREN);
     condition = parseExpression();
-    match(Lexer::T_R_PAREN);
+    match(Token::T_R_PAREN);
     bodyStmt = parseCompoundStatement();
 
     unique_ptr<Stmt> stmt;
@@ -1422,23 +1422,23 @@ std::unique_ptr<Stmt> Parser::parseJumpStatement()
 
     switch (curTokenType())
     {
-    case Lexer::T_CONTINUE:
+    case Token::T_CONTINUE:
     {
-        match(Lexer::T_CONTINUE);
-        match(Lexer::T_SEMICOLON);
+        match(Token::T_CONTINUE);
+        match(Token::T_SEMICOLON);
         s.reset(new ContinueStmt);
         break;
     }
-    case Lexer::T_BREAK:
+    case Token::T_BREAK:
     {
-        match(Lexer::T_BREAK);
-        match(Lexer::T_SEMICOLON);
+        match(Token::T_BREAK);
+        match(Token::T_SEMICOLON);
         s.reset(new BreakStmt);
         break;
     }
-    case Lexer::T_RETURN:
+    case Token::T_RETURN:
     {
-        match(Lexer::T_RETURN);
+        match(Token::T_RETURN);
         if (curToken().isIn(expressionFirst))
         {
             unique_ptr<Expr> expr = parseExpression();
@@ -1448,7 +1448,7 @@ std::unique_ptr<Stmt> Parser::parseJumpStatement()
         {
             s.reset(new ReturnStmt(unique_ptr<Expr>()));
         }
-        match(Lexer::T_SEMICOLON);
+        match(Token::T_SEMICOLON);
         break;
     }
     default:
@@ -1474,12 +1474,12 @@ std::unique_ptr<Stmt> Parser::parseExprStatement()
     unique_ptr<Expr> right;
 
     left = parsePostfixExpression();
-    if (curToken().is(Lexer::T_ASSIGN))
+    if (curToken().is(Token::T_ASSIGN))
     {
-        match(Lexer::T_ASSIGN);
+        match(Token::T_ASSIGN);
         right = parseExpression();
     }
-    match(Lexer::T_SEMICOLON);
+    match(Token::T_SEMICOLON);
 
     unique_ptr<Stmt> stmt;
     if (!trying())
@@ -1510,13 +1510,13 @@ std::unique_ptr<EnumDecl> Parser::parseEnumDefination()
         enumDecl.reset(new EnumDecl);
     }
 
-    match(Lexer::T_ENUM);
-    match(Lexer::T_IDENTIFIER);
+    match(Token::T_ENUM);
+    match(Token::T_IDENTIFIER);
     enumName = token(m_index - 1).str;
 
-    match(Lexer::T_L_BRACE);
+    match(Token::T_L_BRACE);
     parseEnumConstantList(enumDecl);
-    match(Lexer::T_R_BRACE);
+    match(Token::T_R_BRACE);
 
     if (!trying())
     {
@@ -1529,9 +1529,9 @@ std::unique_ptr<EnumDecl> Parser::parseEnumDefination()
 void Parser::parseEnumConstantList(std::unique_ptr<EnumDecl> &enumDecl)
 {
     parseEnumConstant(enumDecl);
-    while (curToken().is(Lexer::T_COMMA))
+    while (curToken().is(Token::T_COMMA))
     {
-        match(Lexer::T_COMMA);
+        match(Token::T_COMMA);
         parseEnumConstant(enumDecl);
     }
 }
@@ -1546,7 +1546,7 @@ void Parser::parseEnumConstant(std::unique_ptr<EnumDecl> &enumDecl)
         ecd.reset(new EnumConstantDecl);
     }
 
-    match(Lexer::T_IDENTIFIER);
+    match(Token::T_IDENTIFIER);
     ecName = token(m_index - 1).str;
 
     if (!trying())
@@ -1566,11 +1566,11 @@ std::unique_ptr<ComponentInstanceDecl> Parser::parseComponentInstance()
         instanceDecl.reset(new ComponentInstanceDecl);
     }
 
-    match(Lexer::T_IDENTIFIER);
+    match(Token::T_IDENTIFIER);
     typeName = token(m_index - 1).str;
-    match(Lexer::T_L_BRACE);
+    match(Token::T_L_BRACE);
     parseBindingItemList(instanceDecl);
-    match(Lexer::T_R_BRACE);
+    match(Token::T_R_BRACE);
 
     if (!trying())
     {
@@ -1582,7 +1582,7 @@ std::unique_ptr<ComponentInstanceDecl> Parser::parseComponentInstance()
 void Parser::parseBindingItemList(std::unique_ptr<ComponentInstanceDecl> &instanceDecl)
 {
     parseBindingItem(instanceDecl);
-    while (curToken().is(Lexer::T_IDENTIFIER))
+    while (curToken().is(Token::T_IDENTIFIER))
     {
         parseBindingItem(instanceDecl);
     }
@@ -1594,17 +1594,17 @@ void Parser::parseBindingItem(std::unique_ptr<ComponentInstanceDecl> &instanceDe
     unique_ptr<Expr> expr;
     unique_ptr<ComponentInstanceDecl> child;
 
-    match(Lexer::T_IDENTIFIER);
+    match(Token::T_IDENTIFIER);
     name = token(m_index - 1).str;
     switch (curTokenType())
     {
-    case Lexer::T_COLON:
+    case Token::T_COLON:
     {
-        match(Lexer::T_COLON);
+        match(Token::T_COLON);
         expr = parseInitializer();
         break;
     }
-    case Lexer::T_L_BRACE:
+    case Token::T_L_BRACE:
     {
         m_index--;
         child = parseComponentInstance();

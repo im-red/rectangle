@@ -24,72 +24,10 @@
 
 using namespace std;
 
-#define ENUM_ELEMENT(x) { x, #x }
-
 namespace rectangle
 {
 namespace frontend
 {
-
-string Lexer::tokenTypeString(int token)
-{
-    static const map<int, string> STRING_MAP =
-    {
-        ENUM_ELEMENT(T_LIST),
-        ENUM_ELEMENT(T_STRING),
-        ENUM_ELEMENT(T_INT),
-        ENUM_ELEMENT(T_FLOAT),
-        ENUM_ELEMENT(T_VOID),
-        ENUM_ELEMENT(T_STRING_LITERAL),
-        ENUM_ELEMENT(T_NUMBER_LITERAL),
-        ENUM_ELEMENT(T_IF),
-        ENUM_ELEMENT(T_DEF),
-        ENUM_ELEMENT(T_ELSE),
-        ENUM_ELEMENT(T_ENUM),
-        ENUM_ELEMENT(T_BREAK),
-        ENUM_ELEMENT(T_WHILE),
-        ENUM_ELEMENT(T_RETURN),
-        ENUM_ELEMENT(T_CONTINUE),
-        ENUM_ELEMENT(T_COMMENT),
-        ENUM_ELEMENT(T_L_BRACE),
-        ENUM_ELEMENT(T_R_BRACE),
-        ENUM_ELEMENT(T_L_BRACKET),
-        ENUM_ELEMENT(T_R_BRACKET),
-        ENUM_ELEMENT(T_L_PAREN),
-        ENUM_ELEMENT(T_R_PAREN),
-        ENUM_ELEMENT(T_COMMA),
-        ENUM_ELEMENT(T_COLON),
-        ENUM_ELEMENT(T_QUOTE),
-        ENUM_ELEMENT(T_SINGLE_QUOTE),
-        ENUM_ELEMENT(T_AND_AND),
-        ENUM_ELEMENT(T_OR_OR),
-        ENUM_ELEMENT(T_NOT),
-        ENUM_ELEMENT(T_PLUS),
-        ENUM_ELEMENT(T_MINUS),
-        ENUM_ELEMENT(T_STAR),
-        ENUM_ELEMENT(T_SLASH),
-        ENUM_ELEMENT(T_REMAINDER),
-        ENUM_ELEMENT(T_DOT),
-        ENUM_ELEMENT(T_GE),
-        ENUM_ELEMENT(T_LE),
-        ENUM_ELEMENT(T_GT),
-        ENUM_ELEMENT(T_LT),
-        ENUM_ELEMENT(T_EQUAL),
-        ENUM_ELEMENT(T_NOT_EQUAL),
-        ENUM_ELEMENT(T_ASSIGN),
-        ENUM_ELEMENT(T_SEMICOLON),
-        ENUM_ELEMENT(T_BLANK),
-        ENUM_ELEMENT(T_LINE_TERMINATOR),
-        ENUM_ELEMENT(T_IDENTIFIER),
-        ENUM_ELEMENT(T_EOF),
-        ENUM_ELEMENT(T_ERROR),
-    };
-
-    assert(STRING_MAP.size() == TokenCount);
-    assert(token >= 0 && token < TokenCount);
-
-    return STRING_MAP.at(token);
-}
 
 string Lexer::errorTypeString(Lexer::ErrorType error)
 {

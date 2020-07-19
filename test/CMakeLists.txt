@@ -41,6 +41,7 @@ set(RECT_SRCS
     ../src/dumpvisitor.cpp
     ../src/sourcefile.cpp
     ../src/errorprinter.cpp
+    ../src/tokentypestring.cpp
 )
 
 add_library(common
@@ -50,7 +51,7 @@ add_library(common
 add_executable(test_all
     test_lexer.cpp 
     test_driver.cpp
-    test_parser.cpp
+#    test_parser.cpp
     test_symbol.cpp
     test_object.cpp
 #    test_machine.cpp

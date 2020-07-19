@@ -96,14 +96,14 @@ public:
 private:
     void clear();
 
-    int tokenType(int i) const;
-    int curTokenType() const { return tokenType(m_index); }
+    Token::TokenType tokenType(int i) const;
+    Token::TokenType curTokenType() const { return tokenType(m_index); }
 
     Token token(int i) const;
     Token curToken() const { return token(m_index); }
 
     void consume();
-    void match(int tokenType);
+    void match(Token::TokenType tokenType);
 
     void incTrying();
     void decTrying();
