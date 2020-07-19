@@ -30,14 +30,6 @@ namespace rectangle
 namespace frontend
 {
 
-class ParseException : public std::runtime_error
-{
-public:
-    explicit ParseException(const std::string &s)
-        : std::runtime_error(s)
-    {}
-};
-
 class Parser
 {
 public:
