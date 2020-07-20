@@ -121,7 +121,23 @@ TEST(symbol, INSTANCE)
     }
 
     AsmVisitor av;
-    AsmText txt = av.visit(&ast);
+    AsmText txt;
+    try
+    {
+        txt = av.visit(&ast);
+    }
+    catch (SyntaxError &e)
+    {
+        auto iter = path2file.find(e.path());
+        if (iter == path2file.end())
+        {
+            fprintf(stderr, "Internal error: %s\n", e.what());
+        }
+        else
+        {
+            printSyntaxError(iter->second, e);
+        }
+    }
     //txt.dump();
 
     AsmBin bin(txt);

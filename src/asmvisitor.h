@@ -112,6 +112,7 @@ private:
     int m_instanceIndexVisiting = -1;
     ComponentDefinationDecl *m_componentVisiting = nullptr;
     bool m_visitingMethod = false;
+    std::string m_curFilePath;
 };
 
 }

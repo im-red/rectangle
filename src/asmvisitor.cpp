@@ -16,13 +16,14 @@
  ********************************************************************************/
 
 #include "asmvisitor.h"
+#include "exception.h"
 #include "symboltable.h"
 #include "typeinfo.h"
 
 #include <assert.h>
 
 using namespace std;
-using namespace rectangle;
+using namespace rectangle::diag;
 
 namespace rectangle
 {
@@ -58,16 +59,19 @@ AsmText AsmVisitor::visit(AST *ast)
 
     for (auto doc : structs)
     {
+        m_curFilePath = doc->filepath;
         visit(doc);
     }
     for (auto doc : definations)
     {
+        m_curFilePath = doc->filepath;
         visit(doc);
     }
 
     assert(instances.size() == 1);
     ComponentInstanceDecl *cid = dynamic_cast<ComponentInstanceDecl *>(instances[0]);
     assert(cid != nullptr);
+    m_curFilePath = cid->filepath;
 
     m_asm.appendLine({".def", "main", "0", to_string(cid->instanceTreeSize)});
     genAsmForInitInstance(cid);
@@ -83,7 +87,7 @@ void AsmVisitor::visit(IntegerLiteral *il)
     assert(il != nullptr);
     if (visitingLvalue())
     {
-        throw VisitException("IntegerLiteral", "Illegal lvalue");
+        throw SyntaxError("Illegal lvalue", il->token(), m_curFilePath);
     }
 
     m_asm.appendLine({"iconst", to_string(il->value)});
@@ -94,7 +98,7 @@ void AsmVisitor::visit(FloatLiteral *fl)
     assert(fl != nullptr);
     if (visitingLvalue())
     {
-        throw VisitException("FloatLiteral", "Illegal lvalue");
+        throw SyntaxError("Illegal lvalue", fl->token(), m_curFilePath);
     }
 
     m_asm.appendLine({"fconst", to_string(fl->value)});
@@ -105,7 +109,7 @@ void AsmVisitor::visit(StringLiteral *sl)
     assert(sl != nullptr);
     if (visitingLvalue())
     {
-        throw VisitException("StringLiteral", "Illegal lvalue");
+        throw SyntaxError("Illegal lvalue", sl->token(), m_curFilePath);
     }
 
     m_asm.appendLine({"sconst", sl->value});
@@ -116,7 +120,7 @@ void AsmVisitor::visit(InitListExpr *ile)
     assert(ile != nullptr);
     if (visitingLvalue())
     {
-        throw VisitException("InitListExpr", "Illegal lvalue");
+        throw SyntaxError("Illegal lvalue", ile->token(), m_curFilePath);
     }
 
     m_asm.appendLine({"vector"});
@@ -135,7 +139,7 @@ void AsmVisitor::visit(BinaryOperatorExpr *boe)
     assert(boe != nullptr);
     if (visitingLvalue())
     {
-        throw VisitException("BinaryOperatorExpr", "Illegal lvalue");
+        throw SyntaxError("Illegal lvalue", boe->token(), m_curFilePath);
     }
 
     if (boe->op == BinaryOperatorExpr::Op::Assign)
@@ -202,7 +206,7 @@ void AsmVisitor::visit(UnaryOperatorExpr *uoe)
     assert(uoe != nullptr);
     if (visitingLvalue())
     {
-        throw VisitException("UnaryOperatorExpr", "Illegal lvalue");
+        throw SyntaxError("Illegal lvalue", uoe->token(), m_curFilePath);
     }
 
     visit(uoe->expr.get());
@@ -236,7 +240,7 @@ void AsmVisitor::visit(CallExpr *ce)
     assert(ce != nullptr);
     if (visitingLvalue())
     {
-        throw VisitException("CallExpr", "Illegal lvalue");
+        throw SyntaxError("Illegal lvalue", ce->token(), m_curFilePath);
     }
 
     Scope *scope = ce->scope;
@@ -896,6 +900,7 @@ void AsmVisitor::clear()
 {
     setVisitingMethod(false);
     setVisitingInstance(false);
+    m_curFilePath = "";
 }
 
 }
