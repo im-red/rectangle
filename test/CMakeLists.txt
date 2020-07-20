@@ -42,6 +42,7 @@ set(RECT_SRCS
     ../src/sourcefile.cpp
     ../src/errorprinter.cpp
     ../src/tokentypestring.cpp
+    ../src/loopdetector.cpp
 )
 
 add_library(common
@@ -57,6 +58,7 @@ add_executable(test_all
 #    test_machine.cpp
     test_topologicalsorter.cpp
     test_util.cpp
+    test_loopdetector.cpp
 )
 
 add_executable(test_symbol
@@ -79,9 +81,14 @@ add_executable(test_util
     test_util.cpp
 )
 
+add_executable(test_loopdetector
+    test_loopdetector.cpp
+)
+
 target_link_libraries(test_all common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_symbol common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_object common ${GTEST_LIBRARIES} pthread)
 #target_link_libraries(test_machine common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_topologicalsorter common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_util common ${GTEST_LIBRARIES} pthread)
+target_link_libraries(test_loopdetector common ${GTEST_LIBRARIES} pthread)
