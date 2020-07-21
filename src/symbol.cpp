@@ -125,7 +125,12 @@ Symbol *Scope::resolve(const string &name)
     auto iter = m_symbols.find(name);
     if (iter == m_symbols.end())
     {
-        if (m_parent)
+        if (m_componentScope != nullptr)
+        {
+            result = m_componentScope->resolve(name);
+        }
+
+        if (result == nullptr && m_parent != nullptr)
         {
             result = m_parent->resolve(name);
         }
@@ -134,10 +139,7 @@ Symbol *Scope::resolve(const string &name)
     {
         result = iter->second;
     }
-    if (result == nullptr && m_componentScope != nullptr)
-    {
-        result = m_componentScope->resolve(name);
-    }
+
     return result;
 }
 
