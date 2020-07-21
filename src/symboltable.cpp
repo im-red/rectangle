@@ -67,14 +67,14 @@ void SymbolTable::pushScope(Scope *scope)
     }
 
     m_curScope = scope;
-    util::condPrint(option::showScopeStack, "pushScope: %p(%s)\n",
+    util::condPrint(option::printScopeStack, "pushScope: %p(%s)\n",
                      static_cast<void *>(m_curScope),
                      m_curScope->scopeString().c_str());
 }
 
 void SymbolTable::popScope()
 {
-    util::condPrint(option::showScopeStack, "popScope: %p(%s)\n",
+    util::condPrint(option::printScopeStack, "popScope: %p(%s)\n",
                      static_cast<void *>(m_curScope),
                      m_curScope->scopeString().c_str());
     m_curScope = m_curScope->parent();

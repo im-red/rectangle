@@ -23,17 +23,20 @@ namespace option
 {
 
 bool verbose = false;
-bool showAst = false;
-bool showSymbolDef = false;
-bool showSymbolRef = false;
-bool showPropertyDep = false;
-bool showScopeStack = false;
-bool showLLTry = false;
-bool showLocalIndex = false;
-bool showGenAsm = false;
-bool showAssemble = false;
-bool showBindingDep = false;
-bool showSvgDraw = false;
+bool printSymbolDef = false;
+bool printSymbolRef = false;
+bool printPropertyDep = false;
+bool printScopeStack = false;
+bool printLLTry = false;
+bool printLocalIndex = false;
+bool printGenAsm = false;
+bool printAssemble = false;
+bool printBindingDep = false;
+bool printSvgDraw = false;
+
+bool dumpAst = false;
+bool dumpAsm = false;
+bool dumpBytecode = false;
 
 }
 }

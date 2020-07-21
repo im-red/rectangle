@@ -398,61 +398,61 @@ void AsmMachine::interpret(instr::AsmInstruction instr, int op)
         Object y = popOperand();
         Object x = popOperand();
         pushOrigin(x.intData(), y.intData());
-        util::condPrint(option::showSvgDraw, "svg: pushOrigin (%d, %d)\n", x.intData(), y.intData());
+        util::condPrint(option::printSvgDraw, "svg: pushOrigin (%d, %d)\n", x.intData(), y.intData());
         break;
     }
     case instr::POPORIGIN:
     {
         popOrigin();
-        util::condPrint(option::showSvgDraw, "svg: popOrigin\n");
+        util::condPrint(option::printSvgDraw, "svg: popOrigin\n");
         break;
     }
     case instr::DEFINESCENE:
     {
         Object o = popOperand();
-        util::condPrint(option::showSvgDraw, "svg: defineScene %s\n", o.toString().c_str());
+        util::condPrint(option::printSvgDraw, "svg: defineScene %s\n", o.toString().c_str());
         defineScene(o);
         break;
     }
     case instr::DRAWRECT:
     {
         Object o = popOperand();
-        util::condPrint(option::showSvgDraw, "svg: drawRect %s\n", o.toString().c_str());
+        util::condPrint(option::printSvgDraw, "svg: drawRect %s\n", o.toString().c_str());
         drawRect(o);
         break;
     }
     case instr::DRAWTEXT:
     {
         Object o = popOperand();
-        util::condPrint(option::showSvgDraw, "svg: drawText %s\n", o.toString().c_str());
+        util::condPrint(option::printSvgDraw, "svg: drawText %s\n", o.toString().c_str());
         drawText(o);
         break;
     }
     case instr::DRAWELLIPSE:
     {
         Object o = popOperand();
-        util::condPrint(option::showSvgDraw, "svg: drawEllipse %s\n", o.toString().c_str());
+        util::condPrint(option::printSvgDraw, "svg: drawEllipse %s\n", o.toString().c_str());
         drawEllipse(o);
         break;
     }
     case instr::DRAWPOLYGON:
     {
         Object o = popOperand();
-        util::condPrint(option::showSvgDraw, "svg: drawPolygon %s\n", o.toString().c_str());
+        util::condPrint(option::printSvgDraw, "svg: drawPolygon %s\n", o.toString().c_str());
         drawPolygon(o);
         break;
     }
     case instr::DRAWLINE:
     {
         Object o = popOperand();
-        util::condPrint(option::showSvgDraw, "svg: drawLine %s\n", o.toString().c_str());
+        util::condPrint(option::printSvgDraw, "svg: drawLine %s\n", o.toString().c_str());
         drawLine(o);
         break;
     }
     case instr::DRAWPOLYLINE:
     {
         Object o = popOperand();
-        util::condPrint(option::showSvgDraw, "svg: drawPolyline %s\n", o.toString().c_str());
+        util::condPrint(option::printSvgDraw, "svg: drawPolyline %s\n", o.toString().c_str());
         drawPolyline(o);
         break;
     }

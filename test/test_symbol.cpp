@@ -54,11 +54,11 @@ TEST(symbol, INSTANCE)
     {
         "../../template/Scene.rect",
         "../../template/Rectangle.rect", 
-        "../../template/Text.rect", 
-        "../../template/Ellipse.rect", 
-        "../../template/Polygon.rect", 
+        "../../template/Text.rect",
+        "../../template/Ellipse.rect",
+        "../../template/Polygon.rect",
         "../../template/Line.rect",
-        "../../template/Polyline.rect", 
+        "../../template/Polyline.rect",
         "../rect/symbol_instance_instance.rect"
     };
 

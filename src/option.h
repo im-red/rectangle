@@ -24,17 +24,20 @@ namespace option
 
 extern bool verbose;
 
-extern bool showAst;
-extern bool showSymbolDef;
-extern bool showSymbolRef;
-extern bool showPropertyDep;
-extern bool showScopeStack;
-extern bool showLLTry;
-extern bool showLocalIndex;
-extern bool showGenAsm;
-extern bool showAssemble;
-extern bool showBindingDep;
-extern bool showSvgDraw;
+extern bool printSymbolDef;
+extern bool printSymbolRef;
+extern bool printPropertyDep;
+extern bool printScopeStack;
+extern bool printLLTry;
+extern bool printLocalIndex;
+extern bool printGenAsm;
+extern bool printAssemble;
+extern bool printBindingDep;
+extern bool printSvgDraw;
+
+extern bool dumpAst;
+extern bool dumpAsm;
+extern bool dumpBytecode;
 
 }
 }

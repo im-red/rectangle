@@ -175,7 +175,7 @@ int AsmBin::codeSize() const
 
 int AsmBin::defineFloat(float f)
 {
-    util::condPrint(option::showAssemble, "assemble: def float %lf\n", static_cast<double>(f));
+    util::condPrint(option::printAssemble, "assemble: def float %lf\n", static_cast<double>(f));
 
     m_constants.emplace_back(f);
     return static_cast<int>(m_constants.size() - 1);
@@ -183,7 +183,7 @@ int AsmBin::defineFloat(float f)
 
 int AsmBin::defineString(const std::string &s)
 {
-    util::condPrint(option::showAssemble, "assemble: def string %s\n", s.c_str());
+    util::condPrint(option::printAssemble, "assemble: def string %s\n", s.c_str());
 
     for (size_t i = 0; i < m_constants.size(); i++)
     {
@@ -250,12 +250,12 @@ int AsmBin::defineFunction(const std::string &name, int addr, int args, int loca
     }
     if (isRef)
     {
-        util::condPrint(option::showAssemble, "assemble: ref [%u] function %s\n",
+        util::condPrint(option::printAssemble, "assemble: ref [%u] function %s\n",
                         index, printName.c_str());
     }
     else
     {
-        util::condPrint(option::showAssemble, "assemble: def [%u] function %s %d %d %d\n",
+        util::condPrint(option::printAssemble, "assemble: def [%u] function %s %d %d %d\n",
                         index, printName.c_str(), addr, args, locals);
     }
 
@@ -315,12 +315,12 @@ int AsmBin::defineLabel(const string &name, int addr)
     }
     if (isRef)
     {
-        util::condPrint(option::showAssemble, "assemble: ref [%u] label %s\n",
+        util::condPrint(option::printAssemble, "assemble: ref [%u] label %s\n",
                         index, printName.c_str());
     }
     else
     {
-        util::condPrint(option::showAssemble, "assemble: def [%u] label %s %d\n",
+        util::condPrint(option::printAssemble, "assemble: def [%u] label %s %d\n",
                         index, printName.c_str(), addr);
     }
 

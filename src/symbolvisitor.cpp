@@ -235,9 +235,9 @@ void SymbolVisitor::calculateOrderedMemberInitList()
         seq2instance[seq] = cid;
         seq2filepath[seq] = m_topLevelInstance->filepath;
 
-        util::condPrint(option::showBindingDep, "binding: filepath [%d] %s\n",
+        util::condPrint(option::printBindingDep, "binding: filepath [%d] %s\n",
                         seq, m_topLevelInstance->filepath.c_str());
-        util::condPrint(option::showBindingDep, "binding: seq [%d] %s(%p)\n",
+        util::condPrint(option::printBindingDep, "binding: seq [%d] %s(%p)\n",
                         seq,
                         id.c_str(),
                         astNode);
@@ -261,9 +261,9 @@ void SymbolVisitor::calculateOrderedMemberInitList()
             seq2instance[seq] = instance;
             seq2filepath[seq] = cdd->filepath;
 
-            util::condPrint(option::showBindingDep, "binding: filepath [%d] %s\n",
+            util::condPrint(option::printBindingDep, "binding: filepath [%d] %s\n",
                             seq, cdd->filepath.c_str());
-            util::condPrint(option::showBindingDep, "binding: seq [%d] %s(%p)\n",
+            util::condPrint(option::printBindingDep, "binding: seq [%d] %s(%p)\n",
                             seq,
                             id.c_str(),
                             astNode);
@@ -287,7 +287,7 @@ void SymbolVisitor::calculateOrderedMemberInitList()
 
         sorter.addEdge(fromSeq, toSeq);
         detector.addEdge(fromSeq, toSeq);
-        util::condPrint(option::showBindingDep, "binding: edge %d -> %d(%s -> %s)\n",
+        util::condPrint(option::printBindingDep, "binding: edge %d -> %d(%s -> %s)\n",
                         fromSeq,
                         toSeq,
                         fromId.c_str(),
@@ -314,7 +314,7 @@ void SymbolVisitor::calculateOrderedMemberInitList()
                 int toSeq = toIter->second;
 
                 sorter.addEdge(fromSeq, toSeq);
-                util::condPrint(option::showBindingDep, "binding: edge %d -> %d(%s -> %s)\n",
+                util::condPrint(option::printBindingDep, "binding: edge %d -> %d(%s -> %s)\n",
                                 fromSeq,
                                 toSeq,
                                 fromId.c_str(),
@@ -340,7 +340,7 @@ void SymbolVisitor::calculateOrderedMemberInitList()
         ASTNode *astNode = seq2astNode[seq];
         ComponentInstanceDecl *cid = seq2instance[seq];
         m_topLevelInstance->orderedMemberInitList.push_back(make_pair(cid, astNode));
-        util::condPrint(option::showBindingDep, "binding: order [%d] [%d] %s(%p)\n",
+        util::condPrint(option::printBindingDep, "binding: order [%d] [%d] %s(%p)\n",
                         i,
                         seq,
                         id.c_str(),
@@ -746,7 +746,7 @@ void SymbolVisitor::visit(CallExpr *e)
             throw SyntaxError(msg, e->token(), m_curFilePath);
         }
 
-        util::condPrint(option::showSymbolRef, "ref: %s\n", func->symbolString().c_str());
+        util::condPrint(option::printSymbolRef, "ref: %s\n", func->symbolString().c_str());
         e->funcExpr->typeInfo = func->typeInfo();
     }
     else if (e->funcExpr->category == Expr::Category::Member)
@@ -795,7 +795,7 @@ void SymbolVisitor::visit(CallExpr *e)
             throw SyntaxError(msg, m->token(), m_curFilePath);
         }
 
-        util::condPrint(option::showSymbolRef, "ref: %s\n", method->symbolString().c_str());
+        util::condPrint(option::printSymbolRef, "ref: %s\n", method->symbolString().c_str());
         e->funcExpr->typeInfo = method->typeInfo();
     }
     else
@@ -905,7 +905,7 @@ void SymbolVisitor::visit(MemberExpr *e)
         throw SyntaxError(msg, e->token(), m_curFilePath);
     }
 
-    util::condPrint(option::showSymbolRef, "ref: %s\n", memberSymbol->symbolString().c_str());
+    util::condPrint(option::printSymbolRef, "ref: %s\n", memberSymbol->symbolString().c_str());
     e->typeInfo = memberSymbol->typeInfo();
 
     if (memberSymbol->category() == Symbol::Category::Property && analyzingPropertyDep())
@@ -915,7 +915,7 @@ void SymbolVisitor::visit(MemberExpr *e)
         assert(pd != nullptr);
 
         componentDefinationAnalyzing()->propertyDeps[propertyIndexAnalyzing()].insert(pd->fieldIndex);
-        util::condPrint(option::showPropertyDep, "property: [%d] -> [%d]\n", propertyIndexAnalyzing(), pd->fieldIndex);
+        util::condPrint(option::printPropertyDep, "property: [%d] -> [%d]\n", propertyIndexAnalyzing(), pd->fieldIndex);
     }
 
     if (analyzingBindingDep())
@@ -926,7 +926,7 @@ void SymbolVisitor::visit(MemberExpr *e)
             PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
             assert(pd != nullptr);
 
-            util::condPrint(option::showBindingDep, "binding: %s[%d](%p) -> %s[%d]\n",
+            util::condPrint(option::printBindingDep, "binding: %s[%d](%p) -> %s[%d]\n",
                             curInstanceId().c_str(),
                             bindingIndexAnalyzing(),
                             bindingAnalyzing(),
@@ -951,7 +951,7 @@ void SymbolVisitor::visit(RefExpr *e)
         throw SyntaxError(msg, e->token(), m_curFilePath);
     }
 
-    util::condPrint(option::showSymbolRef, "ref: %s\n", sym->symbolString().c_str());
+    util::condPrint(option::printSymbolRef, "ref: %s\n", sym->symbolString().c_str());
     e->typeInfo = sym->typeInfo();
 
     if (sym->category() == Symbol::Category::Property && analyzingPropertyDep())
@@ -961,7 +961,7 @@ void SymbolVisitor::visit(RefExpr *e)
         assert(pd != nullptr);
 
         componentDefinationAnalyzing()->propertyDeps[propertyIndexAnalyzing()].insert(pd->fieldIndex);
-        util::condPrint(option::showPropertyDep, "property: [%d] -> [%d]\n", propertyIndexAnalyzing(), pd->fieldIndex);
+        util::condPrint(option::printPropertyDep, "property: [%d] -> [%d]\n", propertyIndexAnalyzing(), pd->fieldIndex);
     }
 
     if (analyzingBindingDep())
@@ -972,7 +972,7 @@ void SymbolVisitor::visit(RefExpr *e)
             PropertyDecl *pd = dynamic_cast<PropertyDecl *>(ast);
             assert(pd != nullptr);
 
-            util::condPrint(option::showBindingDep, "binding: %s[%d](%p) -> %s[%d]\n",
+            util::condPrint(option::printBindingDep, "binding: %s[%d](%p) -> %s[%d]\n",
                             curInstanceId().c_str(),
                             bindingIndexAnalyzing(),
                             bindingAnalyzing(),
@@ -1027,7 +1027,7 @@ void SymbolVisitor::visit(VarDecl *vd)
     vd->localIndex = m_stackFrameLocals;
     m_stackFrameLocals++;
 
-    util::condPrint(option::showGenAsm, "genAsm: localIndex [%d] %s\n",
+    util::condPrint(option::printGenAsm, "genAsm: localIndex [%d] %s\n",
                     vd->localIndex,
                     vd->name.c_str());
 
@@ -1063,7 +1063,7 @@ void SymbolVisitor::visitPropertyDefination(PropertyDecl *pd)
     Symbol *propertySym = new Symbol(Symbol::Category::Property, propertyName, pd->type, pd);
     m_ast->symbolTable()->define(propertySym);
 
-    util::condPrint(option::showPropertyDep, "property: [%d] %s\n", pd->fieldIndex, propertySym->symbolString().c_str());
+    util::condPrint(option::printPropertyDep, "property: [%d] %s\n", pd->fieldIndex, propertySym->symbolString().c_str());
 }
 
 void SymbolVisitor::visitPropertyInitialization(PropertyDecl *pd)
@@ -1204,7 +1204,7 @@ void SymbolVisitor::visitMethodBody(FunctionDecl *fd)
 
     for (size_t i = 0; i < fd->paramList.size(); i++)
     {
-        util::condPrint(option::showGenAsm, "genAsm: localIndex [%d] %s\n",
+        util::condPrint(option::printGenAsm, "genAsm: localIndex [%d] %s\n",
                         fd->paramList[i]->localIndex,
                         fd->paramList[i]->name.c_str());
     }
