@@ -135,8 +135,7 @@ public:
     virtual std::string scopeString() const
     {
         char buf[512];
-        snprintf(buf, sizeof(buf), "[%d] %s (%s)",
-                 m_scopeId,
+        snprintf(buf, sizeof(buf), "%s (%s)",
                  scopeCategoryString(m_category).c_str(),
                  m_scopeName.c_str());
         return std::string(buf);
@@ -151,11 +150,6 @@ public:
     std::string scopeName() const;
     void setScopeName(const std::string &scopeName);
 
-    int scopeId() const;
-    void setScopeId(int scopeId);
-
-    static void resetNextScopeId() { m_nextScopeId = 0; }
-
     Scope *componentScope() const;
     void setComponentScope(Scope *componentScope);
 
@@ -165,8 +159,6 @@ private:
     Scope *m_componentScope = nullptr;
     Category m_category = Category::Invalid;
     std::string m_scopeName = "anonymous";
-    int m_scopeId = -1;
-    static int m_nextScopeId;
 };
 
 class ScopeSymbol : public Symbol, public Scope

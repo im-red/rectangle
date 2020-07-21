@@ -1252,7 +1252,6 @@ void SymbolVisitor::visit(PropertyDecl *)
 
 void SymbolVisitor::clear()
 {
-    Scope::resetNextScopeId();
     m_stackFrameLocals = -1;
     m_nextInstanceIndex = 0;
     m_topLevelInstance = nullptr;

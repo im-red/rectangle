@@ -101,14 +101,10 @@ void Symbol::setAstNode(ASTNode *astNode)
     m_astNode = astNode;
 }
 
-int Scope::m_nextScopeId = 0;
-
 Scope::Scope(Category cat, Scope *p)
     : m_parent(p)
     , m_category(cat)
-    , m_scopeId(m_nextScopeId++)
 {
-
 }
 
 Scope::~Scope()
@@ -156,16 +152,6 @@ std::string Scope::scopeName() const
 void Scope::setScopeName(const std::string &scopeName)
 {
     m_scopeName = scopeName;
-}
-
-int Scope::scopeId() const
-{
-    return m_scopeId;
-}
-
-void Scope::setScopeId(int scopeId)
-{
-    m_scopeId = scopeId;
 }
 
 Scope *Scope::componentScope() const
