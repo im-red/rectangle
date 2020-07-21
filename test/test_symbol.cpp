@@ -50,7 +50,7 @@ using namespace rectangle::diag;
 
 TEST(symbol, INSTANCE)
 {
-    option::showLLTry = true;
+    option::showBindingDep = true;
     vector<string> paths = 
     {
         "../../template/Scene.rect",

@@ -21,6 +21,7 @@
 #include "symboltable.h"
 #include "typeinfo.h"
 #include "exception.h"
+#include "loopdetector.h"
 
 #include <list>
 
@@ -217,6 +218,7 @@ void SymbolVisitor::calculateOrderedMemberInitList()
     map<int, ASTNode *> seq2astNode;
     map<int, string> seq2id;
     map<int, ComponentInstanceDecl *> seq2instance;
+    map<int, string> seq2filepath;
 
     int nextSeq = 0;
     for (auto &p : m_bindingId2bindingDecl)
@@ -231,7 +233,10 @@ void SymbolVisitor::calculateOrderedMemberInitList()
         seq2astNode[seq] = astNode;
         seq2id[seq] = id;
         seq2instance[seq] = cid;
+        seq2filepath[seq] = m_topLevelInstance->filepath;
 
+        util::condPrint(option::showBindingDep, "binding: filepath [%d] %s\n",
+                        seq, m_topLevelInstance->filepath.c_str());
         util::condPrint(option::showBindingDep, "binding: seq [%d] %s(%p)\n",
                         seq,
                         id.c_str(),
@@ -254,7 +259,10 @@ void SymbolVisitor::calculateOrderedMemberInitList()
             seq2astNode[seq] = astNode;
             seq2id[seq] = id;
             seq2instance[seq] = instance;
+            seq2filepath[seq] = cdd->filepath;
 
+            util::condPrint(option::showBindingDep, "binding: filepath [%d] %s\n",
+                            seq, cdd->filepath.c_str());
             util::condPrint(option::showBindingDep, "binding: seq [%d] %s(%p)\n",
                             seq,
                             id.c_str(),
@@ -263,6 +271,7 @@ void SymbolVisitor::calculateOrderedMemberInitList()
     }
 
     TopologicalSorter sorter(static_cast<int>(id2seq.size()));
+    LoopDetector detector;
 
     for (auto &p : m_bindingIdDeps)
     {
@@ -277,6 +286,7 @@ void SymbolVisitor::calculateOrderedMemberInitList()
         int toSeq = toIter->second;
 
         sorter.addEdge(fromSeq, toSeq);
+        detector.addEdge(fromSeq, toSeq);
         util::condPrint(option::showBindingDep, "binding: edge %d -> %d(%s -> %s)\n",
                         fromSeq,
                         toSeq,
@@ -317,7 +327,10 @@ void SymbolVisitor::calculateOrderedMemberInitList()
     TopologicalSorter::SortResult result = sorter.sort(order);
     if (result == TopologicalSorter::SortResult::LoopDetected)
     {
-        throw VisitException("BindingDecl", "Loop detected in property dependency");
+        int node;
+        bool ret = detector.detect(node);
+        assert(ret);
+        throw SyntaxError("Loop detected in property dependency", seq2astNode[node]->token(), seq2filepath[node]);
     }
 
     for (int i = 0; i < static_cast<int>(order.size()); i++)
