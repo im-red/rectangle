@@ -16,6 +16,28 @@
  ********************************************************************************/
 
 #include "driver.h"
+#include "sourcefile.h"
+#include "lexer.h"
+#include "parser.h"
+#include "ast.h"
+#include "asmtext.h"
+#include "asmbin.h"
+#include "asmmachine.h"
+#include "symbolvisitor.h"
+#include "asmvisitor.h"
+#include "exception.h"
+#include "errorprinter.h"
+#include "util.h"
+#include "dumpvisitor.h"
+
+#include <map>
+
+using namespace std;
+using namespace rectangle::frontend;
+using namespace rectangle::backend;
+using namespace rectangle::runtime;
+using namespace rectangle::diag;
+using namespace rectangle::util;
 
 namespace rectangle
 {
@@ -24,18 +46,109 @@ namespace driver
 
 Driver::Driver()
 {
-
 }
 
-Driver::Stage Driver::compile(const std::string &)
+string Driver::compile(const vector<string> &paths)
 {
-    m_stage = Stage::Begin;
-    m_svgResult.clear();
-    m_errorString.clear();
-    m_tokens.clear();
+    map<string, SourceFile> path2file;
+    for (auto &path : paths)
+    {
+        path2file[path] = SourceFile(path);
+        if (!path2file[path].valid())
+        {
+            fprintf(stderr, "error: open %s failed\n", path.c_str());
+            return "";
+        }
+    }
 
-    m_stage = Stage::End;
-    return m_stage;
+    AST ast;
+    for (auto &pair : path2file)
+    {
+        SourceFile &sc = pair.second;
+        string code = sc.source();
+
+        vector<rectangle::frontend::Token> tokens;
+        try
+        {
+            tokens = Lexer().scan(code);
+        }
+        catch (SyntaxError &e)
+        {
+            printSyntaxError(sc, e);
+        }
+
+        unique_ptr<DocumentDecl> document;
+        try
+        {
+            document = Parser().parse(tokens);
+        }
+        catch (SyntaxError &e)
+        {
+            printSyntaxError(sc, e);
+        }
+        document->filepath = sc.path();
+
+        ast.addDocument(move(document));
+    }
+
+    if (option::dumpAst)
+    {
+        DumpVisitor dv;
+        dv.visit(&ast);
+    }
+
+    SymbolVisitor sv;
+    try
+    {
+        sv.visit(&ast);
+    }
+    catch (SyntaxError &e)
+    {
+        auto iter = path2file.find(e.path());
+        if (iter == path2file.end())
+        {
+            fprintf(stderr, "Internal error: %s\n", e.what());
+        }
+        else
+        {
+            printSyntaxError(iter->second, e);
+        }
+    }
+
+    AsmText txt;
+    try
+    {
+        AsmVisitor av;
+        txt = av.visit(&ast);
+    }
+    catch (SyntaxError &e)
+    {
+        auto iter = path2file.find(e.path());
+        if (iter == path2file.end())
+        {
+            fprintf(stderr, "Internal error: %s\n", e.what());
+        }
+        else
+        {
+            printSyntaxError(iter->second, e);
+        }
+    }
+
+    if (option::dumpAsm)
+    {
+        txt.dump();
+    }
+
+    AsmBin bin(txt);
+    if (option::dumpBytecode)
+    {
+        bin.dump();
+    }
+
+    AsmMachine machine;
+    string svg = machine.run(bin, "main");
+
+    return svg;
 }
 
 }

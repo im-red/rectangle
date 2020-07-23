@@ -26,3 +26,23 @@
 
 using namespace testing;
 using namespace std;
+using namespace rectangle::driver;
+
+TEST(driver, COMPILE)
+{
+    vector<string> paths = 
+    {
+        "../../template/Scene.rect",
+        "../../template/Rectangle.rect", 
+        "../../template/Text.rect",
+        "../../template/Ellipse.rect",
+        "../../template/Polygon.rect",
+        "../../template/Line.rect",
+        "../../template/Polyline.rect",
+        "../rect/symbol_instance_instance.rect"
+    };
+
+    Driver d;
+    string svg = d.compile(paths);
+    printf("%s\n", svg.c_str());
+}

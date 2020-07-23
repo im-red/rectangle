@@ -17,9 +17,8 @@
 
 #pragma once
 
-#include "lexer.h"
-
 #include <vector>
+#include <string>
 
 namespace rectangle
 {
@@ -29,30 +28,9 @@ namespace driver
 class Driver
 {
 public:
-    enum class Stage
-    {
-        Begin,
-        Lex,
-        Parse,
-        End
-    };
-
-public:
     Driver();
 
-    Stage compile(const std::string &code);
-
-    Stage stage() const { return m_stage; }
-    std::string svgResult() const { return m_svgResult; }
-    std::string errorString() const { return m_errorString; }
-
-private:
-    Stage m_stage = Stage::Begin;
-    std::string m_svgResult;
-    std::string m_errorString;
-
-    frontend::Lexer m_lexer;
-    std::vector<frontend::Token> m_tokens;
+    std::string compile(const std::vector<std::string> &paths);
 };
 
 }

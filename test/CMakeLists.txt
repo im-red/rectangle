@@ -61,6 +61,10 @@ add_executable(test_all
     test_loopdetector.cpp
 )
 
+add_executable(test_driver
+    test_driver.cpp
+)
+
 add_executable(test_symbol
     test_symbol.cpp
 )
@@ -68,10 +72,6 @@ add_executable(test_symbol
 add_executable(test_object
     test_object.cpp
 )
-
-#add_executable(test_machine
-#    test_machine.cpp
-#)
 
 add_executable(test_topologicalsorter
     test_topologicalsorter.cpp
@@ -88,7 +88,7 @@ add_executable(test_loopdetector
 target_link_libraries(test_all common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_symbol common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_object common ${GTEST_LIBRARIES} pthread)
-#target_link_libraries(test_machine common ${GTEST_LIBRARIES} pthread)
+target_link_libraries(test_driver common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_topologicalsorter common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_util common ${GTEST_LIBRARIES} pthread)
 target_link_libraries(test_loopdetector common ${GTEST_LIBRARIES} pthread)
