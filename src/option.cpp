@@ -38,5 +38,8 @@ bool dumpAst = false;
 bool dumpAsm = false;
 bool dumpBytecode = false;
 
+bool showHelp = false;
+bool showOpt = false;
+
 }
 }

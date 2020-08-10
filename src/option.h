@@ -39,5 +39,8 @@ extern bool dumpAst;
 extern bool dumpAsm;
 extern bool dumpBytecode;
 
+extern bool showHelp;
+extern bool showOpt;
+
 }
 }
