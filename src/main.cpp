@@ -15,15 +15,77 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  ********************************************************************************/
 
-#include "parser.h"
+#include "driver.h"
+#include "argsparser.h"
+#include "option.h"
 
-#include <iostream>
-#include <sstream>
-#include <fstream>
+#include <vector>
+#include <string>
+
+#include <stdlib.h>
 
 using namespace std;
+using namespace rectangle;
+using namespace rectangle::util;
+using namespace rectangle::driver;
 
-int main()
+static vector<string> parseArgs(int argc, char **argv)
 {
+    ArgsParser ap;
+    ap.addOnOffLongOption("verbose", "Show all verbose message", option::verbose);
+    ap.addOnOffLongOption("print-symbol-def", "Print message when define a symbol", option::printSymbolDef);
+    ap.addOnOffLongOption("print-symbol-ref", "Print message when reference a symbol", option::printSymbolRef);
+    ap.addOnOffLongOption("print-property-dep", "Show property dependency information", option::printPropertyDep);
+    ap.addOnOffLongOption("print-scope-stack", "Show scope stack of symbol", option::printScopeStack);
+    ap.addOnOffLongOption("print-ll-try", "Show LL try in parsing", option::printLLTry);
+    ap.addOnOffLongOption("print-local-index", "Print message when define a local variable", option::printLocalIndex);
+    ap.addOnOffLongOption("print-gen-asm", "Show information in generating asm", option::printGenAsm);
+    ap.addOnOffLongOption("print-assemble", "Show information in assembling asm", option::printAssemble);
+    ap.addOnOffLongOption("print-binding-dep", "Show binding dependency information", option::printBindingDep);
+    ap.addOnOffLongOption("print-svg-draw", "Show information in drawing svg", option::printSvgDraw);
+    ap.addOnOffLongOption("dump-ast", "Dump the ast", option::dumpAst);
+    ap.addOnOffLongOption("dump-asm", "Dump the asm source", option::dumpAsm);
+    ap.addOnOffLongOption("dump-bytecode", "Dump the bytecode", option::dumpBytecode);
+    ap.addOnOffLongOption("help", "Show help", option::showHelp);
+    ap.addOnOffLongOption("show-opt", "Show option configured", option::showOpt);
+    ap.addOnOffLongOption("show-files", "Show input files", option::showFiles);
+
+    vector<string> files;
+
+    try
+    {
+        files = ap.parse(argc, argv);
+    }
+    catch (ArgsException &e)
+    {
+        fprintf(stderr, "%s\n", e.what());
+        ap.dumpHelp();
+        exit(EXIT_FAILURE);
+    }
+
+    if (option::showHelp)
+    {
+        ap.dumpHelp();
+        exit(EXIT_SUCCESS);
+    }
+    if (option::showOpt)
+    {
+        ap.dumpOpt();
+    }
+    if (option::showFiles)
+    {
+        fprintf(stderr, "Input files:\n");
+        for (auto &f : files)
+        {
+            fprintf(stderr, "    %s\n", f.c_str());
+        }
+    }
+
+    return files;
+}
+
+int main(int argc, char **argv)
+{
+    parseArgs(argc, argv);
     return 0;
 }
