@@ -41,6 +41,7 @@ extern bool dumpBytecode;
 
 extern bool showHelp;
 extern bool showOpt;
+extern bool showFiles;
 
 }
 }

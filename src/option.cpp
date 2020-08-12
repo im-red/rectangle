@@ -40,6 +40,7 @@ bool dumpBytecode = false;
 
 bool showHelp = false;
 bool showOpt = false;
+bool showFiles = false;
 
 }
 }
