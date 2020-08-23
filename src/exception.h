@@ -77,8 +77,8 @@ public:
 
 private:
     std::string m_msg;
-    int m_line;
-    int m_column;
+    int m_line = -1;
+    int m_column = -1;
     std::string m_token;
     std::string m_path;
 };
