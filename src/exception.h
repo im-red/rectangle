@@ -30,6 +30,10 @@ namespace diag
 class SyntaxError : public std::runtime_error
 {
 public:
+    SyntaxError(const std::string &msg)
+        : std::runtime_error(msg)
+    {
+    }
     SyntaxError(const std::string &msg, int line, int column, const std::string &token, const std::string &path = "")
         : std::runtime_error(msg
                              + " at line "

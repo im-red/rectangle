@@ -68,7 +68,15 @@ AsmText AsmVisitor::visit(AST *ast)
         visit(doc);
     }
 
-    assert(instances.size() == 1);
+    if (instances.size() == 0)
+    {
+        throw SyntaxError("No instance document");
+    }
+    else if (instances.size() > 1)
+    {
+        throw SyntaxError("Multiple instance documents");
+    }
+
     ComponentInstanceDecl *cid = dynamic_cast<ComponentInstanceDecl *>(instances[0]);
     assert(cid != nullptr);
     m_curFilePath = cid->filepath;

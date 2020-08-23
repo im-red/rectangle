@@ -107,12 +107,13 @@ string Driver::compile(const vector<string> &paths)
         auto iter = path2file.find(e.path());
         if (iter == path2file.end())
         {
-            fprintf(stderr, "Internal error: %s\n", e.what());
+            fprintf(stderr, "error: %s\n", e.what());
         }
         else
         {
             printSyntaxError(iter->second, e);
         }
+        return "";
     }
 
     AsmText txt;
@@ -126,12 +127,13 @@ string Driver::compile(const vector<string> &paths)
         auto iter = path2file.find(e.path());
         if (iter == path2file.end())
         {
-            fprintf(stderr, "Internal error: %s\n", e.what());
+            fprintf(stderr, "error: %s\n", e.what());
         }
         else
         {
             printSyntaxError(iter->second, e);
         }
+        return "";
     }
 
     if (option::dumpAsm)

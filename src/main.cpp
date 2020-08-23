@@ -86,6 +86,14 @@ static vector<string> parseArgs(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-    parseArgs(argc, argv);
+    auto files = parseArgs(argc, argv);
+
+    Driver d;
+    string svg = d.compile(files);
+
+    if (svg.size())
+    {
+        printf("%s\n", svg.c_str());
+    }
     return 0;
 }
