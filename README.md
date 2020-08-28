@@ -46,3 +46,5 @@ Scene {
 SVG output:
 
 [example.svg](./example.svg)
+
+[example.png](./example.png)
