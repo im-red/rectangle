@@ -75,6 +75,7 @@ string Driver::compile(const vector<string> &paths)
         catch (SyntaxError &e)
         {
             printSyntaxError(sc, e);
+            return "";
         }
 
         unique_ptr<DocumentDecl> document;
@@ -85,6 +86,7 @@ string Driver::compile(const vector<string> &paths)
         catch (SyntaxError &e)
         {
             printSyntaxError(sc, e);
+            return "";
         }
         document->filepath = sc.path();
 
