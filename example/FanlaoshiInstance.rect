@@ -1,0 +1,29 @@
+Scene {
+    width: 400
+    height: 500
+    Rectangle {
+        width: parent.width
+        height: 100
+        fill_color: "#888888"
+    }
+    Fanlaoshi {
+        color: "red"
+    }
+    Fanlaoshi {
+        x: 100
+        color: "yellow"
+    }
+    Fanlaoshi {
+        x: 200
+        color: "blue"
+    }
+    Fanlaoshi {
+        x: 300
+        color: "green"
+    }
+    Fanlaoshi {
+        y: 100
+        width: 400
+        height: 400
+    }
+}

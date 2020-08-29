@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="420" height="520">
+    <rect x="10" y="10" width="400" height="100" style="fill:#888888; stroke-width:1; stroke:#000000; stroke-dasharray:1,0"/>
+    <polyline points="19,48 26,30 45,23 57,31 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="22,59 33,33 57,31 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="28,56 37,38 57,31 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="35,55 42,42 57,31 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="39,59 47,46 57,31 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="76,58 78,48 57,31 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="86,56 90,42 57,31 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="98,51 99,33 57,31 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="103,46 105,29 81,22 57,31 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="28,56 28,84 33,93 43,98 73,98 84,94 91,86 92,55 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="27,60 22,62 20,71 28,74 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="92,59 99,64 98,71 91,74 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="28,60 39,67 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="57,68 65,68 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="83,65 92,58 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="40,63 56,62 56,73 40,72 40,63 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="66,63 81,62 81,73 67,74 66,63 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="59,78 57,79 58,80 60,80 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="59,78 57,79 58,80 60,80 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="52,85 51,87 51,89 54,90 57,87 58,84 60,88 62,90 66,90 67,88 65,85 " style="fill:none; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <ellipse cx="49" cy="69" rx="2" ry="2" style="fill:red; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <ellipse cx="72" cy="70" rx="2" ry="2" style="fill:red; stroke-width:1; stroke:red; stroke-dasharray:1,0"/>
+    <polyline points="119,48 126,30 145,23 157,31 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="122,59 133,33 157,31 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="128,56 137,38 157,31 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="135,55 142,42 157,31 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="139,59 147,46 157,31 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="176,58 178,48 157,31 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="186,56 190,42 157,31 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="198,51 199,33 157,31 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="203,46 205,29 181,22 157,31 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="128,56 128,84 133,93 143,98 173,98 184,94 191,86 192,55 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="127,60 122,62 120,71 128,74 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="192,59 199,64 198,71 191,74 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="128,60 139,67 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="157,68 165,68 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="183,65 192,58 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="140,63 156,62 156,73 140,72 140,63 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="166,63 181,62 181,73 167,74 166,63 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="159,78 157,79 158,80 160,80 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="159,78 157,79 158,80 160,80 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="152,85 151,87 151,89 154,90 157,87 158,84 160,88 162,90 166,90 167,88 165,85 " style="fill:none; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <ellipse cx="149" cy="69" rx="2" ry="2" style="fill:yellow; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <ellipse cx="172" cy="70" rx="2" ry="2" style="fill:yellow; stroke-width:1; stroke:yellow; stroke-dasharray:1,0"/>
+    <polyline points="219,48 226,30 245,23 257,31 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="222,59 233,33 257,31 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="228,56 237,38 257,31 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="235,55 242,42 257,31 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="239,59 247,46 257,31 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="276,58 278,48 257,31 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="286,56 290,42 257,31 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="298,51 299,33 257,31 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="303,46 305,29 281,22 257,31 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="228,56 228,84 233,93 243,98 273,98 284,94 291,86 292,55 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="227,60 222,62 220,71 228,74 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="292,59 299,64 298,71 291,74 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="228,60 239,67 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="257,68 265,68 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="283,65 292,58 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="240,63 256,62 256,73 240,72 240,63 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="266,63 281,62 281,73 267,74 266,63 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="259,78 257,79 258,80 260,80 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="259,78 257,79 258,80 260,80 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="252,85 251,87 251,89 254,90 257,87 258,84 260,88 262,90 266,90 267,88 265,85 " style="fill:none; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <ellipse cx="249" cy="69" rx="2" ry="2" style="fill:blue; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <ellipse cx="272" cy="70" rx="2" ry="2" style="fill:blue; stroke-width:1; stroke:blue; stroke-dasharray:1,0"/>
+    <polyline points="319,48 326,30 345,23 357,31 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="322,59 333,33 357,31 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="328,56 337,38 357,31 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="335,55 342,42 357,31 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="339,59 347,46 357,31 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="376,58 378,48 357,31 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="386,56 390,42 357,31 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="398,51 399,33 357,31 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="403,46 405,29 381,22 357,31 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="328,56 328,84 333,93 343,98 373,98 384,94 391,86 392,55 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="327,60 322,62 320,71 328,74 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="392,59 399,64 398,71 391,74 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="328,60 339,67 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="357,68 365,68 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="383,65 392,58 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="340,63 356,62 356,73 340,72 340,63 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="366,63 381,62 381,73 367,74 366,63 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="359,78 357,79 358,80 360,80 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="359,78 357,79 358,80 360,80 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="352,85 351,87 351,89 354,90 357,87 358,84 360,88 362,90 366,90 367,88 365,85 " style="fill:none; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <ellipse cx="349" cy="69" rx="2" ry="2" style="fill:green; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <ellipse cx="372" cy="70" rx="2" ry="2" style="fill:green; stroke-width:1; stroke:green; stroke-dasharray:1,0"/>
+    <polyline points="46,262 74,190 150,162 198,194 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="58,306 102,202 198,194 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="82,294 118,222 198,194 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="110,290 138,238 198,194 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="126,306 158,254 198,194 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="274,302 282,262 198,194 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="314,294 330,238 198,194 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="362,274 366,202 198,194 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="382,254 390,186 294,158 198,194 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="82,294 82,406 102,442 142,462 262,462 306,446 334,414 338,290 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="78,310 58,318 50,354 82,366 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="338,306 366,326 362,354 334,366 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="82,310 126,338 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="198,342 230,342 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="302,330 338,302 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="130,322 194,318 194,362 130,358 130,322 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="234,322 294,318 294,362 238,366 234,322 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="206,382 198,386 202,390 210,390 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="206,382 198,386 202,390 210,390 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <polyline points="178,410 174,418 174,426 186,430 198,418 202,406 210,422 218,430 234,430 238,422 230,410 " style="fill:none; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <ellipse cx="166" cy="346" rx="8" ry="8" style="fill:black; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+    <ellipse cx="258" cy="350" rx="8" ry="8" style="fill:black; stroke-width:1; stroke:black; stroke-dasharray:1,0"/>
+</svg>
+
