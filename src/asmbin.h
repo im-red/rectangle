@@ -15,84 +15,78 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  ********************************************************************************/
 
+#include <vector>
+
 #include "asmtext.h"
 #include "object.h"
 
-#include <vector>
-
 #pragma once
 
-namespace rectangle
-{
-namespace backend
-{
+namespace rectangle {
+namespace backend {
 
-class AsmBin
-{
-public:
-    struct FunctionItem
-    {
-        FunctionItem(const std::string &name_ = "", int addr_ = -1, int args_ = -1, int locals_ = -1)
-            : name(name_), addr(addr_), args(args_), locals(locals_), index(-1)
-        {}
-        bool isValid() const
-        {
-            return name != "" && addr != -1 && args != -1 && locals != -1;
-        }
-        std::string name;
-        int addr;
-        int args;
-        int locals;
-        int index;
-    };
+class AsmBin {
+ public:
+  struct FunctionItem {
+    FunctionItem(const std::string &name_ = "", int addr_ = -1, int args_ = -1,
+                 int locals_ = -1)
+        : name(name_), addr(addr_), args(args_), locals(locals_), index(-1) {}
+    bool isValid() const {
+      return name != "" && addr != -1 && args != -1 && locals != -1;
+    }
+    std::string name;
+    int addr;
+    int args;
+    int locals;
+    int index;
+  };
 
-public:
-    explicit AsmBin(const AsmText &t);
-    ~AsmBin();
+ public:
+  explicit AsmBin(const AsmText &t);
+  ~AsmBin();
 
-    void assemble(const AsmText &t);
+  void assemble(const AsmText &t);
 
-    void dump();
+  void dump();
 
-    int codeSize() const;
+  int codeSize() const;
 
-    unsigned char getByte(int addr) const;
-    int getInt(int addr) const;
-    runtime::Object getConstant(int index) const;
-    FunctionItem getFunction(int index) const;
-    FunctionItem getFunction(const std::string &funcName) const;
+  unsigned char getByte(int addr) const;
+  int getInt(int addr) const;
+  runtime::Object getConstant(int index) const;
+  FunctionItem getFunction(int index) const;
+  FunctionItem getFunction(const std::string &funcName) const;
 
-private:
-    int defineFloat(float f);
-    int defineString(const std::string &s);
-    int defineFunction(const std::string &name, int addr = -1, int args = -1, int locals = -1);
-    int defineLabel(const std::string &name, int addr = -1);
+ private:
+  int defineFloat(float f);
+  int defineString(const std::string &s);
+  int defineFunction(const std::string &name, int addr = -1, int args = -1,
+                     int locals = -1);
+  int defineLabel(const std::string &name, int addr = -1);
 
-    void appendByte(unsigned char c);
-    void appendInt(int n);
+  void appendByte(unsigned char c);
+  void appendInt(int n);
 
-    void setInt(int addr, int n);
+  void setInt(int addr, int n);
 
-    void fillLabelAddr();
+  void fillLabelAddr();
 
-private:
-    struct LabelItem
-    {
-        explicit LabelItem(const std::string &name_, int addr_ = -1)
-            : name(name_), addr(addr_)
-        {}
-        std::string name;
-        int addr;
-    };
+ private:
+  struct LabelItem {
+    explicit LabelItem(const std::string &name_, int addr_ = -1)
+        : name(name_), addr(addr_) {}
+    std::string name;
+    int addr;
+  };
 
-    int m_offset = 0;
-    std::vector<unsigned char> m_code;
-    std::vector<runtime::Object> m_constants;
-    std::vector<FunctionItem> m_functions;
-    std::vector<LabelItem> m_labels;
+  int m_offset = 0;
+  std::vector<unsigned char> m_code;
+  std::vector<runtime::Object> m_constants;
+  std::vector<FunctionItem> m_functions;
+  std::vector<LabelItem> m_labels;
 
-    std::vector<int> m_labelIndexAddr;
+  std::vector<int> m_labelIndexAddr;
 };
 
-}
-}
+}  // namespace backend
+}  // namespace rectangle

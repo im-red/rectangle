@@ -21,35 +21,32 @@
 
 using namespace std;
 
-namespace rectangle
-{
-namespace diag
-{
+namespace rectangle {
+namespace diag {
 
-void printSyntaxError(const frontend::SourceFile &sc, const SyntaxError &e)
-{
-    static const char *COLOR_PREFIX = "\033[40;31m";
-    static const char *COLOR_SUFFIX = "\033[0m";
+void printSyntaxError(const frontend::SourceFile &sc, const SyntaxError &e) {
+  static const char *COLOR_PREFIX = "\033[40;31m";
+  static const char *COLOR_SUFFIX = "\033[0m";
 
-    fprintf(stderr, "%s:%d:%d: %serror%s: %s\n",
-            sc.path().c_str(), e.line(), e.column(),
-            COLOR_PREFIX, COLOR_SUFFIX,
-            e.msg().c_str());
+  fprintf(stderr, "%s:%d:%d: %serror%s: %s\n", sc.path().c_str(), e.line(),
+          e.column(), COLOR_PREFIX, COLOR_SUFFIX, e.msg().c_str());
 
-    const size_t tokenBegin = static_cast<size_t>(e.column()) - 1;
-    const size_t tokenEnd = static_cast<size_t>(e.column()) - 1 + e.token().size();
+  const size_t tokenBegin = static_cast<size_t>(e.column()) - 1;
+  const size_t tokenEnd =
+      static_cast<size_t>(e.column()) - 1 + e.token().size();
 
-    string line = sc.line(e.line() - 1);
+  string line = sc.line(e.line() - 1);
 
-    string left = line.substr(0, tokenBegin);
-    string mid = line.substr(tokenBegin, tokenEnd - tokenBegin);
-    string right = line.substr(tokenEnd);
+  string left = line.substr(0, tokenBegin);
+  string mid = line.substr(tokenBegin, tokenEnd - tokenBegin);
+  string right = line.substr(tokenEnd);
 
-    fprintf(stderr, "%s%s%s%s%s\n", left.c_str(), COLOR_PREFIX, mid.c_str(), COLOR_SUFFIX, right.c_str());
+  fprintf(stderr, "%s%s%s%s%s\n", left.c_str(), COLOR_PREFIX, mid.c_str(),
+          COLOR_SUFFIX, right.c_str());
 
-    string indicator = string(static_cast<size_t>(e.column() - 1), ' ') + '^';
-    fprintf(stderr, "%s%s%s\n", COLOR_PREFIX, indicator.c_str(), COLOR_SUFFIX);
+  string indicator = string(static_cast<size_t>(e.column() - 1), ' ') + '^';
+  fprintf(stderr, "%s%s%s\n", COLOR_PREFIX, indicator.c_str(), COLOR_SUFFIX);
 }
 
-}
-}
+}  // namespace diag
+}  // namespace rectangle

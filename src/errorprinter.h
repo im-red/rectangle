@@ -17,15 +17,13 @@
 
 #pragma once
 
-#include "sourcefile.h"
 #include "exception.h"
+#include "sourcefile.h"
 
-namespace rectangle
-{
-namespace diag
-{
+namespace rectangle {
+namespace diag {
 
 void printSyntaxError(const frontend::SourceFile &sc, const SyntaxError &e);
 
 }
-}
+}  // namespace rectangle

@@ -17,205 +17,188 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
-namespace rectangle
-{
-namespace draw
-{
+namespace rectangle {
+namespace draw {
 
-struct Point
-{
-    Point(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
-    int x;
-    int y;
+struct Point {
+  Point(int x_ = 0, int y_ = 0) : x(x_), y(y_) {}
+  int x;
+  int y;
 };
 
-struct SceneData
-{
-    int leftMargin;
-    int topMargin;
-    int rightMargin;
-    int bottomMargin;
-    int width;
-    int height;
+struct SceneData {
+  int leftMargin;
+  int topMargin;
+  int rightMargin;
+  int bottomMargin;
+  int width;
+  int height;
 };
 
-struct RectangleData
-{
-    int x;
-    int y;
-    int width;
-    int height;
-    std::string fill_color;
-    int stroke_width;
-    std::string stroke_color;
-    std::string stroke_dasharray;
+struct RectangleData {
+  int x;
+  int y;
+  int width;
+  int height;
+  std::string fill_color;
+  int stroke_width;
+  std::string stroke_color;
+  std::string stroke_dasharray;
 };
 
-struct TextData
-{
-    int x;
-    int y;
-    int size;
-    std::string text;
+struct TextData {
+  int x;
+  int y;
+  int size;
+  std::string text;
 };
 
-struct EllipseData
-{
-    int x;
-    int y;
-    int x_radius;
-    int y_radius;
-    std::string fill_color;
-    int stroke_width;
-    std::string stroke_color;
-    std::string stroke_dasharray;
+struct EllipseData {
+  int x;
+  int y;
+  int x_radius;
+  int y_radius;
+  std::string fill_color;
+  int stroke_width;
+  std::string stroke_color;
+  std::string stroke_dasharray;
 };
 
-struct PolygonData
-{
-    int x;
-    int y;
-    std::vector<std::vector<int>> points;
-    std::string fill_color;
-    std::string fill_rule;
-    int stroke_width;
-    std::string stroke_color;
-    std::string stroke_dasharray;
+struct PolygonData {
+  int x;
+  int y;
+  std::vector<std::vector<int>> points;
+  std::string fill_color;
+  std::string fill_rule;
+  int stroke_width;
+  std::string stroke_color;
+  std::string stroke_dasharray;
 };
 
-struct LineData
-{
-    int x;
-    int y;
-    int dx1;
-    int dy1;
-    int dx2;
-    int dy2;
-    int stroke_width;
-    std::string stroke_color;
-    std::string stroke_dasharray;
+struct LineData {
+  int x;
+  int y;
+  int dx1;
+  int dy1;
+  int dx2;
+  int dy2;
+  int stroke_width;
+  std::string stroke_color;
+  std::string stroke_dasharray;
 };
 
-struct PolylineData
-{
-    int x;
-    int y;
-    std::vector<std::vector<int>> points;
-    int stroke_width;
-    std::string stroke_color;
-    std::string stroke_dasharray;
+struct PolylineData {
+  int x;
+  int y;
+  std::vector<std::vector<int>> points;
+  int stroke_width;
+  std::string stroke_color;
+  std::string stroke_dasharray;
 };
 
-class Shape
-{
-public:
-    Shape(int originX = 0, int originY = 0);
-    virtual ~Shape();
-    virtual std::string generate() = 0;
+class Shape {
+ public:
+  Shape(int originX = 0, int originY = 0);
+  virtual ~Shape();
+  virtual std::string generate() = 0;
 
-protected:
-    int m_originX;
-    int m_originY;
+ protected:
+  int m_originX;
+  int m_originY;
 };
 
-class RectangleShape : public Shape
-{
-public:
-    explicit RectangleShape(const RectangleData &rect, int originX, int originY);
-    std::string generate() override;
+class RectangleShape : public Shape {
+ public:
+  explicit RectangleShape(const RectangleData &rect, int originX, int originY);
+  std::string generate() override;
 
-private:
-    RectangleData m_data;
+ private:
+  RectangleData m_data;
 };
 
-class TextShape : public Shape
-{
-public:
-    explicit TextShape(const TextData &text, int originX, int originY);
-    std::string generate() override;
+class TextShape : public Shape {
+ public:
+  explicit TextShape(const TextData &text, int originX, int originY);
+  std::string generate() override;
 
-private:
-    TextData m_data;
+ private:
+  TextData m_data;
 };
 
-class EllipseShape : public Shape
-{
-public:
-    explicit EllipseShape(const EllipseData &ellipse, int originX, int originY);
-    std::string generate() override;
+class EllipseShape : public Shape {
+ public:
+  explicit EllipseShape(const EllipseData &ellipse, int originX, int originY);
+  std::string generate() override;
 
-private:
-    EllipseData m_data;
+ private:
+  EllipseData m_data;
 };
 
-class PolygonShape : public Shape
-{
-public:
-    explicit PolygonShape(const PolygonData &polygon, int originX, int originY);
-    std::string generate() override;
+class PolygonShape : public Shape {
+ public:
+  explicit PolygonShape(const PolygonData &polygon, int originX, int originY);
+  std::string generate() override;
 
-private:
-    PolygonData m_data;
+ private:
+  PolygonData m_data;
 };
 
-class LineShape : public Shape
-{
-public:
-    explicit LineShape(const LineData &line, int originX, int originY);
-    std::string generate() override;
+class LineShape : public Shape {
+ public:
+  explicit LineShape(const LineData &line, int originX, int originY);
+  std::string generate() override;
 
-private:
-    LineData m_data;
+ private:
+  LineData m_data;
 };
 
-class PolylineShape : public Shape
-{
-public:
-    explicit PolylineShape(const PolylineData &polyline, int originX, int originY);
-    std::string generate() override;
+class PolylineShape : public Shape {
+ public:
+  explicit PolylineShape(const PolylineData &polyline, int originX,
+                         int originY);
+  std::string generate() override;
 
-private:
-    PolylineData m_data;
+ private:
+  PolylineData m_data;
 };
 
-class SvgPainter
-{
-public:
-    SvgPainter();
+class SvgPainter {
+ public:
+  SvgPainter();
 
-    void clear();
+  void clear();
 
-    void defineScene(const SceneData &d);
+  void defineScene(const SceneData &d);
 
-    void pushOrigin(int x, int y);
-    void popOrigin();
+  void pushOrigin(int x, int y);
+  void popOrigin();
 
-    void draw(const RectangleData &d);
-    void draw(const TextData &d);
-    void draw(const EllipseData &d);
-    void draw(const PolygonData &d);
-    void draw(const LineData &d);
-    void draw(const PolylineData &d);
+  void draw(const RectangleData &d);
+  void draw(const TextData &d);
+  void draw(const EllipseData &d);
+  void draw(const PolygonData &d);
+  void draw(const LineData &d);
+  void draw(const PolylineData &d);
 
-    std::string generate() const;
+  std::string generate() const;
 
-private:
-    std::vector<std::unique_ptr<Shape>> m_shapes;
-    std::vector<Point> m_originStack;
-    Point m_curOrigin;
+ private:
+  std::vector<std::unique_ptr<Shape>> m_shapes;
+  std::vector<Point> m_originStack;
+  Point m_curOrigin;
 
-    int m_svgWidth = 0;
-    int m_svgHeight = 0;
+  int m_svgWidth = 0;
+  int m_svgHeight = 0;
 
-    int m_leftMargin = 10;
-    int m_rightMargin = 10;
-    int m_topMargin = 10;
-    int m_bottomMargin = 10;
+  int m_leftMargin = 10;
+  int m_rightMargin = 10;
+  int m_topMargin = 10;
+  int m_bottomMargin = 10;
 };
 
-}
-}
+}  // namespace draw
+}  // namespace rectangle

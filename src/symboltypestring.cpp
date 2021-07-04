@@ -17,51 +17,34 @@
 
 #include "symbol.h"
 
-#define ENUM_ELEMENT(x) { x, #x }
+#define ENUM_ELEMENT(x) \
+  { x, #x }
 
-namespace rectangle
-{
-namespace backend
-{
+namespace rectangle {
+namespace backend {
 
-std::string Symbol::symbolCategoryString(Category category)
-{
-    static const std::map<Category, std::string> MAP =
-    {
-        ENUM_ELEMENT(Category::Invalid),
-        ENUM_ELEMENT(Category::Variable),
-        ENUM_ELEMENT(Category::Parameter),
-        ENUM_ELEMENT(Category::Struct),
-        ENUM_ELEMENT(Category::Field),
-        ENUM_ELEMENT(Category::Component),
-        ENUM_ELEMENT(Category::Property),
-        ENUM_ELEMENT(Category::Method),
-        ENUM_ELEMENT(Category::InstanceId),
-        ENUM_ELEMENT(Category::Enum),
-        ENUM_ELEMENT(Category::EnumConstants),
-        ENUM_ELEMENT(Category::Function),
-        ENUM_ELEMENT(Category::BuiltInType)
-    };
+std::string Symbol::symbolCategoryString(Category category) {
+  static const std::map<Category, std::string> MAP = {
+      ENUM_ELEMENT(Category::Invalid),       ENUM_ELEMENT(Category::Variable),
+      ENUM_ELEMENT(Category::Parameter),     ENUM_ELEMENT(Category::Struct),
+      ENUM_ELEMENT(Category::Field),         ENUM_ELEMENT(Category::Component),
+      ENUM_ELEMENT(Category::Property),      ENUM_ELEMENT(Category::Method),
+      ENUM_ELEMENT(Category::InstanceId),    ENUM_ELEMENT(Category::Enum),
+      ENUM_ELEMENT(Category::EnumConstants), ENUM_ELEMENT(Category::Function),
+      ENUM_ELEMENT(Category::BuiltInType)};
 
-    return MAP.at(category);
+  return MAP.at(category);
 }
 
-std::string Scope::scopeCategoryString(Category category)
-{
-    static const std::map<Category, std::string> MAP =
-    {
-        ENUM_ELEMENT(Category::Invalid),
-        ENUM_ELEMENT(Category::Global),
-        ENUM_ELEMENT(Category::Local),
-        ENUM_ELEMENT(Category::Function),
-        ENUM_ELEMENT(Category::Component),
-        ENUM_ELEMENT(Category::Method),
-        ENUM_ELEMENT(Category::Struct),
-        ENUM_ELEMENT(Category::Instance)
-    };
+std::string Scope::scopeCategoryString(Category category) {
+  static const std::map<Category, std::string> MAP = {
+      ENUM_ELEMENT(Category::Invalid),   ENUM_ELEMENT(Category::Global),
+      ENUM_ELEMENT(Category::Local),     ENUM_ELEMENT(Category::Function),
+      ENUM_ELEMENT(Category::Component), ENUM_ELEMENT(Category::Method),
+      ENUM_ELEMENT(Category::Struct),    ENUM_ELEMENT(Category::Instance)};
 
-    return MAP.at(category);
+  return MAP.at(category);
 }
 
-}
-}
+}  // namespace backend
+}  // namespace rectangle

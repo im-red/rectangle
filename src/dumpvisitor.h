@@ -19,74 +19,66 @@
 
 #include "visitor.h"
 
-namespace rectangle
-{
-namespace frontend
-{
+namespace rectangle {
+namespace frontend {
 
-class DumpVisitor : public Visitor
-{
-public:
-    DumpVisitor();
+class DumpVisitor : public Visitor {
+ public:
+  DumpVisitor();
 
-    void visit(AST *ast);
+  void visit(AST *ast);
 
-protected:
-    void visit(Expr *e) override { Visitor::visit(e); }
-    void visit(Stmt *s) override { Visitor::visit(s); }
-    void visit(DocumentDecl *dd) override;
-    void visit(IntegerLiteral *il) override;
-    void visit(FloatLiteral *fl) override;
-    void visit(StringLiteral *sl) override;
-    void visit(InitListExpr *ile) override;
-    void visit(BinaryOperatorExpr *boe) override;
-    void visit(UnaryOperatorExpr *uoe) override;
-    void visit(CallExpr *ce) override;
-    void visit(ListSubscriptExpr *lse) override;
-    void visit(MemberExpr *me) override;
-    void visit(RefExpr *re) override;
-    void visit(VarDecl *vd) override;
-    void visit(PropertyDecl *pd) override;
-    void visit(ParamDecl *pd) override;
-    void visit(CompoundStmt *cs) override;
-    void visit(DeclStmt *ds) override;
-    void visit(IfStmt *is) override;
-    void visit(WhileStmt *ws) override;
-    void visit(BreakStmt *) override;
-    void visit(ContinueStmt *) override;
-    void visit(ReturnStmt *rs) override;
-    void visit(ExprStmt *es) override;
-    void visit(FunctionDecl *fd) override;
-    void visit(EnumConstantDecl *ecd) override;
-    void visit(EnumDecl *ed) override;
-    void visit(ComponentDefinationDecl *cdd) override;
-    void visit(FieldDecl *fd) override;
-    void visit(StructDecl *sd) override;
-    void visit(BindingDecl *bd) override;
-    void visit(ComponentInstanceDecl *cid) override;
+ protected:
+  void visit(Expr *e) override { Visitor::visit(e); }
+  void visit(Stmt *s) override { Visitor::visit(s); }
+  void visit(DocumentDecl *dd) override;
+  void visit(IntegerLiteral *il) override;
+  void visit(FloatLiteral *fl) override;
+  void visit(StringLiteral *sl) override;
+  void visit(InitListExpr *ile) override;
+  void visit(BinaryOperatorExpr *boe) override;
+  void visit(UnaryOperatorExpr *uoe) override;
+  void visit(CallExpr *ce) override;
+  void visit(ListSubscriptExpr *lse) override;
+  void visit(MemberExpr *me) override;
+  void visit(RefExpr *re) override;
+  void visit(VarDecl *vd) override;
+  void visit(PropertyDecl *pd) override;
+  void visit(ParamDecl *pd) override;
+  void visit(CompoundStmt *cs) override;
+  void visit(DeclStmt *ds) override;
+  void visit(IfStmt *is) override;
+  void visit(WhileStmt *ws) override;
+  void visit(BreakStmt *) override;
+  void visit(ContinueStmt *) override;
+  void visit(ReturnStmt *rs) override;
+  void visit(ExprStmt *es) override;
+  void visit(FunctionDecl *fd) override;
+  void visit(EnumConstantDecl *ecd) override;
+  void visit(EnumDecl *ed) override;
+  void visit(ComponentDefinationDecl *cdd) override;
+  void visit(FieldDecl *fd) override;
+  void visit(StructDecl *sd) override;
+  void visit(BindingDecl *bd) override;
+  void visit(ComponentInstanceDecl *cid) override;
 
-private:
-    void incIndent();
-    void decIndent();
-    void printIndent();
+ private:
+  void incIndent();
+  void decIndent();
+  void printIndent();
 
-    struct IndentPrinter
-    {
-        IndentPrinter(DumpVisitor *dv) : m_dv(dv)
-        {
-            m_dv->incIndent();
-            m_dv->printIndent();
-        }
-        ~IndentPrinter()
-        {
-            m_dv->decIndent();
-        }
-        DumpVisitor *m_dv;
-    };
+  struct IndentPrinter {
+    IndentPrinter(DumpVisitor *dv) : m_dv(dv) {
+      m_dv->incIndent();
+      m_dv->printIndent();
+    }
+    ~IndentPrinter() { m_dv->decIndent(); }
+    DumpVisitor *m_dv;
+  };
 
-private:
-    int m_indent = 0;
+ private:
+  int m_indent = 0;
 };
 
-}
-}
+}  // namespace frontend
+}  // namespace rectangle

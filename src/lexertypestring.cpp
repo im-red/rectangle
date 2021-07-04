@@ -15,34 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  ********************************************************************************/
 
-#include "lexer.h"
-
-#include <string>
-#include <map>
-
 #include <assert.h>
+
+#include <map>
+#include <string>
+
+#include "lexer.h"
 
 using namespace std;
 
-namespace rectangle
-{
-namespace frontend
-{
+namespace rectangle {
+namespace frontend {
 
-string Lexer::errorTypeString(Lexer::ErrorType error)
-{
-    static const map<int, string> MAP =
-    {
-        {IllegalSymbol, "Illegal symbol" },
-        {IllegalCharacter, "Illegal character" },
-        {UnclosedStringLiteral, "Unclosed string literal" },
-        {StrayNewlineInStringLiteral, "Stray new line in string literal" }
-    };
+string Lexer::errorTypeString(Lexer::ErrorType error) {
+  static const map<int, string> MAP = {
+      {IllegalSymbol, "Illegal symbol"},
+      {IllegalCharacter, "Illegal character"},
+      {UnclosedStringLiteral, "Unclosed string literal"},
+      {StrayNewlineInStringLiteral, "Stray new line in string literal"}};
 
-    assert(error > NoError && error < ErrorCount);
+  assert(error > NoError && error < ErrorCount);
 
-    return MAP.at(error);
+  return MAP.at(error);
 }
 
-}
-}
+}  // namespace frontend
+}  // namespace rectangle

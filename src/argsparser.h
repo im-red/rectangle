@@ -17,42 +17,37 @@
 
 #pragma once
 
-#include <string>
 #include <map>
-#include <vector>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
-namespace rectangle
-{
-namespace util
-{
+namespace rectangle {
+namespace util {
 
-class ArgsException : public std::runtime_error
-{
-public:
-    ArgsException(const std::string &msg)
-        : std::runtime_error(msg)
-    {}
+class ArgsException : public std::runtime_error {
+ public:
+  ArgsException(const std::string &msg) : std::runtime_error(msg) {}
 };
 
-class ArgsParser
-{
-public:
-    ArgsParser();
+class ArgsParser {
+ public:
+  ArgsParser();
 
-    void dumpHelp() const;
-    void dumpOpt() const;
+  void dumpHelp() const;
+  void dumpOpt() const;
 
-    void addOnOffLongOption(const std::string &opt, const std::string &msg, bool &onoff);
-    std::vector<std::string> parse(int argc, char **argv);
+  void addOnOffLongOption(const std::string &opt, const std::string &msg,
+                          bool &onoff);
+  std::vector<std::string> parse(int argc, char **argv);
 
-private:
-    void initDefaultValue();
+ private:
+  void initDefaultValue();
 
-private:
-    std::map<std::string, std::string> m_opt2msg;
-    std::map<std::string, bool *> m_onOffLongOpt;
+ private:
+  std::map<std::string, std::string> m_opt2msg;
+  std::map<std::string, bool *> m_onOffLongOpt;
 };
 
-}
-}
+}  // namespace util
+}  // namespace rectangle

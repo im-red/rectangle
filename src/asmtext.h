@@ -20,34 +20,30 @@
 #include <string>
 #include <vector>
 
-namespace rectangle
-{
-namespace backend
-{
+namespace rectangle {
+namespace backend {
 
-class AsmText
-{
-    friend bool operator==(const AsmText &lhs, const AsmText &rhs);
+class AsmText {
+  friend bool operator==(const AsmText &lhs, const AsmText &rhs);
 
-public:
-    AsmText();
+ public:
+  AsmText();
 
-public:
-    void appendLine(const std::vector<std::string> &line);
-    int appendBlank();
-    void setLine(int lineNumber, const std::vector<std::string> &line);
+ public:
+  void appendLine(const std::vector<std::string> &line);
+  int appendBlank();
+  void setLine(int lineNumber, const std::vector<std::string> &line);
 
-    void dump();
+  void dump();
 
-    std::vector<std::vector<std::string>> text() const;
-    void clear();
+  std::vector<std::vector<std::string>> text() const;
+  void clear();
 
-private:
-    std::vector<std::vector<std::string>> m_text;
+ private:
+  std::vector<std::vector<std::string>> m_text;
 };
-}
-}
+}  // namespace backend
+}  // namespace rectangle
 
-bool operator==(const rectangle::backend::AsmText &lhs, const rectangle::backend::AsmText &rhs);
-
-
+bool operator==(const rectangle::backend::AsmText &lhs,
+                const rectangle::backend::AsmText &rhs);

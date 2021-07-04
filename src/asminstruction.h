@@ -19,101 +19,97 @@
 
 #include <string>
 
-namespace rectangle
-{
-namespace backend
-{
-namespace instr
-{
+namespace rectangle {
+namespace backend {
+namespace instr {
 
-enum AsmInstruction : unsigned char
-{
-    INVALID,
+enum AsmInstruction : unsigned char {
+  INVALID,
 
-    IADD,
-    FADD,
-    SADD,
+  IADD,
+  FADD,
+  SADD,
 
-    ISUB,
-    FSUB,
+  ISUB,
+  FSUB,
 
-    IMUL,
-    FMUL,
+  IMUL,
+  FMUL,
 
-    IDIV,
-    FDIV,
+  IDIV,
+  FDIV,
 
-    IREM,
+  IREM,
 
-    IEQ,
-    FEQ,
-    SEQ,
+  IEQ,
+  FEQ,
+  SEQ,
 
-    INE,
-    FNE,
-    SNE,
+  INE,
+  FNE,
+  SNE,
 
-    ILT,
-    FLT,
+  ILT,
+  FLT,
 
-    IGT,
-    FGT,
+  IGT,
+  FGT,
 
-    ILE,
-    FLE,
+  ILE,
+  FLE,
 
-    IGE,
-    FGE,
+  IGE,
+  FGE,
 
-    INEG,
-    FNEG,
+  INEG,
+  FNEG,
 
-    IAND,
+  IAND,
 
-    IOR,
+  IOR,
 
-    INOT,
+  INOT,
 
-    ICONST,
-    FCONST,
-    SCONST,
-    STRUCT,
-    POP,
+  ICONST,
+  FCONST,
+  SCONST,
+  STRUCT,
+  POP,
 
-    GLOAD,
-    GSTORE,
-    LLOAD,
-    LSTORE,
-    FLOAD,
-    FSTORE,
+  GLOAD,
+  GSTORE,
+  LLOAD,
+  LSTORE,
+  FLOAD,
+  FSTORE,
 
-    VECTOR,
-    VAPPEND,
-    VLOAD,
-    VSTORE,
+  VECTOR,
+  VAPPEND,
+  VLOAD,
+  VSTORE,
 
-    BR,
-    BRT,
-    BRF,
+  BR,
+  BRT,
+  BRF,
 
-    CALL,
-    RET,
+  CALL,
+  RET,
 
-    LEN,
-    PRINT,
-    HALT,
+  LEN,
+  PRINT,
+  HALT,
 
-    PUSHORIGIN,
-    POPORIGIN,
+  PUSHORIGIN,
+  POPORIGIN,
 
-    DEFINESCENE,
+  DEFINESCENE,
 
-    DRAWRECT,
-    DRAWTEXT,
-    DRAWELLIPSE,
-    DRAWPOLYGON,
-    DRAWLINE,
-    DRAWPOLYLINE
+  DRAWRECT,
+  DRAWTEXT,
+  DRAWELLIPSE,
+  DRAWPOLYGON,
+  DRAWLINE,
+  DRAWPOLYLINE
 };
 
 std::string getAsmName(unsigned char value);
@@ -125,6 +121,6 @@ bool is1OpInstr(unsigned char value);
 bool isBranchInstr(unsigned char value);
 bool isCallInstr(unsigned char value);
 
-}
-}
-}
+}  // namespace instr
+}  // namespace backend
+}  // namespace rectangle

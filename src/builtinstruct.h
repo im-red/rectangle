@@ -17,44 +17,42 @@
 
 #pragma once
 
-#include "typeinfo.h"
-
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
-namespace rectangle
-{
-namespace backend
-{
-namespace builtin
-{
+#include "typeinfo.h"
 
-struct FieldInfo
-{
-    FieldInfo(int index_, const std::string &name_, const std::shared_ptr<TypeInfo> &type_)
-        : index(index_), name(name_), type(type_)
-    {}
-    int index;
-    std::string name;
-    std::shared_ptr<TypeInfo> type;
+namespace rectangle {
+namespace backend {
+namespace builtin {
+
+struct FieldInfo {
+  FieldInfo(int index_, const std::string &name_,
+            const std::shared_ptr<TypeInfo> &type_)
+      : index(index_), name(name_), type(type_) {}
+  int index;
+  std::string name;
+  std::shared_ptr<TypeInfo> type;
 };
 
-class StructInfo
-{
-public:
-    StructInfo(const std::string &name, const std::vector<std::pair<std::string, std::shared_ptr<TypeInfo> > > &fields);
+class StructInfo {
+ public:
+  StructInfo(
+      const std::string &name,
+      const std::vector<std::pair<std::string, std::shared_ptr<TypeInfo> > >
+          &fields);
 
-    int fieldIndex(const std::string &name) const;
-    int fieldCount() const;
-    FieldInfo fieldAt(int index) const;
+  int fieldIndex(const std::string &name) const;
+  int fieldCount() const;
+  FieldInfo fieldAt(int index) const;
 
-    std::string name() const;
+  std::string name() const;
 
-private:
-    std::string m_name;
-    std::map<std::string, FieldInfo> m_name2field;
+ private:
+  std::string m_name;
+  std::map<std::string, FieldInfo> m_name2field;
 };
 
 extern const StructInfo sceneInfo;
@@ -67,6 +65,6 @@ extern const StructInfo polylineInfo;
 
 extern std::vector<const StructInfo *> infoList;
 
-}
-}
-}
+}  // namespace builtin
+}  // namespace backend
+}  // namespace rectangle

@@ -17,72 +17,62 @@
 
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
 
-namespace rectangle
-{
-namespace backend
-{
+namespace rectangle {
+namespace backend {
 
-class TypeInfo
-{
-public:
-    enum class Category
-    {
-        Int,
-        Void,
-        Float,
-        String,
-        List,
-        Custom,
-    };
+class TypeInfo {
+ public:
+  enum class Category {
+    Int,
+    Void,
+    Float,
+    String,
+    List,
+    Custom,
+  };
 
-public:
-    explicit TypeInfo(Category cat);
-    virtual ~TypeInfo();
+ public:
+  explicit TypeInfo(Category cat);
+  virtual ~TypeInfo();
 
-    Category category() const;
-    bool operator==(const TypeInfo &rhs) const
-    {
-        return m_category == rhs.m_category && toString() == rhs.toString();
-    }
-    bool operator!=(const TypeInfo &rhs) const
-    {
-        return !operator==(rhs);
-    }
+  Category category() const;
+  bool operator==(const TypeInfo &rhs) const {
+    return m_category == rhs.m_category && toString() == rhs.toString();
+  }
+  bool operator!=(const TypeInfo &rhs) const { return !operator==(rhs); }
 
-    virtual std::string toString() const;
-    virtual bool assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const;
+  virtual std::string toString() const;
+  virtual bool assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const;
 
-private:
-    Category m_category;
+ private:
+  Category m_category;
 };
 
-class ListTypeInfo : public TypeInfo
-{
-public:
-    explicit ListTypeInfo(const std::shared_ptr<TypeInfo> &ele);
-    std::shared_ptr<TypeInfo> elementType() const { return m_elementType; }
+class ListTypeInfo : public TypeInfo {
+ public:
+  explicit ListTypeInfo(const std::shared_ptr<TypeInfo> &ele);
+  std::shared_ptr<TypeInfo> elementType() const { return m_elementType; }
 
-    std::string toString() const override;
-    bool assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const override;
+  std::string toString() const override;
+  bool assignCompatible(const std::shared_ptr<TypeInfo> &rhs) const override;
 
-private:
-    std::shared_ptr<TypeInfo> m_elementType;
+ private:
+  std::shared_ptr<TypeInfo> m_elementType;
 };
 
-class CustomTypeInfo : public TypeInfo
-{
-public:
-    explicit CustomTypeInfo(const std::string &name);
-    std::string name() const { return m_name; }
+class CustomTypeInfo : public TypeInfo {
+ public:
+  explicit CustomTypeInfo(const std::string &name);
+  std::string name() const { return m_name; }
 
-    std::string toString() const override;
+  std::string toString() const override;
 
-private:
-    std::string m_name;
+ private:
+  std::string m_name;
 };
 
-}
-}
+}  // namespace backend
+}  // namespace rectangle

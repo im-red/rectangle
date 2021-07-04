@@ -17,71 +17,43 @@
 
 #pragma once
 
-#include "lexer.h"
-
 #include <stdexcept>
 #include <string>
 
-namespace rectangle
-{
-namespace diag
-{
+#include "lexer.h"
 
-class SyntaxError : public std::runtime_error
-{
-public:
-    SyntaxError(const std::string &msg)
-        : std::runtime_error(msg)
-    {
-    }
-    SyntaxError(const std::string &msg, int line, int column, const std::string &token, const std::string &path = "")
-        : std::runtime_error(msg
-                             + " at line "
-                             + std::to_string(line)
-                             + " column "
-                             + std::to_string(column)
-                             + " (\""
-                             + token
-                             + "\")")
-        , m_msg(msg)
-        , m_line(line)
-        , m_column(column)
-        , m_token(token)
-        , m_path(path)
-    {
-    }
-    SyntaxError(const std::string &msg, const frontend::Token &tok, const std::string &path = "")
-        : SyntaxError(msg, tok.line, tok.column, tok.str, path)
-    {
-    }
-    std::string msg() const
-    {
-        return m_msg;
-    }
-    int line() const
-    {
-        return m_line;
-    }
-    int column() const
-    {
-        return m_column;
-    }
-    std::string token() const
-    {
-        return m_token;
-    }
-    std::string path() const
-    {
-        return m_path;
-    }
+namespace rectangle {
+namespace diag {
 
-private:
-    std::string m_msg;
-    int m_line = -1;
-    int m_column = -1;
-    std::string m_token;
-    std::string m_path;
+class SyntaxError : public std::runtime_error {
+ public:
+  SyntaxError(const std::string &msg) : std::runtime_error(msg) {}
+  SyntaxError(const std::string &msg, int line, int column,
+              const std::string &token, const std::string &path = "")
+      : std::runtime_error(msg + " at line " + std::to_string(line) +
+                           " column " + std::to_string(column) + " (\"" +
+                           token + "\")"),
+        m_msg(msg),
+        m_line(line),
+        m_column(column),
+        m_token(token),
+        m_path(path) {}
+  SyntaxError(const std::string &msg, const frontend::Token &tok,
+              const std::string &path = "")
+      : SyntaxError(msg, tok.line, tok.column, tok.str, path) {}
+  std::string msg() const { return m_msg; }
+  int line() const { return m_line; }
+  int column() const { return m_column; }
+  std::string token() const { return m_token; }
+  std::string path() const { return m_path; }
+
+ private:
+  std::string m_msg;
+  int m_line = -1;
+  int m_column = -1;
+  std::string m_token;
+  std::string m_path;
 };
 
-}
-}
+}  // namespace diag
+}  // namespace rectangle

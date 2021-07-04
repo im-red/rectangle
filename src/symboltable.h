@@ -17,38 +17,35 @@
 
 #pragma once
 
-#include "symbol.h"
-
 #include <set>
 
-namespace rectangle
-{
-namespace backend
-{
+#include "symbol.h"
 
-class SymbolTable
-{
-public:
-    SymbolTable();
-    ~SymbolTable();
+namespace rectangle {
+namespace backend {
 
-    void clear();
+class SymbolTable {
+ public:
+  SymbolTable();
+  ~SymbolTable();
 
-    Scope *curScope() const;
+  void clear();
 
-    void pushScope(Scope *scope);
-    void popScope();
+  Scope *curScope() const;
 
-    void define(Symbol *symbol);
+  void pushScope(Scope *scope);
+  void popScope();
 
-private:
-    void initGlobalScope();
+  void define(Symbol *symbol);
 
-private:
-    std::set<Scope *> m_scopes;
-    Scope *m_globalScope = nullptr;
-    Scope *m_curScope = nullptr;
+ private:
+  void initGlobalScope();
+
+ private:
+  std::set<Scope *> m_scopes;
+  Scope *m_globalScope = nullptr;
+  Scope *m_curScope = nullptr;
 };
 
-}
-}
+}  // namespace backend
+}  // namespace rectangle

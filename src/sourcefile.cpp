@@ -16,57 +16,38 @@
  ********************************************************************************/
 
 #include "sourcefile.h"
-#include "util.h"
 
 #include <assert.h>
 
+#include "util.h"
+
 using namespace std;
 
-namespace rectangle
-{
-namespace frontend
-{
+namespace rectangle {
+namespace frontend {
 
-SourceFile::SourceFile(const string &path)
-    : m_path(path)
-{
-    if (!util::fileExists(path))
-    {
-        m_valid = false;
-    }
-    else
-    {
-        m_source = util::readFile(path);
-        m_lines = util::splitIntoLines(m_source);
-        m_valid = true;
-    }
+SourceFile::SourceFile(const string &path) : m_path(path) {
+  if (!util::fileExists(path)) {
+    m_valid = false;
+  } else {
+    m_source = util::readFile(path);
+    m_lines = util::splitIntoLines(m_source);
+    m_valid = true;
+  }
 }
 
-std::string SourceFile::path() const
-{
-    return m_path;
+std::string SourceFile::path() const { return m_path; }
+
+std::string SourceFile::source() const { return m_source; }
+
+std::vector<std::string> SourceFile::lines() const { return m_lines; }
+
+string SourceFile::line(int n) const {
+  assert(n >= 0 && n < static_cast<int>(m_lines.size()));
+  return m_lines[static_cast<size_t>(n)];
 }
 
-std::string SourceFile::source() const
-{
-    return m_source;
-}
+bool SourceFile::valid() const { return m_valid; }
 
-std::vector<std::string> SourceFile::lines() const
-{
-    return m_lines;
-}
-
-string SourceFile::line(int n) const
-{
-    assert(n >= 0 && n < static_cast<int>(m_lines.size()));
-    return m_lines[static_cast<size_t>(n)];
-}
-
-bool SourceFile::valid() const
-{
-    return m_valid;
-}
-
-}
-}
+}  // namespace frontend
+}  // namespace rectangle

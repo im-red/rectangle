@@ -17,10 +17,8 @@
 
 #include "option.h"
 
-namespace rectangle
-{
-namespace option
-{
+namespace rectangle {
+namespace option {
 
 bool verbose = false;
 bool printSymbolDef = false;
@@ -42,5 +40,5 @@ bool showHelp = false;
 bool showOpt = false;
 bool showFiles = false;
 
-}
-}
+}  // namespace option
+}  // namespace rectangle

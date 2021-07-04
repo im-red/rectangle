@@ -17,157 +17,150 @@
 
 #pragma once
 
-#include "typeinfo.h"
-
-#include <string>
 #include <map>
+#include <string>
 #include <vector>
 
-namespace rectangle
-{
+#include "typeinfo.h"
+
+namespace rectangle {
 
 struct ASTNode;
 
-namespace backend
-{
+namespace backend {
 
 class TypeInfo;
 
-class Symbol
-{
-public:
-    enum class Category
-    {
-        Invalid,
-        Variable,
-        Parameter,
-        Struct,
-        Field,
-        Component,
-        Property,
-        Method,
-        InstanceId,
-        Enum,
-        EnumConstants,
-        Function,
-        BuiltInType
-    };
+class Symbol {
+ public:
+  enum class Category {
+    Invalid,
+    Variable,
+    Parameter,
+    Struct,
+    Field,
+    Component,
+    Property,
+    Method,
+    InstanceId,
+    Enum,
+    EnumConstants,
+    Function,
+    BuiltInType
+  };
 
-public:
-    static std::string symbolCategoryString(Category m_category);
+ public:
+  static std::string symbolCategoryString(Category m_category);
 
-    Symbol(Category cat, const std::string &n, std::shared_ptr<TypeInfo> ti = std::shared_ptr<TypeInfo>(), ASTNode *ast = nullptr);
-    virtual ~Symbol();
+  Symbol(Category cat, const std::string &n,
+         std::shared_ptr<TypeInfo> ti = std::shared_ptr<TypeInfo>(),
+         ASTNode *ast = nullptr);
+  virtual ~Symbol();
 
-    std::string symbolString() const;
+  std::string symbolString() const;
 
-    Category category() const;
-    std::string name() const;
-    std::shared_ptr<TypeInfo> typeInfo() const;
-    void setTypeInfo(const std::shared_ptr<TypeInfo> &typeInfo);
-    ASTNode *astNode() const;
-    void setAstNode(ASTNode *astNode);
+  Category category() const;
+  std::string name() const;
+  std::shared_ptr<TypeInfo> typeInfo() const;
+  void setTypeInfo(const std::shared_ptr<TypeInfo> &typeInfo);
+  ASTNode *astNode() const;
+  void setAstNode(ASTNode *astNode);
 
-private:
-    Category m_category = Category::Invalid;
-    std::string m_name;
-    std::shared_ptr<TypeInfo> m_typeInfo;
-    ASTNode *m_astNode = nullptr;
+ private:
+  Category m_category = Category::Invalid;
+  std::string m_name;
+  std::shared_ptr<TypeInfo> m_typeInfo;
+  ASTNode *m_astNode = nullptr;
 };
 
-class MethodSymbol : public Symbol
-{
-public:
-    MethodSymbol(const std::string &name,
-                 const std::shared_ptr<TypeInfo> &ti,
-                 Symbol *componentSymbol,
-                 const std::vector<std::shared_ptr<TypeInfo>> &paramTypes)
-        : Symbol(Symbol::Category::Method, name, ti)
-        , m_componentSymbol(componentSymbol)
-        , m_paramTypes(paramTypes)
-    {}
+class MethodSymbol : public Symbol {
+ public:
+  MethodSymbol(const std::string &name, const std::shared_ptr<TypeInfo> &ti,
+               Symbol *componentSymbol,
+               const std::vector<std::shared_ptr<TypeInfo>> &paramTypes)
+      : Symbol(Symbol::Category::Method, name, ti),
+        m_componentSymbol(componentSymbol),
+        m_paramTypes(paramTypes) {}
 
-    Symbol *componentSymbol() const { return m_componentSymbol; }
-    std::vector<std::shared_ptr<TypeInfo>> paramTypes() const { return m_paramTypes; }
+  Symbol *componentSymbol() const { return m_componentSymbol; }
+  std::vector<std::shared_ptr<TypeInfo>> paramTypes() const {
+    return m_paramTypes;
+  }
 
-private:
-    Symbol *m_componentSymbol;
-    std::vector<std::shared_ptr<TypeInfo>> m_paramTypes;
+ private:
+  Symbol *m_componentSymbol;
+  std::vector<std::shared_ptr<TypeInfo>> m_paramTypes;
 };
 
-class FunctionSymbol : public Symbol
-{
-public:
-    FunctionSymbol(const std::string &name,
-                   const std::shared_ptr<TypeInfo> &ti,
-                   const std::vector<std::shared_ptr<TypeInfo>> &paramTypes = std::vector<std::shared_ptr<TypeInfo>>())
-        : Symbol(Symbol::Category::Function, name, ti)
-        , m_paramTypes(paramTypes)
-    {}
+class FunctionSymbol : public Symbol {
+ public:
+  FunctionSymbol(const std::string &name, const std::shared_ptr<TypeInfo> &ti,
+                 const std::vector<std::shared_ptr<TypeInfo>> &paramTypes =
+                     std::vector<std::shared_ptr<TypeInfo>>())
+      : Symbol(Symbol::Category::Function, name, ti),
+        m_paramTypes(paramTypes) {}
 
-    std::vector<std::shared_ptr<TypeInfo>> paramTypes() const { return m_paramTypes; }
+  std::vector<std::shared_ptr<TypeInfo>> paramTypes() const {
+    return m_paramTypes;
+  }
 
-private:
-    std::vector<std::shared_ptr<TypeInfo>> m_paramTypes;
+ private:
+  std::vector<std::shared_ptr<TypeInfo>> m_paramTypes;
 };
 
-class Scope
-{
-public:
-    enum class Category
-    {
-        Invalid,
-        Global,
-        Local,
-        Function,
-        Component,
-        Method,
-        Struct,
-        Instance
-    };
+class Scope {
+ public:
+  enum class Category {
+    Invalid,
+    Global,
+    Local,
+    Function,
+    Component,
+    Method,
+    Struct,
+    Instance
+  };
 
-public:
-    static std::string scopeCategoryString(Category category);
+ public:
+  static std::string scopeCategoryString(Category category);
 
-    Scope(Category cat, Scope *p);
-    virtual ~Scope();
+  Scope(Category cat, Scope *p);
+  virtual ~Scope();
 
-    virtual std::string scopeString() const
-    {
-        char buf[512];
-        snprintf(buf, sizeof(buf), "%s (%s)",
-                 scopeCategoryString(m_category).c_str(),
-                 m_scopeName.c_str());
-        return std::string(buf);
-    }
+  virtual std::string scopeString() const {
+    char buf[512];
+    snprintf(buf, sizeof(buf), "%s (%s)",
+             scopeCategoryString(m_category).c_str(), m_scopeName.c_str());
+    return std::string(buf);
+  }
 
-    Scope *parent() const { return m_parent; }
-    Category category() const { return m_category; }
+  Scope *parent() const { return m_parent; }
+  Category category() const { return m_category; }
 
-    void define(Symbol *sym);
-    Symbol *resolve(const std::string &name);
+  void define(Symbol *sym);
+  Symbol *resolve(const std::string &name);
 
-    std::string scopeName() const;
-    void setScopeName(const std::string &scopeName);
+  std::string scopeName() const;
+  void setScopeName(const std::string &scopeName);
 
-    Scope *componentScope() const;
-    void setComponentScope(Scope *componentScope);
+  Scope *componentScope() const;
+  void setComponentScope(Scope *componentScope);
 
-private:
-    std::map<std::string, Symbol *> m_symbols;
-    Scope *m_parent = nullptr;
-    Scope *m_componentScope = nullptr;
-    Category m_category = Category::Invalid;
-    std::string m_scopeName = "anonymous";
+ private:
+  std::map<std::string, Symbol *> m_symbols;
+  Scope *m_parent = nullptr;
+  Scope *m_componentScope = nullptr;
+  Category m_category = Category::Invalid;
+  std::string m_scopeName = "anonymous";
 };
 
-class ScopeSymbol : public Symbol, public Scope
-{
-public:
-    ScopeSymbol(Symbol::Category symCat, const std::string &name,
-                Scope::Category scopeCat, Scope *parent,
-                const std::shared_ptr<TypeInfo> &ti = std::shared_ptr<TypeInfo>());
+class ScopeSymbol : public Symbol, public Scope {
+ public:
+  ScopeSymbol(
+      Symbol::Category symCat, const std::string &name,
+      Scope::Category scopeCat, Scope *parent,
+      const std::shared_ptr<TypeInfo> &ti = std::shared_ptr<TypeInfo>());
 };
 
-}
-}
+}  // namespace backend
+}  // namespace rectangle

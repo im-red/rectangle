@@ -17,22 +17,20 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-
 #include <stdarg.h>
 
-namespace rectangle
-{
-namespace util
-{
+#include <string>
+#include <vector>
 
-void condPrint(bool cond, const char * const fmt, ...);
+namespace rectangle {
+namespace util {
+
+void condPrint(bool cond, const char *const fmt, ...);
 
 bool fileExists(const std::string &filename);
 std::string readFile(const std::string &filename);
 
 std::vector<std::string> splitIntoLines(const std::string &s);
 
-}
-}
+}  // namespace util
+}  // namespace rectangle

@@ -17,21 +17,18 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
-namespace rectangle
-{
-namespace driver
-{
+namespace rectangle {
+namespace driver {
 
-class Driver
-{
-public:
-    Driver();
+class Driver {
+ public:
+  Driver();
 
-    std::string compile(const std::vector<std::string> &paths);
+  std::string compile(const std::vector<std::string> &paths);
 };
 
-}
-}
+}  // namespace driver
+}  // namespace rectangle

@@ -20,29 +20,26 @@
 #include <string>
 #include <vector>
 
-namespace rectangle
-{
-namespace frontend
-{
+namespace rectangle {
+namespace frontend {
 
-class SourceFile
-{
-public:
-    SourceFile(const std::string &path = "");
+class SourceFile {
+ public:
+  SourceFile(const std::string &path = "");
 
-    std::string path() const;
-    std::string source() const;
-    std::vector<std::string> lines() const;
-    std::string line(int n) const;
+  std::string path() const;
+  std::string source() const;
+  std::vector<std::string> lines() const;
+  std::string line(int n) const;
 
-    bool valid() const;
+  bool valid() const;
 
-private:
-    std::string m_path;
-    bool m_valid = false;
-    std::string m_source;
-    std::vector<std::string> m_lines;
+ private:
+  std::string m_path;
+  bool m_valid = false;
+  std::string m_source;
+  std::vector<std::string> m_lines;
 };
 
-}
-}
+}  // namespace frontend
+}  // namespace rectangle

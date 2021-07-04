@@ -16,87 +16,71 @@
  ********************************************************************************/
 
 #include "util.h"
-#include "option.h"
+
+#include <stdio.h>
 
 #include <fstream>
 #include <sstream>
 
-#include <stdio.h>
+#include "option.h"
 
 using namespace std;
 
-namespace rectangle
-{
-namespace util
-{
+namespace rectangle {
+namespace util {
 
-void condPrint(bool cond, const char * const fmt, ...)
-{
-    if (option::verbose || cond)
-    {
-        va_list ap;
-        va_start(ap, fmt);
-        vfprintf(stderr, fmt, ap);
-        va_end(ap);
+void condPrint(bool cond, const char *const fmt, ...) {
+  if (option::verbose || cond) {
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+  }
+}
+
+bool fileExists(const string &filename) {
+  ifstream fs(filename);
+  return fs.is_open();
+}
+
+string readFile(const string &filename) {
+  string result;
+  if (fileExists(filename)) {
+    ifstream file(filename);
+    stringstream buffer;
+    buffer << file.rdbuf();
+    result = buffer.str();
+  }
+  return result;
+}
+
+static bool isLineTerminator(char c) { return c == '\n' || c == '\r'; }
+
+vector<string> splitIntoLines(const string &s) {
+  vector<string> result;
+
+  string line;
+  bool skipLineFeed = false;
+
+  for (int i = 0; i < static_cast<int>(s.size()); i++) {
+    char c = s[static_cast<size_t>(i)];
+    if (skipLineFeed) {
+      skipLineFeed = false;
+      continue;
     }
-}
-
-bool fileExists(const string &filename)
-{
-    ifstream fs(filename);
-    return fs.is_open();
-}
-
-string readFile(const string &filename)
-{
-    string result;
-    if (fileExists(filename))
-    {
-        ifstream file(filename);
-        stringstream buffer;
-        buffer << file.rdbuf();
-        result = buffer.str();
+    if (isLineTerminator(c)) {
+      char nextC = s[static_cast<size_t>(i + 1)];
+      if (c == '\r' && nextC == '\n') {
+        skipLineFeed = true;
+      }
+      result.emplace_back(move(line));
+    } else {
+      line += c;
     }
-    return result;
+  }
+  result.emplace_back(move(line));
+  return result;
 }
 
-static bool isLineTerminator(char c)
-{
-    return c == '\n' || c == '\r';
-}
-
-vector<string> splitIntoLines(const string &s)
-{
-    vector<string> result;
-
-    string line;
-    bool skipLineFeed = false;
-
-    for (int i = 0; i < static_cast<int>(s.size()); i++)
-    {
-        char c = s[static_cast<size_t>(i)];
-        if (skipLineFeed)
-        {
-            skipLineFeed = false;
-            continue;
-        }
-        if (isLineTerminator(c))
-        {
-            char nextC = s[static_cast<size_t>(i + 1)];
-            if (c == '\r' && nextC == '\n')
-            {
-                skipLineFeed = true;
-            }
-            result.emplace_back(move(line));
-        }
-        else
-        {
-            line += c;
-        }
-    }
-    result.emplace_back(move(line));
-    return result;
-}
-
-}
-}
+}  // namespace util
+}  // namespace rectangle

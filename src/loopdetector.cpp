@@ -21,86 +21,57 @@
 
 using namespace std;
 
-namespace rectangle
-{
-namespace util
-{
+namespace rectangle {
+namespace util {
 
-LoopDetector::LoopDetector()
-{
+LoopDetector::LoopDetector() {}
 
-}
+void LoopDetector::clear() { m_node2outs.clear(); }
 
-void LoopDetector::clear()
-{
-    m_node2outs.clear();
-}
+void LoopDetector::addEdge(int from, int to) { m_node2outs[from].insert(to); }
 
-void LoopDetector::addEdge(int from, int to)
-{
-    m_node2outs[from].insert(to);
-}
+bool LoopDetector::detect(int &nodeInLoop) {
+  enum class Color { White, Gray, Black };
 
-bool LoopDetector::detect(int &nodeInLoop)
-{
-    enum class Color
-    {
-        White,
-        Gray,
-        Black
-    };
+  map<int, Color> node2color;
+  for (auto &pair : m_node2outs) {
+    node2color[pair.first] = Color::White;
+  }
 
-    map<int, Color> node2color;
-    for (auto &pair : m_node2outs)
-    {
-        node2color[pair.first] = Color::White;
+  map<int, set<int>> remain = m_node2outs;
+  vector<int> growing;
+  while (!remain.empty()) {
+    if (growing.empty()) {
+      int seed = remain.begin()->first;
+      growing.push_back(seed);
+      node2color[seed] = Color::Gray;
     }
-
-    map<int, set<int>> remain = m_node2outs;
-    vector<int> growing;
-    while (!remain.empty())
-    {
-        if (growing.empty())
-        {
-            int seed = remain.begin()->first;
-            growing.push_back(seed);
-            node2color[seed] = Color::Gray;
-        }
-        int cur = growing.back();
-        set<int> remainOuts = remain[cur];
-        if (remainOuts.size() == 0)
-        {
-            growing.pop_back();
-            node2color[cur] = Color::Black;
-            remain.erase(cur);
-            if (!growing.empty())
-            {
-                int parent = growing.back();
-                remain[parent].erase(cur);
-            }
-        }
-        else
-        {
-            int next = *remainOuts.begin();
-            if (node2color[next] == Color::White)
-            {
-                growing.push_back(next);
-                node2color[next] = Color::Gray;
-            }
-            else if (node2color[next] == Color::Gray)
-            {
-                nodeInLoop = next;
-                return true;
-            }
-            else
-            {
-                remain[cur].erase(next);
-            }
-        }
+    int cur = growing.back();
+    set<int> remainOuts = remain[cur];
+    if (remainOuts.size() == 0) {
+      growing.pop_back();
+      node2color[cur] = Color::Black;
+      remain.erase(cur);
+      if (!growing.empty()) {
+        int parent = growing.back();
+        remain[parent].erase(cur);
+      }
+    } else {
+      int next = *remainOuts.begin();
+      if (node2color[next] == Color::White) {
+        growing.push_back(next);
+        node2color[next] = Color::Gray;
+      } else if (node2color[next] == Color::Gray) {
+        nodeInLoop = next;
+        return true;
+      } else {
+        remain[cur].erase(next);
+      }
     }
+  }
 
-    return false;
+  return false;
 }
 
-}
-}
+}  // namespace util
+}  // namespace rectangle

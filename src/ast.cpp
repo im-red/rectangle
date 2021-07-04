@@ -16,70 +16,55 @@
  ********************************************************************************/
 
 #include "ast.h"
+
 #include "builtinstruct.h"
 
 using namespace std;
 using namespace rectangle::backend;
 
-namespace rectangle
-{
+namespace rectangle {
 
-AST::AST()
-{
-    m_symbolTable.reset(new SymbolTable);
-    initBuiltinDocuments();
+AST::AST() {
+  m_symbolTable.reset(new SymbolTable);
+  initBuiltinDocuments();
 }
 
-AST::~AST()
-{
+AST::~AST() {}
 
+void AST::clear() {
+  m_documents.clear();
+  m_symbolTable->clear();
 }
 
-void AST::clear()
-{
-    m_documents.clear();
-    m_symbolTable->clear();
+void AST::addDocument(std::unique_ptr<DocumentDecl> &&document) {
+  m_documents.push_back(move(document));
 }
 
-void AST::addDocument(std::unique_ptr<DocumentDecl> &&document)
-{
-    m_documents.push_back(move(document));
+std::vector<DocumentDecl *> AST::documents() const {
+  std::vector<DocumentDecl *> result;
+  for (auto &doc : m_documents) {
+    result.push_back(doc.get());
+  }
+  for (auto &doc : m_builtinDocuments) {
+    result.push_back(doc.get());
+  }
+  return result;
 }
 
-std::vector<DocumentDecl *> AST::documents() const
-{
-    std::vector<DocumentDecl *> result;
-    for (auto &doc : m_documents)
-    {
-        result.push_back(doc.get());
+SymbolTable *AST::symbolTable() { return m_symbolTable.get(); }
+
+void AST::initBuiltinDocuments() {
+  for (auto pInfo : builtin::infoList) {
+    unique_ptr<StructDecl> sd(new StructDecl);
+    sd->name = pInfo->name();
+    sd->filepath = "(builtin)";
+    int fieldCount = pInfo->fieldCount();
+    for (int i = 0; i < fieldCount; i++) {
+      builtin::FieldInfo field = pInfo->fieldAt(i);
+      sd->fieldList.emplace_back(new FieldDecl(field.name, field.type));
     }
-    for (auto &doc : m_builtinDocuments)
-    {
-        result.push_back(doc.get());
-    }
-    return result;
+    m_builtinDocuments.push_back(move(sd));
+  }
 }
 
-SymbolTable *AST::symbolTable()
-{
-    return m_symbolTable.get();
-}
-
-void AST::initBuiltinDocuments()
-{
-    for (auto pInfo : builtin::infoList)
-    {
-        unique_ptr<StructDecl> sd(new StructDecl);
-        sd->name = pInfo->name();
-        sd->filepath = "(builtin)";
-        int fieldCount = pInfo->fieldCount();
-        for (int i = 0; i < fieldCount; i++)
-        {
-            builtin::FieldInfo field = pInfo->fieldAt(i);
-            sd->fieldList.emplace_back(new FieldDecl(field.name, field.type));
-        }
-        m_builtinDocuments.push_back(move(sd));
-    }
-}
-
-}
+}  // namespace rectangle

@@ -17,70 +17,66 @@
 
 #pragma once
 
-#include "token.h"
-
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
-namespace rectangle
-{
-namespace frontend
-{
+#include "token.h"
 
-class Lexer
-{
-public:
-    enum ErrorType
-    {
-        NoError,
-        IllegalSymbol,
-        IllegalCharacter,
-        UnclosedStringLiteral,
-        StrayNewlineInStringLiteral,
-        ErrorCount
-    };
+namespace rectangle {
+namespace frontend {
 
-public:
-    static std::string errorTypeString(ErrorType error);
+class Lexer {
+ public:
+  enum ErrorType {
+    NoError,
+    IllegalSymbol,
+    IllegalCharacter,
+    UnclosedStringLiteral,
+    StrayNewlineInStringLiteral,
+    ErrorCount
+  };
 
-    Lexer();
-    std::vector<Token> scan(const std::string &code);
+ public:
+  static std::string errorTypeString(ErrorType error);
 
-private:
-    static Token::TokenType classify(const char *s, int n);
+  Lexer();
+  std::vector<Token> scan(const std::string &code);
 
-    void setCode(const std::string &code);
-    Token nextToken();
+ private:
+  static Token::TokenType classify(const char *s, int n);
 
-    Token::TokenType scanToken();
-    Token::TokenType scanString(char c);
-    Token::TokenType scanNumber(char c);
+  void setCode(const std::string &code);
+  Token nextToken();
 
-    void nextChar();
+  Token::TokenType scanToken();
+  Token::TokenType scanString(char c);
+  Token::TokenType scanNumber(char c);
 
-    static bool isLineTerminator(char c);
-    static bool isSpace(char c);
-    static bool isDigit(char c);
-    static bool isIdentifierStart(char c);
-    static bool isIdentifierPart(char c);
+  void nextChar();
 
-    void clear();
+  static bool isLineTerminator(char c);
+  static bool isSpace(char c);
+  static bool isDigit(char c);
+  static bool isIdentifierStart(char c);
+  static bool isIdentifierPart(char c);
 
-private:
-    std::string m_code;
-    int m_line = 0;
-    int m_column = 0;
-    int m_nextPos = 0;
-    char m_char = 0;
-    Token::TokenType m_tokenType = Token::TokenCount;
-    std::string m_tokenString;
-    int m_tokenLine = 0;
-    int m_tokenColumn = 0;
-    int m_tokenPos = 0;
-    ErrorType m_error = NoError;
-    bool m_skipLineFeed = false;
+  void clear();
+
+ private:
+  std::string m_code;
+  int m_line = 0;
+  int m_column = 0;
+  int m_nextPos = 0;
+  char m_char = 0;
+  Token::TokenType m_tokenType = Token::TokenCount;
+  std::string m_tokenString;
+  int m_tokenLine = 0;
+  int m_tokenColumn = 0;
+  int m_tokenPos = 0;
+  ErrorType m_error = NoError;
+  bool m_skipLineFeed = false;
 };
 
-}
-}
+}  // namespace frontend
+}  // namespace rectangle

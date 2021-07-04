@@ -21,85 +21,61 @@
 
 using namespace std;
 
-namespace rectangle
-{
-namespace backend
-{
+namespace rectangle {
+namespace backend {
 
-AsmText::AsmText()
-{
+AsmText::AsmText() {}
 
+void AsmText::appendLine(const std::vector<std::string> &line) {
+  m_text.push_back(line);
 }
 
-void AsmText::appendLine(const std::vector<std::string> &line)
-{
-    m_text.push_back(line);
+int AsmText::appendBlank() {
+  int result = static_cast<int>(m_text.size());
+  m_text.emplace_back();
+  return result;
 }
 
-int AsmText::appendBlank()
-{
-    int result = static_cast<int>(m_text.size());
-    m_text.emplace_back();
-    return result;
+void AsmText::setLine(int lineNumber, const std::vector<std::string> &line) {
+  assert(lineNumber >= 0 && lineNumber < static_cast<int>(m_text.size()));
+  m_text[static_cast<size_t>(lineNumber)] = line;
 }
 
-void AsmText::setLine(int lineNumber, const std::vector<std::string> &line)
-{
-    assert(lineNumber >= 0 && lineNumber < static_cast<int>(m_text.size()));
-    m_text[static_cast<size_t>(lineNumber)] = line;
-}
-
-void AsmText::dump()
-{
-    printf("---------- AsmText::dump begin ----------\n");
-    for (auto &line : m_text)
-    {
-        if (line.size() == 0)
-        {
-            continue;
-        }
-
-        string firstWord = line.front();
-        if (firstWord == ".def")
-        {
-            printf("\n");
-        }
-        if (firstWord.size() > 0 && firstWord[0] != '.')
-        {
-            printf("    ");
-        }
-
-        if (firstWord == "sconst")
-        {
-            assert(line.size() == 2);
-            printf("%s \"%s\"", firstWord.c_str(), line[1].c_str());
-        }
-        else
-        {
-            for (auto &word : line)
-            {
-                printf("%s ", word.c_str());
-            }
-        }
-        printf("\n");
+void AsmText::dump() {
+  printf("---------- AsmText::dump begin ----------\n");
+  for (auto &line : m_text) {
+    if (line.size() == 0) {
+      continue;
     }
-    printf("----------- AsmText::dump end -----------\n");
+
+    string firstWord = line.front();
+    if (firstWord == ".def") {
+      printf("\n");
+    }
+    if (firstWord.size() > 0 && firstWord[0] != '.') {
+      printf("    ");
+    }
+
+    if (firstWord == "sconst") {
+      assert(line.size() == 2);
+      printf("%s \"%s\"", firstWord.c_str(), line[1].c_str());
+    } else {
+      for (auto &word : line) {
+        printf("%s ", word.c_str());
+      }
+    }
+    printf("\n");
+  }
+  printf("----------- AsmText::dump end -----------\n");
 }
 
-std::vector<std::vector<std::string> > AsmText::text() const
-{
-    return m_text;
+std::vector<std::vector<std::string> > AsmText::text() const { return m_text; }
+
+void AsmText::clear() { m_text.clear(); }
+
+bool operator==(const AsmText &lhs, const AsmText &rhs) {
+  return lhs.m_text == rhs.m_text;
 }
 
-void AsmText::clear()
-{
-    m_text.clear();
-}
-
-bool operator==(const AsmText &lhs, const AsmText &rhs)
-{
-    return lhs.m_text == rhs.m_text;
-}
-
-}
-}
+}  // namespace backend
+}  // namespace rectangle

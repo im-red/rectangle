@@ -20,23 +20,20 @@
 #include <map>
 #include <set>
 
-namespace rectangle
-{
-namespace util
-{
+namespace rectangle {
+namespace util {
 
-class LoopDetector
-{
-public:
-    LoopDetector();
+class LoopDetector {
+ public:
+  LoopDetector();
 
-    void clear();
-    void addEdge(int from, int to);
-    bool detect(int &nodeInLoop);
+  void clear();
+  void addEdge(int from, int to);
+  bool detect(int &nodeInLoop);
 
-private:
-    std::map<int, std::set<int>> m_node2outs;
+ private:
+  std::map<int, std::set<int>> m_node2outs;
 };
 
-}
-}
+}  // namespace util
+}  // namespace rectangle

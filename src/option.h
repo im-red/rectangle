@@ -17,10 +17,8 @@
 
 #pragma once
 
-namespace rectangle
-{
-namespace option
-{
+namespace rectangle {
+namespace option {
 
 extern bool verbose;
 
@@ -43,5 +41,5 @@ extern bool showHelp;
 extern bool showOpt;
 extern bool showFiles;
 
-}
-}
+}  // namespace option
+}  // namespace rectangle

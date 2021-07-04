@@ -17,34 +17,32 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include "astnode.h"
 #include "symboltable.h"
 
-#include <vector>
-#include <memory>
+namespace rectangle {
 
-namespace rectangle
-{
+class AST {
+ public:
+  AST();
+  ~AST();
 
-class AST
-{
-public:
-    AST();
-    ~AST();
+  void clear();
+  void addDocument(std::unique_ptr<DocumentDecl> &&document);
 
-    void clear();
-    void addDocument(std::unique_ptr<DocumentDecl> &&document);
+  std::vector<DocumentDecl *> documents() const;
+  backend::SymbolTable *symbolTable();
 
-    std::vector<DocumentDecl *> documents() const;
-    backend::SymbolTable *symbolTable();
+ private:
+  void initBuiltinDocuments();
 
-private:
-    void initBuiltinDocuments();
-
-private:
-    std::vector<std::unique_ptr<DocumentDecl>> m_documents;
-    std::vector<std::unique_ptr<DocumentDecl>> m_builtinDocuments;
-    std::unique_ptr<backend::SymbolTable> m_symbolTable = nullptr;
+ private:
+  std::vector<std::unique_ptr<DocumentDecl>> m_documents;
+  std::vector<std::unique_ptr<DocumentDecl>> m_builtinDocuments;
+  std::unique_ptr<backend::SymbolTable> m_symbolTable = nullptr;
 };
 
-}
+}  // namespace rectangle
